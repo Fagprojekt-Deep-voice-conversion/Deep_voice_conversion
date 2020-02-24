@@ -50,6 +50,6 @@ GAN til Voice conversion
 
 https://paperswithcode.com/paper/stargan-vc-non-parallel-many-to-many-voice
 
-AutoVC: Zero-Shot Voice Style Transfer with Only Autoencoder Loss:
+### AutoVC: Zero-Shot Voice Style Transfer with Only Autoencoder Loss:
 Autoencoder til voice conversion
 http://proceedings.mlr.press/v97/qian19c.html
