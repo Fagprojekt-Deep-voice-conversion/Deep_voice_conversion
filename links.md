@@ -23,31 +23,31 @@ https://drive.google.com/drive/folders/1cBMH_hiwOsA_Vr3Og4rz7pZZrMPPtF3e?usp=sha
 
 # Reading material
 
-Data driven articulatory synthesis with deep neural networks:
-
+### Data driven articulatory synthesis with deep neural networks:
 Brug af Deep Neural Network vs Gaussian Mixture Model til at ændre accent
+
 https://www.sciencedirect.com/science/article/pii/S0885230815000200?via%3Dihub#upi0005
 
-Voice Conversion Based on Maximum-LikelihoodEstimation of Spectral Parameter Trajectory:
-
+### Voice Conversion Based on Maximum-LikelihoodEstimation of Spectral Parameter Trajectory:
 Brug af Gaussian Mixture Model til voice conversion
+
 https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4317579&tag=1
 
-ACCENT CONVERSION THROUGH  CROSS-SPEAKER ARTICULATORY SYNTHESIS:
-
+### ACCENT CONVERSION THROUGH  CROSS-SPEAKER ARTICULATORY SYNTHESIS:
 Accenct conversion (zero-shot)
+
 https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6855097
 
 
-STARGAN-VC: NON-PARALLEL MANY-TO-MANY VOICE CONVERSIONWITH STAR GENERATIVE ADVERSARIAL NETWORKS:
-
+### STARGAN-VC: NON-PARALLEL MANY-TO-MANY VOICE CONVERSIONWITH STAR GENERATIVE ADVERSARIAL NETWORKS:
 GAN til voice conversion
+
 https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6855097
 
 
-StarGAN-VC: Non-parallel many-to-many voice conversion with star generative adversarial networks:
-
+### StarGAN-VC: Non-parallel many-to-many voice conversion with star generative adversarial networks:
 GAN til Voice conversion
+
 https://paperswithcode.com/paper/stargan-vc-non-parallel-many-to-many-voice
 
 AutoVC: Zero-Shot Voice Style Transfer with Only Autoencoder Loss:
