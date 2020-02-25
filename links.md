@@ -39,11 +39,6 @@ Accenct conversion (zero-shot)
 https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6855097
 
 
-### STARGAN-VC: NON-PARALLEL MANY-TO-MANY VOICE CONVERSIONWITH STAR GENERATIVE ADVERSARIAL NETWORKS:
-GAN til voice conversion
-
-https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6855097
-
 
 ### StarGAN-VC: Non-parallel many-to-many voice conversion with star generative adversarial networks:
 GAN til Voice conversion
