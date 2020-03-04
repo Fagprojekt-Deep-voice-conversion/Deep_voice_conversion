@@ -55,3 +55,8 @@ http://proceedings.mlr.press/v97/qian19c.html
 Autoencoder + GAN fra jan 2020
 
 https://paperswithcode.com/paper/unsupervised-representation-disentanglement
+
+
+### Lidt om Variational AutoEncoder
+
+https://jaan.io/what-is-variational-autoencoder-vae-tutorial/
