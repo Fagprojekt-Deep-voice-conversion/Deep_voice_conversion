@@ -49,3 +49,9 @@ https://paperswithcode.com/paper/stargan-vc-non-parallel-many-to-many-voice
 Autoencoder til voice conversion
 
 http://proceedings.mlr.press/v97/qian19c.html
+
+
+### Unsupervised Representation Disentanglement using Cross Domain Features and Adversarial Learning in Variational Autoencoder based Voice Conversion
+Autoencoder + GAN fra jan 2020
+
+https://paperswithcode.com/paper/unsupervised-representation-disentanglement
