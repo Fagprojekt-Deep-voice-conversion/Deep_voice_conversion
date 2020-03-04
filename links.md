@@ -21,6 +21,22 @@ https://github.com/Fagprojekt-Deep-voice-conversion/Deep_voice_conversion
 # Google drive
 https://drive.google.com/drive/folders/1cBMH_hiwOsA_Vr3Og4rz7pZZrMPPtF3e?usp=sharing
 
+# Data
+SUPERSEDED - CSTR VCTK Corpus: English Multi-speaker Corpus for CSTR Voice Cloning Toolkit
+
+https://datashare.is.ed.ac.uk/handle/10283/2651
+
+Licens: Open Data Commons Attribution License (ODC-By) v1.0 - https://www.opendatacommons.org/licenses/by/1.0/
+LicensSummary: https://opendatacommons.org/licenses/by/summary/
+
+Data Creator:
+
+Veaux, Christophe
+
+Yamagishi, Junichi
+
+MacDonald, Kirsten
+
 # Reading material
 
 ### Data driven articulatory synthesis with deep neural networks:
