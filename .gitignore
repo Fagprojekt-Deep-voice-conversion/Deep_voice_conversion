@@ -469,3 +469,8 @@ MigrationBackup/
 
 # End of https://www.gitignore.io/api/python,visualstudio,visualstudiocode
 Model/WaveNetVC_pretrained.pth
+
+# json settings
+settings.json
+.idea/workspace.xml
+
