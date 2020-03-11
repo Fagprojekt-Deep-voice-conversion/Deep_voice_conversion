@@ -13,9 +13,9 @@ def spec_Mel(path):
     #librosa.display.waveplot(Test, sr=sr);
 
     print("Sampling Rate: {}".format(sr))
-    n_fft = 2048 #frame length. The (positive integer) number of samples in an analysis window (or frame). This is denoted by an integer variable n_fft.
-    hop_length = 512 #The number of samples between successive frames, e.g., the columns of a spectrogram. This is denoted as a positive integer hop_length.
-    n_mels = 128 #the non linear transformation value to transform HZ to mel's
+    n_fft = 1024 #frame length. The (positive integer) number of samples in an analysis window (or frame). This is denoted by an integer variable n_fft.
+    hop_length = 256 #The number of samples between successive frames, e.g., the columns of a spectrogram. This is denoted as a positive integer hop_length.
+    n_mels = 80 #the non linear transformation value to transform HZ to mel's
     mel = librosa.filters.mel(sr=sr, n_fft=n_fft, n_mels=n_mels)
 
 
