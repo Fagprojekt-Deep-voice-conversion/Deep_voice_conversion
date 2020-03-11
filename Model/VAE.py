@@ -1,4 +1,3 @@
-
 import os, sys
 os.chdir(".")
 sys.path.append(os.path.abspath(os.curdir))
@@ -58,5 +57,5 @@ waveform = wavegen(model, c=spect_vc.T[20:140,:])
 #plt.plot(waveform)
 #plt.show()
 
-
+name = "Test_Spec_to_audio"
 librosa.output.write_wav(name+'.wav', b, sr=16000)
