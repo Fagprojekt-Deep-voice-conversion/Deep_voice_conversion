@@ -16,11 +16,11 @@ def spec_Mel(path):
 
     print("Sampling Rate: {}".format(sr))
     n_fft = 1024 #frame length. The (positive integer) number of samples in an analysis window (or frame). This is denoted by an integer variable n_fft.
-    hop_length = 256 #The number of samples between successive frames, e.g., the columns of a spectrogram. This is denoted as a positive integer hop_length.
+    hop_length = 256  #The number of samples between successive frames, e.g., the columns of a spectrogram. This is denoted as a positive integer hop_length.
     n_mels = 80 #the non linear transformation value to transform HZ to mel's
-    sample_rate = 16000
-    fmin = 125
-    fmax = 7600
+    sample_rate = sr
+    fmin = 40
+    fmax = 7900
     mel = librosa.filters.mel(sr=sample_rate, n_fft=n_fft, n_mels=n_mels)
 
 
@@ -42,14 +42,17 @@ def plot_Mel(path):
     Test, _ = librosa.effects.trim(y)
     librosa.display.waveplot(Test, sr=sr);
 
-    n_fft = 2048  # frame length. The (positive integer) number of samples in an analysis window (or frame). This is denoted by an integer variable n_fft.
+    n_fft = 1024  # frame length. The (positive integer) number of samples in an analysis window (or frame). This is denoted by an integer variable n_fft.
     hop_length = 256  # The number of samples between successive frames, e.g., the columns of a spectrogram. This is denoted as a positive integer hop_length.
     n_mels = 80  # the non linear transformation value to transform HZ to mel's
+    fmin = 125
+    fmax = 7600
     mel = librosa.filters.mel(sr=sr, n_fft=n_fft, n_mels=n_mels)
 
     S = librosa.feature.melspectrogram(Test, sr=sr, n_fft=n_fft,
                                        hop_length=hop_length,
-                                       n_mels=n_mels)
+                                       n_mels=n_mels, fmin = fmin, fmax
+                                        = fmax)
     S_DB = librosa.power_to_db(S, ref=np.max)  # Shape: 128 X 203
     librosa.display.specshow(S_DB, sr=sr, hop_length=hop_length,
                              x_axis='time', y_axis='mel');
