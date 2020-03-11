@@ -472,3 +472,5 @@ Model/WaveNetVC_pretrained.pth
 
 # json settings
 settings.json
+.idea/workspace.xml
+
