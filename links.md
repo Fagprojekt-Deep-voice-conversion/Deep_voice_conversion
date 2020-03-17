@@ -76,3 +76,8 @@ https://paperswithcode.com/paper/unsupervised-representation-disentanglement
 ### Lidt om Variational AutoEncoder
 
 https://jaan.io/what-is-variational-autoencoder-vae-tutorial/
+
+
+### Loss function for speaker encoder
+
+https://arxiv.org/abs/1710.10467
