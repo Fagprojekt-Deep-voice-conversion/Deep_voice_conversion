@@ -39,6 +39,11 @@ MacDonald, Kirsten
 
 # Reading material
 
+## Licenses from arxiv
+https://arxiv.org/help/license
+
+## Papers
+
 ### Data driven articulatory synthesis with deep neural networks:
 Brug af Deep Neural Network vs Gaussian Mixture Model til at ændre accent
 
@@ -53,7 +58,6 @@ https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4317579&tag=1
 Accenct conversion (zero-shot)
 
 https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6855097
-
 
 
 ### StarGAN-VC: Non-parallel many-to-many voice conversion with star generative adversarial networks:
@@ -76,3 +80,23 @@ https://paperswithcode.com/paper/unsupervised-representation-disentanglement
 ### Lidt om Variational AutoEncoder
 
 https://jaan.io/what-is-variational-autoencoder-vae-tutorial/
+
+
+## Wavenet
+
+https://en.wikipedia.org/wiki/WaveNet
+https://towardsdatascience.com/wavenet-google-assistants-voice-synthesizer-a168e9af13b1
+https://medium.com/@kion.kim/wavenet-a-network-good-to-know-7caaae735435
+
+### Papers
+original: https://arxiv.org/abs/1609.03499
+fast: https://arxiv.org/abs/1611.09482
+parallel: https://arxiv.org/abs/1711.10433
+
+### Videos that explain
+original wavenet: https://www.youtube.com/watch?v=YyUXG-BfDbE
+parallel wavenet: https://vimeo.com/287766925
+
+## discrete variational encoder
+https://vimeo.com/287766904
+
