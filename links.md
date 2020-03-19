@@ -100,3 +100,6 @@ parallel wavenet: https://vimeo.com/287766925
 ## discrete variational encoder
 https://vimeo.com/287766904
 
+## GAN
+https://pathmind.com/wiki/generative-adversarial-network-gan 
+https://towardsdatascience.com/generative-adversarial-networks-explained-34472718707a
