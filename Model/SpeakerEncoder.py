@@ -7,7 +7,11 @@ class SpeakerEncoder(nn.Module):
     def __init__(self):
         super(SpeakerEncoder, self).__init__()
 
-        self.lstm = nn.LSTM(input_size = 80, hidden_size = 768, num_layers = 2, batch_first = True)
+        self.hidden_size = 768
+        self.num_layers = 2
+        n_mels = 80
+        
+        self.lstm = nn.LSTM(input_size = n_mels, hidden_size = self.hidden_size, num_layers = self.num_layers, batch_first = True)
         self.linear = nn.Linear(in_features = 768, out_features = 256)
         self.relu = nn.ReLU()
 
