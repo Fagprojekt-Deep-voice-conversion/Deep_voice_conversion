@@ -5,7 +5,7 @@ Synthesis waveform from trained WaveNet.
 Modified from https://github.com/r9y9/wavenet_vocoder
 """
 import os, sys
-os.chdir("..")
+os.chdir("./.")
 sys.path.append(os.path.abspath(os.curdir))
 
 import torch

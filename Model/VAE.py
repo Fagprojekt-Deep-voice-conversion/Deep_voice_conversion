@@ -50,10 +50,5 @@ print(x.shape)
 
 
 
-
-# Convert to waveform using WaveNet Vocoder (pretrained)
-#waveform = wavegen(model, c=spect_vc.T)
-#Sound = librosa.feature.inverse.mel_to_stft(spect_vc)
-
-#name = "Test_spec_to_audio_ny"
-#librosa.output.write_wav(name+'.wav', waveform, sr=16000)
+name = "Test_Spec_to_audio"
+librosa.output.write_wav(name+'.wav', b, sr=16000)
