@@ -481,3 +481,8 @@ Model/Test_spec_to_audio_ny.wav
 Model/Test_spec_to_audio.wav
 Model/Reconstruction_Test.wav
 Model/Reconstruction_Test.wav
+*.wav
+*.wav
+
+resemblyzer/pretrained.pt
+
