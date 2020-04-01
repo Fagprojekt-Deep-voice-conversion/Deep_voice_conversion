@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from resemblyzer.audio import preprocess_wav
 class Preproccesing:
-    def __init__(self, sr = 16000, n_fft = 1024, hop = 256, n_mels = 80, ref_db = 20):
+    def __init__(self, sr = 16000, n_fft = 1024, hop = 256, n_mels = 40, ref_db = 20):
         self.sampling_rate = sr
         self.n_fft = n_fft
         self.hop_length = hop
@@ -28,9 +28,11 @@ class Preproccesing:
             paths = [paths]
         self.labels = labels
         self.mel_specs = [[] for _ in labels]
-    
+        print(len(self.mel_specs))
         for i, label in enumerate(labels):
+            print(i, label)
             for path in paths[i]:
+                print(path)
                 filename = path
 
                 # Load and rescale signal
@@ -50,10 +52,12 @@ class Preproccesing:
 
                 # Create Mel Spectrogram from STFT and Mel filterbank - Normalise: [0 , 1]
                 mel_spectrogram = np.dot(mel_basis, S_DB)
-                norm_mel = (mel_spectrogram - np.min(mel_spectrogram)) / (np.max(mel_spectrogram) - np.min(mel_spectrogram))
-                self.Mel_spectrogram = norm_mel.T
+                #norm_mel = (mel_spectrogram - np.min(mel_spectrogram)) / (np.max(mel_spectrogram) - np.min(mel_spectrogram))
+                self.Mel_spectrogram = mel_spectrogram
                 self.mel_specs[i].append(self.Mel_spectrogram)
+                print(np.shape(self.Mel_spectrogram))
         return self.mel_specs
+
 
     def ShowSpec(self, librosa = False):
         """
@@ -71,9 +75,5 @@ class Preproccesing:
                     plt.colorbar()
             plt.title(self.labels[i])
             plt.show()
-
-    def TrimSilence(self):
-        TODO
-
 
 

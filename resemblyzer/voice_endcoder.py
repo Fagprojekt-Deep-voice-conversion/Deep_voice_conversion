@@ -36,6 +36,7 @@ class VoiceEncoder(nn.Module):
                             weights_fpath)
         start = timer()
         checkpoint = torch.load(weights_fpath, map_location="cpu")
+        print(checkpoint["step"])
         self.load_state_dict(checkpoint["model_state"], strict=False)
         self.to(device)
         
