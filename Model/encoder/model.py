@@ -1,5 +1,5 @@
-from Real_Time_Voice_Cloning.encoder.params_model import *
-from Real_Time_Voice_Cloning.encoder.params_data import *
+from Model.encoder.params_model import *
+from Model.encoder.params_data import *
 from scipy.interpolate import interp1d
 from sklearn.metrics import roc_curve
 from torch.nn.utils import clip_grad_norm_
