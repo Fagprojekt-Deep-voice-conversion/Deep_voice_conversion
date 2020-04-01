@@ -1,8 +1,8 @@
-from Real_Time_Voice_Cloning.encoder.params_data import *
-from Real_Time_Voice_Cloning.encoder.model import SpeakerEncoder
+from Model.encoder.params_data import *
+from Model.encoder.model import SpeakerEncoder
 from Real_Time_Voice_Cloning.encoder.audio import preprocess_wav   # We want to expose this function from here
 from matplotlib import cm
-from Real_Time_Voice_Cloning.encoder import audio
+from Model.encoder import audio
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np

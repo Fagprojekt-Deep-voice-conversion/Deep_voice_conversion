@@ -23,6 +23,8 @@ Data = DataLoad("../Kode/Data")
 encoder = load_encoder("../Real_Time_Voice_Cloning/encoder/pretrained.pt").float()
 
 def SpeakerIdentity(Data):
+    if type(Data) is str:
+        Data = [[Data]]
     embedding = []
     labels = []
     for j in Data:
