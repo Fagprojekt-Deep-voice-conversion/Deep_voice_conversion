@@ -31,31 +31,31 @@ class Preproccesing:
         print(len(self.mel_specs))
         for i, label in enumerate(labels):
             print(i, label)
-            for path in paths[i]:
-                print(path)
-                filename = path
+        #for path in paths:
+            print(paths[i])
+            filename = paths[i][0]
 
-                # Load and rescale signal
-                y, sr = librosa.load(filename, sr=self.sampling_rate)
-                y = preprocess_wav(y)
+            # Load and rescale signal
+            y, sr = librosa.load(filename, sr=self.sampling_rate)
+            y = preprocess_wav(y)
 
 
-                # Short Time Fourier Transformation
-                STFT = librosa.core.stft(y, n_fft=self.n_fft, hop_length=self.hop_length)
+             # Short Time Fourier Transformation
+            STFT = librosa.core.stft(y, n_fft=self.n_fft, hop_length=self.hop_length)
 
-                # Convert to power spectrum, and from power to DB using reference power = ref_db
-                power = abs(STFT)**2
-                S_DB = librosa.power_to_db(power, ref = self.ref_db)
+            # Convert to power spectrum, and from power to DB using reference power = ref_db
+            power = abs(STFT)**2
+            S_DB = librosa.power_to_db(power, ref = self.ref_db)
 
-                # Compute Mel-Filterbank with n_mels (default = 80) mels
-                mel_basis = librosa.filters.mel(self.sampling_rate, self.n_fft, self.n_mels)
+            # Compute Mel-Filterbank with n_mels (default = 80) mels
+            mel_basis = librosa.filters.mel(self.sampling_rate, self.n_fft, self.n_mels)
 
-                # Create Mel Spectrogram from STFT and Mel filterbank - Normalise: [0 , 1]
-                mel_spectrogram = np.dot(mel_basis, S_DB)
-                #norm_mel = (mel_spectrogram - np.min(mel_spectrogram)) / (np.max(mel_spectrogram) - np.min(mel_spectrogram))
-                self.Mel_spectrogram = mel_spectrogram
-                self.mel_specs[i].append(self.Mel_spectrogram)
-                print(np.shape(self.Mel_spectrogram))
+            # Create Mel Spectrogram from STFT and Mel filterbank - Normalise: [0 , 1]
+            mel_spectrogram = np.dot(mel_basis, S_DB)
+            #norm_mel = (mel_spectrogram - np.min(mel_spectrogram)) / (np.max(mel_spectrogram) - np.min(mel_spectrogram))
+            self.Mel_spectrogram = mel_spectrogram
+            self.mel_specs[i].append(self.Mel_spectrogram)
+            print(np.shape(self.Mel_spectrogram))
         return self.mel_specs
 
 
