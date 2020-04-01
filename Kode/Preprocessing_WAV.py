@@ -45,7 +45,7 @@ class Preproccesing:
 
                 # Convert to power spectrum, and from power to DB using reference power = ref_db
                 power = abs(STFT)**2
-                #S_DB = librosa.power_to_db(power, ref = self.ref_db)
+                S_DB = librosa.power_to_db(power, ref = self.ref_db)
 
                 # Compute Mel-Filterbank with n_mels (default = 80) mels
                 mel_basis = librosa.filters.mel(self.sampling_rate, self.n_fft, self.n_mels)
@@ -53,7 +53,7 @@ class Preproccesing:
                 # Create Mel Spectrogram from STFT and Mel filterbank - Normalise: [0 , 1]
                 mel_spectrogram = np.dot(mel_basis, S_DB)
                 #norm_mel = (mel_spectrogram - np.min(mel_spectrogram)) / (np.max(mel_spectrogram) - np.min(mel_spectrogram))
-                self.Mel_spectrogram = np.log(mel_spectrogram.T)
+                self.Mel_spectrogram = mel_spectrogram
                 self.mel_specs[i].append(self.Mel_spectrogram)
                 print(np.shape(self.Mel_spectrogram))
         return self.mel_specs

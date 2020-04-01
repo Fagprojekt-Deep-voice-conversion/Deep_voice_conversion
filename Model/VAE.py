@@ -11,6 +11,7 @@ from Model.encoder.inference import load_model as load_encoder
 from Model.encoder.audio import preprocess_wav
 import librosa
 from Model.encoder.inference import embed_utterance
+from Kode.Preprocessing_WAV import Preproccesing
 path = sys.path[0]
 os.chdir(path)
 
@@ -43,3 +44,21 @@ def EvalEmbedding(embedding, labels):
 
 embedding, labels = SpeakerIdentity(Data.head(n = 9))
 EvalEmbedding(embedding, labels)
+"""
+from Real_Time_Voice_Cloning.vocoder.inference import load_model, infer_waveform
+from Real_Time_Voice_Cloning.synthesizer.inference import Synthesizer
+load_model("../Real_Time_Voice_Cloning/vocoder/pretrained.pt")
+path = Data.iloc[0,0]
+y = librosa.load(path)[0]
+y = Synthesizer.load_preprocess_wav(path)
+y = Synthesizer.make_spectrogram(y)
+
+plt.matshow(y)
+plt.show()
+
+x = infer_waveform(y)
+plt.plot(x[:25000])
+plt.show()
+
+librosa.output.write_wav("test.wav", x)
+"""
