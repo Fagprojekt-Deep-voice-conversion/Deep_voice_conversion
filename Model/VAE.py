@@ -36,6 +36,7 @@ def SpeakerIdentity(Data):
     return np.array(embedding), labels
 
 def EvalEmbedding(embedding, labels):
+    np.random.seed(2020)
     X = TSNE(n_components=2 ).fit_transform(embedding)
     sns.scatterplot(X[:, 0], X[:, 1], hue=labels)
     plt.title("t-SNE")
