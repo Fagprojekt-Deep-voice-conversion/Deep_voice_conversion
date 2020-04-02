@@ -74,9 +74,19 @@ class Encoder(nn.Module):
         out_forward = outputs[:, :, :self.dim_neck]
         out_backward = outputs[:, :, self.dim_neck:]
         
-        codes = []
-        for i in range(0, outputs.size(1), self.freq):
-            codes.append(torch.cat((out_forward[:,i+self.freq-1,:],out_backward[:,i,:]), dim=-1))
+        #codes = []
+        #for i in range(0, outputs.size(1), self.freq):
+        #    print(i)
+        #    codes.append(torch.cat((out_forward[:,i+self.freq-1,:],out_backward[:,i,:]), dim=-1))
+        """
+        Slight Adjustments to be consistent with the paper
+        Down sampling as in box e and f
+        """
+
+        codesA = [out_forward[:, i * self.freq + self.freq - 1, :] for i in range(int(outputs.size(1) / self.freq))]
+        codesB = [out_backward[:,i,:] for i in range(0, outputs.size(1), self.freq)]
+
+        codes = [codesA, codesB]
 
         return codes
       
@@ -173,7 +183,7 @@ class Generator(nn.Module):
     """Generator network."""
     def __init__(self, dim_neck, dim_emb, dim_pre, freq):
         super(Generator, self).__init__()
-        
+        self.freq = freq
         self.encoder = Encoder(dim_neck, dim_emb, freq)
         self.decoder = Decoder(dim_neck, dim_emb, dim_pre)
         self.postnet = Postnet()
@@ -184,9 +194,20 @@ class Generator(nn.Module):
         if c_trg is None:
             return torch.cat(codes, dim=-1)
         
-        tmp = []
-        for code in codes:
+        tmp = [[] for _ in codes]
+        for j, code in enumerate(codes):
+            [sample.unsqueeze(1).expand(-1, self.freq, -1) for sample in codes[0]]
+            for i, sample in enumerate(code):
+                [sample.unsqueeze(1).expand(-1, self.freq, -1)]
+                if i + 1 != len(code):
+                    sample.unsqueeze(1).expand(-1, self.freq, -1)
+                else:
+                    sample.unsqueeze(1).expand(-1, self.freq + x.size(1) -(i+1) * self.freq, -1)
+                tmp[j].append(sample)
+
+
             tmp.append(code.unsqueeze(1).expand(-1,int(x.size(1)/len(codes)),-1))
+
         code_exp = torch.cat(tmp, dim=1)
         
         encoder_outputs = torch.cat((code_exp, c_trg.unsqueeze(1).expand(-1,x.size(1),-1)), dim=-1)

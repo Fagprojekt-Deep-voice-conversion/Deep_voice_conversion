@@ -45,8 +45,8 @@ def EvalEmbedding(embedding, labels):
     plt.show()
 
 
-embedding, labels = SpeakerIdentity(Data.head(n = 9))
-EvalEmbedding(embedding, labels)
+#embedding, labels = SpeakerIdentity(Data.head(n = 9))
+#EvalEmbedding(embedding, labels)
 """
 from Real_Time_Voice_Cloning.vocoder.inference import load_model, infer_waveform
 from Real_Time_Voice_Cloning.synthesizer.inference import Synthesizer
