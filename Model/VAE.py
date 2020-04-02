@@ -20,7 +20,7 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
 Data = DataLoad("../Kode/Data")
-encoder = load_encoder("../Real_Time_Voice_Cloning/encoder/pretrained.pt").float()
+encoder = load_encoder("../Model/encoder/pretrained.pt").float()
 
 def SpeakerIdentity(Data):
     if type(Data) is str:
