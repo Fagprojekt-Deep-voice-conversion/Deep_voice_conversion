@@ -25,10 +25,5 @@ M, x1 = torch.from_numpy(Prep.Mel_spectrogram.T).to(device).unsqueeze(0), torch.
 
 print(M.shape, x1.shape)
 
-_, out, _ = G(M, x1, x1)
-out = out.squeeze(1)
-out = out.detach().numpy()
-print(np.shape(out))
-plt.matshow(out[0])
-plt.show()
+
 
