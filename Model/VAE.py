@@ -19,7 +19,7 @@ os.chdir(path)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
-Data = DataLoad("../Kode/Data")
+#Data = DataLoad("../Kode/Data")
 encoder = load_encoder("../Model/encoder/pretrained.pt").float()
 
 def SpeakerIdentity(Data):
@@ -27,7 +27,7 @@ def SpeakerIdentity(Data):
         Data = [[Data]]
     embedding = []
     labels = []
-    for j in Data:
+    for j, i in enumerate(Data):
         for path in Data[j]:
             print(path)
             labels.append(j)
@@ -35,7 +35,7 @@ def SpeakerIdentity(Data):
             y = preprocess_wav(y)
             embed = embed_utterance(y)
             embedding.append(embed)
-    return np.array(embedding), labels
+    return torch.from_numpy(np.array(embedding)), labels
 
 def EvalEmbedding(embedding, labels):
     np.random.seed(2020)
