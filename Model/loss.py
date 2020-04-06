@@ -1,5 +1,6 @@
 import os, sys
 import numpy as np
+import matplotlib.pyplot as plt
 import torch
 from Model.AutoVC.autovc_master.model_vc import Generator
 from Model.VAE import SpeakerIdentity
@@ -9,7 +10,7 @@ from Kode.Preprocessing_WAV import Preproccesing
 data = DataLoad("../Kode/Data")
 Prep = Preproccesing(n_mels = 80)
 embeddings, labels = SpeakerIdentity(data.head(n = 1))
-Specs = Prep.spec_Mel('../Kode/Data/p225/p225_001.wav', 'p225')
+Specs = Prep.spec_Mel('../Kode/Data/p225/p225_009.wav', 'p225')
 
 path = sys.path[0]
 os.chdir(path)
@@ -24,6 +25,10 @@ M, x1 = torch.from_numpy(Prep.Mel_spectrogram.T).to(device).unsqueeze(0), torch.
 
 print(M.shape, x1.shape)
 
-G(M, x1, x1)
-
+_, out, _ = G(M, x1, x1)
+out = out.squeeze(1)
+out = out.detach().numpy()
+print(np.shape(out))
+plt.matshow(out[0])
+plt.show()
 

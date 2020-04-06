@@ -78,13 +78,14 @@ class Encoder(nn.Module):
         #for i in range(0, outputs.size(1), self.freq):
         #    print(i)
         #    codes.append(torch.cat((out_forward[:,i+self.freq-1,:],out_backward[:,i,:]), dim=-1))
+
+
         """
         Slight Adjustments to be consistent with the paper
         Down sampling as in box e and f
         """
-
-        codesA = [out_forward[:, i * self.freq + self.freq - 1, :] for i in range(int(outputs.size(1) / self.freq))]
-        codesB = [out_backward[:,i,:] for i in range(0, outputs.size(1), self.freq)]
+        codesA = [out_forward[:, i, :] for i in range(self.freq-1, outputs.size(1), self.freq)]  # (31, 63, 95, ...)
+        codesB = [out_backward[:, i, :] for i in range(0, outputs.size(1), self.freq)]  # (0, 32, 64, ... )
 
         codes = [codesA, codesB]
 
@@ -194,21 +195,15 @@ class Generator(nn.Module):
         if c_trg is None:
             return torch.cat(codes, dim=-1)
         
-        tmp = [[] for _ in codes]
-        for j, code in enumerate(codes):
-            [sample.unsqueeze(1).expand(-1, self.freq, -1) for sample in codes[0]]
-            for i, sample in enumerate(code):
-                [sample.unsqueeze(1).expand(-1, self.freq, -1)]
-                if i + 1 != len(code):
-                    sample.unsqueeze(1).expand(-1, self.freq, -1)
-                else:
-                    sample.unsqueeze(1).expand(-1, self.freq + x.size(1) -(i+1) * self.freq, -1)
-                tmp[j].append(sample)
+        tmp = []
+        for code in codes:
+            L = len(code)
+            diff = x.size(1) - L * self.freq
+            Up_Sampling = [sample.unsqueeze(1).expand(-1, self.freq + bool( (i+1) == L) * diff, -1) for i, sample in enumerate(code)]
+            tmp.append(torch.cat(Up_Sampling, dim = 1))
 
 
-            tmp.append(code.unsqueeze(1).expand(-1,int(x.size(1)/len(codes)),-1))
-
-        code_exp = torch.cat(tmp, dim=1)
+        code_exp = torch.cat(tmp, dim=-1)
         
         encoder_outputs = torch.cat((code_exp, c_trg.unsqueeze(1).expand(-1,x.size(1),-1)), dim=-1)
         
@@ -219,7 +214,8 @@ class Generator(nn.Module):
         
         mel_outputs = mel_outputs.unsqueeze(1)
         mel_outputs_postnet = mel_outputs_postnet.unsqueeze(1)
-        
-        return mel_outputs, mel_outputs_postnet, torch.cat(codes, dim=-1)
+        content_codes = torch.cat([torch.cat(code, dim = -1) for code in codes], dim = -1)
+
+        return mel_outputs, mel_outputs_postnet, content_codes
 
     
