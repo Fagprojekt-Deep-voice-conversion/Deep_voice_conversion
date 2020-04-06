@@ -15,6 +15,7 @@ class Preproccesing:
         self.rescaling_max = 0.999
 
     def spec_Mel(self, paths, labels):
+        print(paths)
         """
         Creates Mel Spectrogram from Waveform (.wav).
         Input: .wav filepath
