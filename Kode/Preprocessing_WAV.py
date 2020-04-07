@@ -34,7 +34,7 @@ class Preproccesing:
             print(i, label)
         #for path in paths:
             print(paths[i])
-            filename = paths[i][0]
+            filename = paths[i]
 
             # Load and rescale signal
             y, sr = librosa.load(filename, sr=self.sampling_rate)
