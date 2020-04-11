@@ -29,7 +29,7 @@ def SpeakerIdentity(Data):
     labels = []
     for j, i in enumerate(Data):
         for path in Data[j]:
-            print(path)
+
             labels.append(j)
             y = librosa.load(path, sr = 16000)[0]
             y = preprocess_wav(y)

@@ -13,8 +13,12 @@ os.chdir(path)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
-data, labels = DataLoad2("../Kode/Data")
 Prep = Preproccesing(n_mels = 80)
+
+data, labels = DataLoad2("../Kode/Data")
+
+
+
 trainloader = torch.utils.data.DataLoader(data, batch_size = 2, shuffle = True)
 
 G = Generator(32,256,512,32).eval().to(device)
@@ -35,17 +39,22 @@ def loss(output, target, mu = 1, lambd = 1):
 
 
 
-optimiser = torch.optim.Adam(G.parameters(), lr = 1e-4)
+optimiser = torch.optim.Adam(G.parameters(), lr = 1e-3)
 
 L = []
-for _ in range(100):
-    for batch in trainloader:
+K = 1
+for j in range(K):
+    for i, batch in enumerate(trainloader, 0 ):
+        print((i + (j * len(trainloader))) / (len(trainloader)*K) * 100, ' %')
+
+        optimiser.zero_grad()
         Mel = Prep.Mel_Batch(batch)
         embedding, label = SpeakerIdentity([batch])
 
         outputs = [G(X, embedding[i].unsqueeze(0), embedding[i].unsqueeze(0)) for i, X in enumerate(Mel)]
         error = loss(outputs, (Mel, embedding))
         error.backward()
+
         optimiser.step()
 
         r = error.detach().numpy()
@@ -58,7 +67,7 @@ plt.show()
 
 
 
-"""
+
 embeddings, labels = SpeakerIdentity(data)
 Specs = Prep.spec_Mel('../Kode/Data/p225/p225_009.wav', 'p225')
 
@@ -85,4 +94,3 @@ def loss(output, target, mu = 1, lambd = 1):
 
     return err_reconstruct + mu * err_reconstruct0 + lambd * err_content
 
-"""
