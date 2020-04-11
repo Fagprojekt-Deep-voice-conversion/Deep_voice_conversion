@@ -193,7 +193,9 @@ class Generator(nn.Module):
                 
         codes = self.encoder(x, c_org)
         if c_trg is None:
-            return torch.cat(codes, dim=-1)
+            content_codes = torch.cat([torch.cat(code, dim=-1) for code in codes], dim=-1)
+
+            return content_codes
         
         tmp = []
         for code in codes:
@@ -215,7 +217,8 @@ class Generator(nn.Module):
         mel_outputs = mel_outputs.unsqueeze(1)
         mel_outputs_postnet = mel_outputs_postnet.unsqueeze(1)
         content_codes = torch.cat([torch.cat(code, dim = -1) for code in codes], dim = -1)
-
         return mel_outputs, mel_outputs_postnet, content_codes
 
-    
+
+
+

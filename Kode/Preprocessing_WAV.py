@@ -5,6 +5,8 @@ import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 from resemblyzer.audio import preprocess_wav
+import torch
+
 class Preproccesing:
     def __init__(self, sr = 16000, n_fft = 1024, hop = 256, n_mels = 40, ref_db = 20):
         self.sampling_rate = sr
@@ -15,7 +17,7 @@ class Preproccesing:
         self.rescaling_max = 0.999
 
     def spec_Mel(self, paths, labels):
-        print(paths)
+
         """
         Creates Mel Spectrogram from Waveform (.wav).
         Input: .wav filepath
@@ -29,12 +31,16 @@ class Preproccesing:
             paths = [paths]
         self.labels = labels
         self.mel_specs = [[] for _ in labels]
-        print(len(self.mel_specs))
+
         for i, label in enumerate(labels):
             print(i, label)
         #for path in paths:
             print(paths[i])
             filename = paths[i]
+
+            for path in paths[i]:
+
+                filename = path
 
             # Load and rescale signal
             y, sr = librosa.load(filename, sr=self.sampling_rate)
@@ -51,12 +57,12 @@ class Preproccesing:
             # Compute Mel-Filterbank with n_mels (default = 80) mels
             mel_basis = librosa.filters.mel(self.sampling_rate, self.n_fft, self.n_mels)
 
-            # Create Mel Spectrogram from STFT and Mel filterbank - Normalise: [0 , 1]
+                # Create Mel Spectrogram from STFT and Mel filterbank - Normalise: [0 , 1]
             mel_spectrogram = np.dot(mel_basis, S_DB)
             #norm_mel = (mel_spectrogram - np.min(mel_spectrogram)) / (np.max(mel_spectrogram) - np.min(mel_spectrogram))
             self.Mel_spectrogram = mel_spectrogram
             self.mel_specs[i].append(self.Mel_spectrogram)
-            print(np.shape(self.Mel_spectrogram))
+
         return self.mel_specs
 
 
@@ -76,5 +82,20 @@ class Preproccesing:
                     plt.colorbar()
             plt.title(self.labels[i])
             plt.show()
+
+    def Mel_Batch(self, Batch):
+        use_cuda = torch.cuda.is_available()
+        device = torch.device("cuda" if use_cuda else "cpu")
+
+        Mels = []
+        for wav in Batch:
+            y,_ = librosa.load(wav)
+            y = preprocess_wav(y)
+            X = librosa.feature.melspectrogram(y, sr = self.sampling_rate, n_fft = self.n_fft, hop_length = self.hop_length,
+                                           n_mels = self.n_mels)
+            X = torch.from_numpy(X.T).to(device)
+            Mels.append(X)
+        return Mels
+
 
 
