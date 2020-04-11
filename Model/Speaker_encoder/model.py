@@ -1,3 +1,7 @@
+"""
+Speaker Identity encoder from https://github.com/CorentinJ/Real-Time-Voice-Cloning/tree/master/encoder. See LICENSE.txt
+"""
+
 from Model.Speaker_encoder.params_model import *
 from Model.Speaker_encoder.params_data import *
 from scipy.interpolate import interp1d
@@ -10,6 +14,15 @@ import torch
 
 
 class SpeakerEncoder(nn.Module):
+    """
+    The Speaker Encoder module
+    input_size: 40 mels
+    model_hidden_size = 256
+    num_layers = 3
+
+    Not consistenet with AutoVC but the best i could find...
+    Trained on GE2E loss for 1.5 M step
+    """
     def __init__(self, device, loss_device):
         super().__init__()
         self.loss_device = loss_device

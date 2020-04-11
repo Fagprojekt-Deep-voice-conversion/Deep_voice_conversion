@@ -22,8 +22,7 @@ def load_model(weights_fpath: Path, device=None):
     model will be loaded and will run on this device. Outputs will however always be on the cpu. 
     If None, will default to your GPU if it"s available, otherwise your CPU.
     """
-    # TODO: I think the slow loading of the encoder might have something to do with the device it
-    #   was saved on. Worth investigating.
+
     global _model, _device
     if device is None:
         _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -36,6 +35,7 @@ def load_model(weights_fpath: Path, device=None):
     print("Loaded encoder \"%s\" trained to step %d" % (weights_fpath, checkpoint["step"]))
     
     return _model
+
 def is_loaded():
     return _model is not None
 
@@ -110,6 +110,7 @@ def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_fram
 
 def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     """
+    This is the main function!
     Computes an embedding for a single utterance.
     
     # TODO: handle multiple wavs to benefit from batching on GPU

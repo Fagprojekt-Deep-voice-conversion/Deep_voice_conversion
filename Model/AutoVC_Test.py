@@ -26,7 +26,6 @@ Data, labels = DataLoad2("../Kode/Data")
 def SpeakerIdentity(Data):
     if type(Data) is str:
         Data = [[Data]]
-    embedding = []
 
     for path in Data:
         print(path)
@@ -43,6 +42,9 @@ def EvalEmbedding(embedding, labels):
     plt.title("t-SNE")
     plt.show()
 
-embedding = SpeakerIdentity(Data)
-EvalEmbedding(embedding, labels)
+X = Data[0]
+
+print(X)
+#embedding = SpeakerIdentity(Data)
+#EvalEmbedding(embedding, labels)
 

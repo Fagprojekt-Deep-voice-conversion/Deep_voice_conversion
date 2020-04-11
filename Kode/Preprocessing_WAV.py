@@ -89,7 +89,7 @@ class Preproccesing:
             y = preprocess_wav(y)
             X = librosa.feature.melspectrogram(y, sr = self.sampling_rate, n_fft = self.n_fft, hop_length = self.hop_length,
                                            n_mels = self.n_mels)
-            X = torch.from_numpy(X.T).to(device)
+            X = torch.from_numpy(X.T).to(device).unsqueeze(0)
             Mels.append(X)
         return Mels
 
