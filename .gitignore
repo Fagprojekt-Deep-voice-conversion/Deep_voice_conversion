@@ -2,7 +2,30 @@
 # Created by https://www.gitignore.io/api/python,visualstudio,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=python,visualstudio,visualstudiocode
 
-*/download_prerequisites.sh
+# Own additions
+
+Model/WaveNetVC_pretrained.pth
+
+### json settings ###
+settings.json
+.idea/workspace.xml
+
+### Wav files ###
+Model/Reconstruction_Test.wav
+Model/Reconstruction_Test.wav
+Model/Test_spec_to_audio (2).wav
+Model/Test_spec_to_audio_ny.wav
+Model/Test_spec_to_audio.wav
+Model/Reconstruction_Test.wav
+Model/Reconstruction_Test.wav
+*.wav
+*.wav
+
+### Pre trained model ###
+resemblyzer/pretrained.pt
+
+### shell scripts for cluster ###
+download_prerequisites.sh
 
 
 
@@ -472,21 +495,5 @@ healthchecksdb
 MigrationBackup/
 
 # End of https://www.gitignore.io/api/python,visualstudio,visualstudiocode
-Model/WaveNetVC_pretrained.pth
 
-# json settings
-settings.json
-.idea/workspace.xml
-
-Model/Reconstruction_Test.wav
-Model/Reconstruction_Test.wav
-Model/Test_spec_to_audio (2).wav
-Model/Test_spec_to_audio_ny.wav
-Model/Test_spec_to_audio.wav
-Model/Reconstruction_Test.wav
-Model/Reconstruction_Test.wav
-*.wav
-*.wav
-
-resemblyzer/pretrained.pt
 
