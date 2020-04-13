@@ -9,7 +9,7 @@ else
 fi
 
 ### Switch to StarGAN branch
-git checkout remotes/origin/StarGAN
+git checkout -t origin/StarGAN
 
 if [ -d "StarGAN" ]
 then
