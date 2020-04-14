@@ -43,7 +43,7 @@ def resample_to_xk(sampling_rate, origin_wavpath, target_wavpath, num_workers=1)
     """
     os.makedirs(target_wavpath, exist_ok=True)
     spk_folders = os.listdir(origin_wavpath)
-    print(f'> Using {num_workers} workers!')
+    print(f'Using {num_workers} workers!')
     executor = ProcessPoolExecutor(max_workers=num_workers)
 
     futures = []

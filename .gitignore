@@ -32,7 +32,7 @@ Libraries
 ### StarGAN run setups
 *.err
 *.out
-*./StarGAN-env/*
+StarGAN/run_scripts/StarGAN-env/
 
 
 ### Python ###
