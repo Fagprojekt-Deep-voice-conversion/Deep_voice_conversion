@@ -20,7 +20,6 @@ Model/Test_spec_to_audio.wav
 Model/Reconstruction_Test.wav
 Model/Reconstruction_Test.wav
 *.wav
-*.wav
 data/VCTK-Data/*
 
 ### Pre trained model ###
@@ -29,6 +28,11 @@ resemblyzer/pretrained.pt
 ### shell scripts for cluster ###
 
 Libraries
+
+### StarGAN run setups
+*.err
+*.out
+*./StarGAN-env/*
 
 
 ### Python ###
