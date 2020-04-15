@@ -12,7 +12,7 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 print(device)
 
-data_path = "../Kode/Data"
+data_path = "../data/VCTK-Data/VCTK-Corpus/wav48"
 data, labels = DataLoad2(data_path)
 
 print("Number of wav files: {:}".format(len(data)))

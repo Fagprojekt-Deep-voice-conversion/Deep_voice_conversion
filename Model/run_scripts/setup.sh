@@ -9,7 +9,7 @@ python3 -m venv AutoVC-env
 
 source AutoVC-env/bin/activate
 
-python -m pip install torch==1.4.0 sklearn tqdm librosa torchvision webrtcvad
+python -m pip install torch==1.4.0 sklearn tqdm librosa torchvision webrtcvad scipy matplotlib pandas pickle
 
 deactivate
 

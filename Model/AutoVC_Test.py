@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.curdir))
 import torch
 import numpy as np
 from tqdm import tqdm
-import matplotlib.pyplot as plt
+
 from Speaker_encoder.inference import load_model as load_encoder
 from Speaker_encoder.audio import preprocess_wav
 import librosa
