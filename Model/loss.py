@@ -10,32 +10,55 @@ from tqdm import tqdm
 from Model.AutoVC.model_vc import Generator
 from Model.AutoVC_Test import SpeakerIdentity
 from Kode.dataload import DataLoad2
-from Model.AutoVC_Test import TrainLoader
 from Kode.Preprocessing_WAV import Preproccesing
 path = sys.path[0]
 os.chdir(path)
 
-# Check for GPU
-""" A bit of init stuff ... Checking for GPU and loading data """
-use_cuda = torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
-Prep = Preproccesing(n_mels = 80)
-data, labels = DataLoad2("../Kode/Data")
+def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1):
+    Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
+    Prep = Preproccesing()
+    embeddings = SpeakerIdentity(Data)
+    emb = []
+    for person in sorted(set(labels)):
+        index = np.where(labels == person)
+        X = embeddings[index]
+        X = X.mean(0).unsqueeze(0).expand(len(index[0]), -1)
+        emb.append(X)
+    emb = torch.cat(emb, dim = 0)
+    Mels = Prep.Mel_Batch(list(Data))
+
+    C = torch.utils.data.DataLoader(ConcatDataset(Mels, emb), shuffle = shuffle,
+                                    batch_size = batch_size, collate_fn = collate,
+                                    num_workers = num_workers)
+    return C
+
+def collate(batch):
+    batch = list(zip(*batch))
+    lengths = torch.tensor([t.shape[1] for t in batch[0]])
+    m = lengths.max()
+    Mels = []
+    for t in batch[0]:
+        pad = torch.nn.ConstantPad2d((0, 0, 0, m - t.size(1)), 0)
+        t = pad(t)
+        Mels.append(t)
+    Mels = torch.cat(Mels, dim = 0)
+    embeddings = torch.cat([t.unsqueeze(0) for t in batch[1]], dim = 0)
+
+    return [Mels, embeddings]
+
+class ConcatDataset(torch.utils.data.Dataset):
+    def __init__(self, *datasets):
+        self.datasets = datasets
+
+    def __getitem__(self, i):
+        return tuple(d[i] for d in self.datasets)
+
+    def __len__(self):
+        return min(len(d) for d in self.datasets)
 
 
-""" Creates batches for training. Batch size = 2 as in the Paper"""
-trainloader = TrainLoader(data, labels)
 
-"""
-Loads model of Generator network - Pretrained from AutoVC, hence transfer learning.
-Hopefully this will speed training up... The speaker identity encoder is not the same as in AutoVC, which means it has to be trained...
-"""
-G = Generator(32,256,512,32).eval().to(device)
-g_checkpoint = torch.load('AutoVC/autovc.ckpt', map_location=torch.device(device))
-G.load_state_dict(g_checkpoint['model'])
-
-
-def loss(output, target, mu = 1, lambd = 1):
+def loss(output, target, model, mu = 1, lambd = 1):
     """
     Loss function as proposed in AutoVC
     L = Reconstruction Error + mu * Prenet reconstruction Error + lambda * content Reconstruction error
@@ -57,7 +80,7 @@ def loss(output, target, mu = 1, lambd = 1):
     """ Zips output ... """
     out_decoder, out_post, codes = output[0].squeeze(1), output[1].squeeze(1), output[2]
     X, c_org = target[0], target[1]
-    ReconCodes = G(out_post, c_org, None)
+    ReconCodes = model(out_post, c_org, None)
     """ 
     Reconstruction error: 
         The mean of the squared p2 norm of (Postnet outputs - Original Mel Spectrograms)
@@ -78,46 +101,60 @@ def loss(output, target, mu = 1, lambd = 1):
     return err_reconstruct + mu * err_reconstruct0 + lambd * err_content
 
 
-""" We use the Adam optimiser with init learning rate 1e-3"""
-optimiser = torch.optim.Adam(G.parameters(), lr = 1e-3)
+# Check for GPU
+""" A bit of init stuff ... Checking for GPU and loading data """
+
+
+def Train(trainloader, n_steps, save_every, models_dir, model_path_name):
+    model = Generator(32, 256, 512, 32).eval().to(device)
+    g_checkpoint = torch.load('AutoVC/autovc.ckpt', map_location=torch.device(device))
+    model.load_state_dict(g_checkpoint['model'])
+
+    optimiser = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    step = 1
+    running_loss = []
+    state_fpath = models_dir.joinpath(model_path_name + ".pt")
+
+    while step < n_steps:
+        for batch in tqdm(trainloader):
+            X, c_org = batch[0], batch[1]
+
+            """ Outputs and loss"""
+            mel, post, codes = model(X, c_org, c_org)
+            error = loss([mel, post, codes], [X, c_org], model)
+
+            """ Zeros the gradient for every step """
+            """ Computes gradient and do optimiser step"""
+            optimiser.zero_grad()
+            error.backward()
+            optimiser.step()
+            step += 1
+
+            if step % 100 == 0:
+                """ Append current error to L for plotting """
+                r = error.detach().numpy()
+                running_loss.append(r)
+
+            if step % save_every == 0:
+                print("Saving the model (step %d)" % step)
+                torch.save({
+                    "step": step + 1,
+                    "model_state": model.state_dict(),
+                    "optimizer_state": optimiser.state_dict(),
+                }, state_fpath)
+
+            if step >= n_steps:
+                break
+
+use_cuda = torch.cuda.is_available()
+device = torch.device("cuda" if use_cuda else "cpu")
+Prep = Preproccesing(n_mels = 80)
+data, labels = DataLoad2("../Kode/Data")
+trainloader = TrainLoader(data, labels, batch_size= 2, num_workers= 1)
 
 
 
-"""
-Training.
-K epochs with batch size 2. 
 
-It does not seem like it is working... Problems with either loss function of optimiser / training...
-No process is happening... I do not know how to fix it.
-A second problem is the batch. We need a smart way to implement training on batches with spectrograms of 
-not equal length...
-"""
-L = []
-K = 2
-for j in range(K):
-    print("epoch {:} out of {:}".format(j+1, K))
-    for batch in tqdm(trainloader):
-
-        X, c_org = batch[0], batch[1]
-
-        """ Outputs and loss"""
-        mel, post, codes = G(X, c_org, c_org)
-        error = loss([mel, post, codes], [X, c_org])
-
-        """ Zeros the gradient for every step """
-        """ Computes gradient and do optimiser step"""
-        G.zero_grad()
-        error.backward()
-        optimiser.step()
-
-        """ Append current error to L for plotting """
-        r = error.detach().numpy()
-        L.append(r)
-plt.plot(L)
-plt.show()
-
-post = post.squeeze(1).detach().numpy()
-plt.matshow(post)
-plt.show()
 
 

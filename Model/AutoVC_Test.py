@@ -34,12 +34,12 @@ def SpeakerIdentity(Data):
     embedding = []
     print("Creating Speaker Embeddings...")
     for path in tqdm(Data):
-
         y = librosa.load(path, sr = 16000)[0]
         y = preprocess_wav(y)
         embed = embed_utterance(y)
         embedding.append(embed)
-    return torch.from_numpy(np.array(embedding))
+
+    return torch.from_numpy(np.array(embedding)).to(device)
 
 def EvalEmbedding(embedding, labels):
     np.random.seed(2020)
@@ -55,7 +55,9 @@ def EvalEmbedding(embedding, labels):
 #g_checkpoint = torch.load('AutoVC/autovc.ckpt', map_location=torch.device(device))
 #G.load_state_dict(g_checkpoint['model'])
 
-def TrainLoader(Data,labels, batch_size = 2, shuffle = True, SpeakerId = 1):
+
+
+def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1):
     Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
     Prep = Preproccesing()
     embeddings = SpeakerIdentity(Data)
@@ -68,7 +70,9 @@ def TrainLoader(Data,labels, batch_size = 2, shuffle = True, SpeakerId = 1):
     emb = torch.cat(emb, dim = 0)
     Mels = Prep.Mel_Batch(list(Data))
 
-    C = torch.utils.data.DataLoader(ConcatDataset(Mels, emb), shuffle = True, batch_size = 2, collate_fn = collate)
+    C = torch.utils.data.DataLoader(ConcatDataset(Mels, emb), shuffle = shuffle,
+                                    batch_size = batch_size, collate_fn = collate,
+                                    num_workers = num_workers)
 
     return C
 
