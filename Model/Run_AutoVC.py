@@ -1,3 +1,4 @@
+print("Hej flotte")
 import os, sys
 os.chdir(sys.path[0])
 
@@ -5,7 +6,7 @@ import torch
 from Train_and_Loss import TrainLoader, loss, Train
 from Kode.dataload import DataLoad2
 
-
+print("Train Script started ...")
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
