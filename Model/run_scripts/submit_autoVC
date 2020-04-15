@@ -32,4 +32,9 @@ load cuda
 sh setup.sh
 source AutoVC-env/bin/activate
 
+python ../Run_AutoVC.py
+
+
+
+
 
