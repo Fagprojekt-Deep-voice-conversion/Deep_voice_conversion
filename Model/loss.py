@@ -6,9 +6,11 @@ import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+from tqdm import tqdm
 from Model.AutoVC.model_vc import Generator
 from Model.AutoVC_Test import SpeakerIdentity
 from Kode.dataload import DataLoad2
+from Model.AutoVC_Test import TrainLoader
 from Kode.Preprocessing_WAV import Preproccesing
 path = sys.path[0]
 os.chdir(path)
@@ -22,7 +24,7 @@ data, labels = DataLoad2("../Kode/Data")
 
 
 """ Creates batches for training. Batch size = 2 as in the Paper"""
-trainloader = torch.utils.data.DataLoader(data, batch_size = 2, shuffle = True)
+trainloader = TrainLoader(data, labels)
 
 """
 Loads model of Generator network - Pretrained from AutoVC, hence transfer learning.
@@ -53,29 +55,25 @@ def loss(output, target, mu = 1, lambd = 1):
     """
 
     """ Zips output ... """
-    output = [*zip(*output)]
-
+    out_decoder, out_post, codes = output[0].squeeze(1), output[1].squeeze(1), output[2]
+    X, c_org = target[0], target[1]
+    ReconCodes = G(out_post, c_org, None)
     """ 
     Reconstruction error: 
         The mean of the squared p2 norm of (Postnet outputs - Original Mel Spectrograms)
     """
-    err_reconstruct  = [torch.dist(output_post, target[0][i], 2) ** 2 for i, output_post in enumerate(output[1])]
-    err_reconstruct = torch.tensor(err_reconstruct, requires_grad=True).mean()
-
+    err_reconstruct  = torch.dist(X, out_post, 2)
     """
     Prenet Reconstruction error
         The mean of the squared p2 norm of (Decoder outputs - Original Mel Spectrograms)
     """
-    err_reconstruct0 = [torch.dist(output_mel, target[0][i], 2)**2 for i, output_mel in enumerate(output[0])]
-    err_reconstruct0 = torch.tensor(err_reconstruct0, requires_grad=True).mean()
+    err_reconstruct0 = torch.dist(X, out_decoder, 2)
 
     """
     Content reconstruction Error
         The mean of the p1 norm of (Content codes of postnet output - Content codes)
     """
-    err_content      = [torch.dist(G(output[1][i].squeeze(0), target[1][i].unsqueeze(0), None), content_codes, 1)
-                        for i, content_codes in enumerate(output[2])]
-    err_content      = torch.tensor(err_content, requires_grad = True).mean()
+    err_content      = torch.dist(ReconCodes, codes, 1)
 
     return err_reconstruct + mu * err_reconstruct0 + lambd * err_content
 
@@ -95,24 +93,20 @@ A second problem is the batch. We need a smart way to implement training on batc
 not equal length...
 """
 L = []
-K = 1
+K = 2
 for j in range(K):
-    for i, batch in enumerate(trainloader, 0 ):
-        """ Prints how far in the process in percentage """
-        print((i + (j * len(trainloader))) / (len(trainloader)*K) * 100, ' %')
+    print("epoch {:} out of {:}".format(j+1, K))
+    for batch in tqdm(trainloader):
 
-        """ Zeros the gradient for every step """
-        optimiser.zero_grad()
-
-        """ Creates Mel Spectrograms and Speaker Identity embedding. TODO: The spectrograms still do not have the right specifications ... """
-        Mel = Prep.Mel_Batch(batch)
-        embedding = SpeakerIdentity(batch)
+        X, c_org = batch[0], batch[1]
 
         """ Outputs and loss"""
-        outputs = [G(X, embedding[i].unsqueeze(0), embedding[i].unsqueeze(0)) for i, X in enumerate(Mel)]
-        error = loss(outputs, (Mel, embedding))
+        mel, post, codes = G(X, c_org, c_org)
+        error = loss([mel, post, codes], [X, c_org])
 
+        """ Zeros the gradient for every step """
         """ Computes gradient and do optimiser step"""
+        G.zero_grad()
         error.backward()
         optimiser.step()
 
@@ -120,6 +114,10 @@ for j in range(K):
         r = error.detach().numpy()
         L.append(r)
 plt.plot(L)
+plt.show()
+
+post = post.squeeze(1).detach().numpy()
+plt.matshow(post)
 plt.show()
 
 
