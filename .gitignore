@@ -32,6 +32,9 @@ Libraries
 *.out
 StarGAN/run_scripts/StarGAN-env/
 
+### AutoVC run setups
+Model/run_scripts/AutoVC-env/
+
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
