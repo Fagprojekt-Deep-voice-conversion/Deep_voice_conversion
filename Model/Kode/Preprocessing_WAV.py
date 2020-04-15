@@ -16,50 +16,6 @@ class Preproccesing:
         self.fmax, self.fmin, self.rescaling_max = fmax, fmin, rescaling_max
         self.power = power
 
-    def spec_Mel(self, paths, labels):
-
-        """
-        Creates Mel Spectrogram from Waveform (.wav).
-        Input: .wav filepath
-        Output: 80 dim normalised mel-spectrogram
-        """
-        if type(paths) is not list:
-            paths = [paths]
-        if type(labels) is not list:
-            labels = [labels]
-        if len(labels) == 1:
-            paths = [paths]
-        self.labels = labels
-        self.mel_specs = [[] for _ in labels]
-
-        for i, label in enumerate(labels):
-
-            for path in paths[i]:
-
-                filename = path
-
-                # Load and rescale signal
-                y, sr = librosa.load(filename, sr=self.sampling_rate)
-                y = preprocess_wav(y)
-
-
-                # Short Time Fourier Transformation
-                STFT = librosa.core.stft(y, n_fft=self.n_fft, hop_length=self.hop_length)
-
-                # Convert to power spectrum, and from power to DB using reference power = ref_db
-                power = abs(STFT)**2
-                S_DB = librosa.power_to_db(power, ref = self.ref_db)
-
-                # Compute Mel-Filterbank with n_mels (default = 80) mels
-                mel_basis = librosa.filters.mel(self.sampling_rate, self.n_fft, self.n_mels)
-
-                # Create Mel Spectrogram from STFT and Mel filterbank - Normalise: [0 , 1]
-                mel_spectrogram = np.dot(mel_basis, S_DB)
-                #norm_mel = (mel_spectrogram - np.min(mel_spectrogram)) / (np.max(mel_spectrogram) - np.min(mel_spectrogram))
-                self.Mel_spectrogram = mel_spectrogram
-                self.mel_specs[i].append(self.Mel_spectrogram)
-
-        return self.mel_specs
 
 
     def ShowSpec(self, librosa = False):
