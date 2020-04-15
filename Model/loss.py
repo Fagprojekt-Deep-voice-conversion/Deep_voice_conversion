@@ -147,6 +147,15 @@ def Train(trainloader, n_steps, save_every, models_dir, model_path_name):
             if step >= n_steps:
                 break
 
+    print("Saving the model (step %d)" % step)
+    torch.save({
+        "step": step + 1,
+        "model_state": model.state_dict(),
+        "optimizer_state": optimiser.state_dict(),
+    }, state_fpath)
+
+
+
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 Prep = Preproccesing(n_mels = 80)
