@@ -14,7 +14,7 @@ print(device)
 data_path = "../Kode/Data"
 data, labels = DataLoad2(data_path)
 
-
+print("Number of wav files: {:}".format(len(data)))
 batch_size = 2
 num_workers = 0
 shuffle = True
