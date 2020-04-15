@@ -495,4 +495,20 @@ MigrationBackup/
 
 # End of https://www.gitignore.io/api/python,visualstudio,visualstudiocode
 
+# json settings
+settings.json
+.idea/workspace.xml
 
+Model/Reconstruction_Test.wav
+Model/Reconstruction_Test.wav
+Model/Test_spec_to_audio (2).wav
+Model/Test_spec_to_audio_ny.wav
+Model/Test_spec_to_audio.wav
+Model/Reconstruction_Test.wav
+Model/Reconstruction_Test.wav
+
+
+resemblyzer/pretrained.pt
+
+Real_Time_Voice_Cloning/
+*.ckpt
