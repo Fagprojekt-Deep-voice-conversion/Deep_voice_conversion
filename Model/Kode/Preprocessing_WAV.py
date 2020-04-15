@@ -5,7 +5,7 @@ import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
-from Model.Speaker_encoder.audio import preprocess_wav
+from Speaker_encoder.audio import preprocess_wav
 import torch
 
 class Preproccesing:

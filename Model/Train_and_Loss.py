@@ -7,8 +7,8 @@ import numpy as np
 
 import torch
 from tqdm import tqdm
-from Model.AutoVC.model_vc import Generator
-from Model.AutoVC_Test import SpeakerIdentity
+from AutoVC.model_vc import Generator
+from AutoVC_Test import SpeakerIdentity
 
 from Kode.Preprocessing_WAV import Preproccesing
 import pickle
