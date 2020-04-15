@@ -4,15 +4,20 @@ The loss and training script for AutoVC (home made but inspired by AutoVC paper)
 """
 import os, sys
 import numpy as np
-import matplotlib.pyplot as plt
+
 import torch
 from tqdm import tqdm
 from Model.AutoVC.model_vc import Generator
 from Model.AutoVC_Test import SpeakerIdentity
-from Kode.dataload import DataLoad2
+
 from Kode.Preprocessing_WAV import Preproccesing
+import pickle
+
 path = sys.path[0]
 os.chdir(path)
+
+use_cuda = torch.cuda.is_available()
+device = torch.device("cuda" if use_cuda else "cpu")
 
 def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1):
     Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
@@ -85,12 +90,12 @@ def loss(output, target, model, mu = 1, lambd = 1):
     Reconstruction error: 
         The mean of the squared p2 norm of (Postnet outputs - Original Mel Spectrograms)
     """
-    err_reconstruct  = torch.dist(X, out_post, 2)
+    err_reconstruct  = torch.dist(X, out_post, 2)**2
     """
     Prenet Reconstruction error
         The mean of the squared p2 norm of (Decoder outputs - Original Mel Spectrograms)
     """
-    err_reconstruct0 = torch.dist(X, out_decoder, 2)
+    err_reconstruct0 = torch.dist(X, out_decoder, 2)**2
 
     """
     Content reconstruction Error
@@ -105,7 +110,8 @@ def loss(output, target, model, mu = 1, lambd = 1):
 """ A bit of init stuff ... Checking for GPU and loading data """
 
 
-def Train(trainloader, n_steps, save_every, models_dir, model_path_name):
+def Train(trainloader, n_steps, save_every, models_dir, model_path_name, loss_path_name):
+    print(device)
     model = Generator(32, 256, 512, 32).eval().to(device)
     g_checkpoint = torch.load('AutoVC/autovc.ckpt', map_location=torch.device(device))
     model.load_state_dict(g_checkpoint['model'])
@@ -114,8 +120,8 @@ def Train(trainloader, n_steps, save_every, models_dir, model_path_name):
 
     step = 1
     running_loss = []
-    state_fpath = models_dir.joinpath(model_path_name + ".pt")
-
+    state_fpath = models_dir + "/" + model_path_name + ".pt"
+    loss_fpath = models_dir + "/" + loss_path_name
     while step < n_steps:
         for batch in tqdm(trainloader):
             X, c_org = batch[0], batch[1]
@@ -135,6 +141,7 @@ def Train(trainloader, n_steps, save_every, models_dir, model_path_name):
                 """ Append current error to L for plotting """
                 r = error.detach().numpy()
                 running_loss.append(r)
+                pickle.dump(running_loss, open(loss_fpath, "wb"))
 
             if step % save_every == 0:
                 print("Saving the model (step %d)" % step)
@@ -146,7 +153,8 @@ def Train(trainloader, n_steps, save_every, models_dir, model_path_name):
 
             if step >= n_steps:
                 break
-
+                
+    pickle.dump(running_loss, open(loss_fpath, "wb"))
     print("Saving the model (step %d)" % step)
     torch.save({
         "step": step + 1,
@@ -156,11 +164,7 @@ def Train(trainloader, n_steps, save_every, models_dir, model_path_name):
 
 
 
-use_cuda = torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
-Prep = Preproccesing(n_mels = 80)
-data, labels = DataLoad2("../Kode/Data")
-trainloader = TrainLoader(data, labels, batch_size= 2, num_workers= 1)
+
 
 
 
