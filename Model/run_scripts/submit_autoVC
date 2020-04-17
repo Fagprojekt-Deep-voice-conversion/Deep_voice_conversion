@@ -26,8 +26,8 @@
 #BSUB -e AutoVC_%J.err
 # -- end of LSF options --
 
-load python3
-load cuda
+module load python3
+moduel load cuda
 
 sh setup.sh
 source AutoVC-env/bin/activate
