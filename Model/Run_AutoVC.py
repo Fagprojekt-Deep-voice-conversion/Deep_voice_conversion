@@ -27,7 +27,7 @@ models_dir = "Training"
 model_path_name = "trainedModel"
 loss_path_name = "loss"
 
-trainloader = TrainLoader(data[-20:], labels[-20:], batch_size = batch_size, shuffle = shuffle, num_workers = num_workers)
+trainloader = TrainLoader(data, labels, batch_size = batch_size, shuffle = shuffle, num_workers = num_workers)
 Train(trainloader, n_steps, save_every, models_dir, model_path_name, loss_path_name)
 
 
