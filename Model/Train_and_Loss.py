@@ -7,8 +7,8 @@ import numpy as np
 
 import torch
 from tqdm import tqdm
-from Model.AutoVC.model_vc import Generator
-from Model.AutoVC_Test import SpeakerIdentity
+from AutoVC.model_vc import Generator
+from AutoVC_Test import SpeakerIdentity
 
 from Kode.Preprocessing_WAV import Preproccesing
 import pickle
@@ -122,6 +122,9 @@ def Train(trainloader, n_steps, save_every, models_dir, model_path_name, loss_pa
     running_loss = []
     state_fpath = models_dir + "/" + model_path_name + ".pt"
     loss_fpath = models_dir + "/" + loss_path_name
+    
+    model.train()
+    
     while step < n_steps:
         for batch in tqdm(trainloader):
             X, c_org = batch[0], batch[1]

@@ -4,11 +4,11 @@ sys.path.append(os.path.abspath(os.curdir))
 import torch
 import numpy as np
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-from Model.Speaker_encoder.inference import load_model as load_encoder
-from Model.Speaker_encoder.audio import preprocess_wav
+
+from Speaker_encoder.inference import load_model as load_encoder
+from Speaker_encoder.audio import preprocess_wav
 import librosa
-from Model.Speaker_encoder.inference import embed_utterance
+from Speaker_encoder.inference import embed_utterance
 
 path = sys.path[0]
 os.chdir(path)
