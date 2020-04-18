@@ -19,7 +19,7 @@ os.chdir(path)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
-def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1):
+def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pin_memory = False):
     Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
     Prep = Preproccesing()
     embeddings = SpeakerIdentity(Data)
@@ -34,7 +34,8 @@ def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1):
 
     C = torch.utils.data.DataLoader(ConcatDataset(Mels, emb), shuffle = shuffle,
                                     batch_size = batch_size, collate_fn = collate,
-                                    num_workers = num_workers)
+                                    num_workers = num_workers,
+                                    pin_memory = pin_memory)
     return C
 
 def collate(batch):
@@ -110,11 +111,11 @@ def loss(output, target, model, mu = 1, lambd = 1):
 """ A bit of init stuff ... Checking for GPU and loading data """
 
 
-def Train(trainloader, n_steps, save_every, models_dir, model_path_name, loss_path_name):
+def Train(model, trainloader, n_steps, save_every, models_dir, model_path_name, loss_path_name):
     print(device)
-    model = Generator(32, 256, 512, 32).eval().to(device)
-    g_checkpoint = torch.load('AutoVC/autovc.ckpt', map_location=torch.device(device))
-    model.load_state_dict(g_checkpoint['model'])
+    #model = Generator(32, 256, 512, 32).eval().to(device)
+    #g_checkpoint = torch.load('AutoVC/autovc.ckpt', map_location=torch.device(device))
+    #model.load_state_dict(g_checkpoint['model'])
 
     optimiser = torch.optim.Adam(model.parameters(), lr=1e-3)
 
@@ -142,7 +143,7 @@ def Train(trainloader, n_steps, save_every, models_dir, model_path_name, loss_pa
 
             if step % 100 == 0:
                 """ Append current error to L for plotting """
-                r = error.detach().numpy()
+                r = error.cpu().detach().numpy()
                 running_loss.append(r)
                 pickle.dump(running_loss, open(loss_fpath, "wb"))
 
