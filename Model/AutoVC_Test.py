@@ -39,6 +39,9 @@ def EvalEmbedding(embedding, labels):
     sns.scatterplot(X[:, 0], X[:, 1], hue=labels)
     plt.title("t-SNE")
     plt.show()
+
+
+
 #embedding = SpeakerIdentity(Data)
 #EvalEmbedding(embedding, labels)
 #P = Preproccesing()
