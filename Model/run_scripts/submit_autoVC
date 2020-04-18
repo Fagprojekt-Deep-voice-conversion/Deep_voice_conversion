@@ -1,6 +1,6 @@
 #!/bin/sh
 ### General options
-### –- specify queue --
+### ?- specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
 #BSUB -J AutoVC
@@ -34,8 +34,3 @@ source AutoVC-env/bin/activate
 echo $PWD
 
 python3 ../Run_AutoVC.py
-
-
-
-
-
