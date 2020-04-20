@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/*/Deep_voice_conversion/Model/run_scripts
+###cd ~/*/Deep_voice_conversion/Model/run_scripts
 
 
 ### Make python environment

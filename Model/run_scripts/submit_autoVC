@@ -26,11 +26,33 @@
 #BSUB -e AutoVC_%J.err
 # -- end of LSF options --
 
+
+### Set directory
+BASE_DIRECTORY=$(echo "$PWD" | cut -d "/" -f2)
+if [ $BASE_DIRECTORY = "work1" ]
+then 
+	cd /work1/s183920/Deep_voice_conversion/Model/run_scripts
+else
+	cd ~/Desktop/Deep_voice_conversion/Model/run_scripts
+
+
+### Load modules
 module load python3
 module load cuda
 
+### Run setup
 sh setup.sh
 source AutoVC-env/bin/activate
 echo $PWD
 
+### Run python script
 python3 ../Run_AutoVC.py
+
+
+
+
+
+
+
+
+
