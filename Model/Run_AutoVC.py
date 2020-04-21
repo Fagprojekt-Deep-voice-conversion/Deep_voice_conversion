@@ -16,7 +16,7 @@ print(device)
 
 data_path = "../data/VCTK-Data/VCTK-Corpus/wav48"
 data, labels = DataLoad2(data_path)
-data, labels = data[:2000], labels[:2000]
+data, labels = data[:7000], labels[:7000]
 print("Number of wav files: {:}".format(len(data)))
 batch_size = 2
 num_workers = 0
@@ -27,8 +27,8 @@ seed = 20
 n_steps = 100000
 save_every = 10000
 models_dir = "Models"
-model_path_name = "trainedModel"
-loss_path_name = "loss"
+model_path_name = "trainedModel30k"
+loss_path_name = "loss30k"
 
 
 

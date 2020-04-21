@@ -46,7 +46,7 @@ class Preproccesing:
         for wav in tqdm(Batch):
             y, _ = librosa.load(wav, sr = self.sampling_rate)
             y = preprocess_wav(y)
-            y = y / np.abs(y).max() * self.rescaling_max
+            #y = y / np.max(np.abs(y)) * self.rescaling_max
 
             X = librosa.feature.melspectrogram(y, sr = self.sampling_rate,
                                                n_fft = self.n_fft,
