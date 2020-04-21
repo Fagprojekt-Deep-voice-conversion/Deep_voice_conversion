@@ -17,6 +17,7 @@ Model/Test_spec_to_audio.wav
 Model/Reconstruction_Test.wav
 Model/Reconstruction_Test.wav
 Model/Models/trainedModel.pt
+Model/Models/trainedModel30k.pt
 *.wav
 data/VCTK-Data/*
 

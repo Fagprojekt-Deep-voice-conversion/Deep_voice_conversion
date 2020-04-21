@@ -112,59 +112,62 @@ def loss(output, target, model, mu = 1, lambd = 1):
 
 
 def Train(model, trainloader, n_steps, save_every, models_dir, model_path_name, loss_path_name):
-    print(device)
+	if torch.cuda.is_available():
+		print(f"Training beginning on {torch.cuda.get_device_name(0)}")
+	else:
+		print(f"Training beginning on cpu")
     #model = Generator(32, 256, 512, 32).eval().to(device)
     #g_checkpoint = torch.load('AutoVC/autovc.ckpt', map_location=torch.device(device))
     #model.load_state_dict(g_checkpoint['model'])
 
-    optimiser = torch.optim.Adam(model.parameters(), lr=1e-3)
+	optimiser = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-    step = 1
-    running_loss = []
-    state_fpath = models_dir + "/" + model_path_name + ".pt"
-    loss_fpath = models_dir + "/" + loss_path_name
-    
-    model.train()
-    
-    while step < n_steps:
-        for batch in tqdm(trainloader):
-            X, c_org = batch[0], batch[1]
+	step = 1
+	running_loss = []
+	state_fpath = models_dir + "/" + model_path_name + ".pt"
+	loss_fpath = models_dir + "/" + loss_path_name
 
-            """ Outputs and loss"""
-            mel, post, codes = model(X, c_org, c_org)
-            error = loss([mel, post, codes], [X, c_org], model)
+	model.train()
 
-            """ Zeros the gradient for every step """
-            """ Computes gradient and do optimiser step"""
-            optimiser.zero_grad()
-            error.backward()
-            optimiser.step()
-            step += 1
+	while step < n_steps:
+		for batch in tqdm(trainloader):
+			X, c_org = batch[0], batch[1]
 
-            if step % 100 == 0:
-                """ Append current error to L for plotting """
-                r = error.cpu().detach().numpy()
-                running_loss.append(r)
-                pickle.dump(running_loss, open(loss_fpath, "wb"))
+			""" Outputs and loss"""
+			mel, post, codes = model(X, c_org, c_org)
+			error = loss([mel, post, codes], [X, c_org], model)
 
-            if step % save_every == 0:
-                print("Saving the model (step %d)" % step)
-                torch.save({
-                    "step": step + 1,
-                    "model_state": model.state_dict(),
-                    "optimizer_state": optimiser.state_dict(),
-                }, state_fpath)
+			""" Zeros the gradient for every step """
+			""" Computes gradient and do optimiser step"""
+			optimiser.zero_grad()
+			error.backward()
+			optimiser.step()
+			step += 1
 
-            if step >= n_steps:
-                break
-                
-    pickle.dump(running_loss, open(loss_fpath, "wb"))
-    print("Saving the model (step %d)" % step)
-    torch.save({
-        "step": step + 1,
-        "model_state": model.state_dict(),
-        "optimizer_state": optimiser.state_dict(),
-    }, state_fpath)
+			if step % 100 == 0:
+				""" Append current error to L for plotting """
+				r = error.cpu().detach().numpy()
+				running_loss.append(r)
+				pickle.dump(running_loss, open(loss_fpath, "wb"))
+
+			if step % save_every == 0:
+				print("Saving the model (step %d)" % step)
+				torch.save({
+					"step": step + 1,
+					"model_state": model.state_dict(),
+					"optimizer_state": optimiser.state_dict(),
+				}, state_fpath)
+
+			if step >= n_steps:
+				break
+				
+	pickle.dump(running_loss, open(loss_fpath, "wb"))
+	print("Saving the model (step %d)" % step)
+	torch.save({
+		"step": step + 1,
+		"model_state": model.state_dict(),
+		"optimizer_state": optimiser.state_dict(),
+	}, state_fpath)
 
 
 
