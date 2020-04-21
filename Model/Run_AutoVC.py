@@ -74,16 +74,3 @@ if __name__ == "__main__":
 	model.share_memory()
 
 	Train(model, trainloader, n_steps, save_every, models_dir, model_path_name, loss_path_name)
-
-
-
-
-
-
-
-
-
-
-
-
-
