@@ -36,7 +36,7 @@ def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pi
                                     batch_size = batch_size, collate_fn = collate,
                                     num_workers = num_workers,
                                     pin_memory = pin_memory)
-    return C, corrupted
+    return C, uncorrupted
 
 def collate(batch):
     batch = list(zip(*batch))
