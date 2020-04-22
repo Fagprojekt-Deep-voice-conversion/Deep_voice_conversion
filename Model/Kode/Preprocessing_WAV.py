@@ -69,7 +69,7 @@ class Preproccesing:
             except:
                 print("Issue with Wav file")
                 corrupted.append(i)
-        return Mels, uncorrupted
+        return Mels, uncorrupted, corrupted
 
 
 
