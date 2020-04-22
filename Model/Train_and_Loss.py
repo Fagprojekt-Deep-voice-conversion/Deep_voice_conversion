@@ -30,8 +30,8 @@ def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pi
         X = X.mean(0).unsqueeze(0).expand(len(index[0]), -1)
         emb.append(X)
     emb = torch.cat(emb, dim = 0)
-    Mels = Prep.Mel_Batch(list(Data))
-
+    Mels, uncorrupted = Prep.Mel_Batch(list(Data))
+    emb = emb[uncorrupted]
     C = torch.utils.data.DataLoader(ConcatDataset(Mels, emb), shuffle = shuffle,
                                     batch_size = batch_size, collate_fn = collate,
                                     num_workers = num_workers,
