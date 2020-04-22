@@ -34,14 +34,19 @@ def SpeakerIdentity(Data):
     if type(Data) is str:
         Data = [[Data]]
     embedding = []
+    uncorrupted = np.ones(len(Data), dtype = np.bool)
     print("Creating Speaker Embeddings...")
-    for path in tqdm(Data):
-        y = librosa.load(path, sr = 16000)[0]
-        y = preprocess_wav(y)
-        embed = embed_utterance(y)
-        embedding.append(embed)
+    for i,path in tqdm(enumerate(Data)):
+        try:
+            y = librosa.load(path, sr = 16000)[0]
+            y = preprocess_wav(y)
+            embed = embed_utterance(y)
+            embedding.append(embed)
+        except:
+            uncorrupted[i] = False
 
-    return torch.from_numpy(np.array(embedding)).to(device)
+
+    return torch.from_numpy(np.array(embedding)).to(device), uncorrupted
 
 def EvalEmbedding(embedding, labels):
     np.random.seed(2020)

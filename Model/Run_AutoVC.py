@@ -46,9 +46,9 @@ if __name__ == "__main__":
 	#Arguments
 	
 	### Data
-	data_path = "../data/VCTK-Data/VCTK-Corpus/wav48"
+	data_path = "Kode/Data"
 	data, labels = DataLoad2(data_path)
-	data, labels = data[:30000], labels[:30000]
+	data, labels = data[:10], labels[:10]
 	
 	batch_size = 2
 	num_workers = 0

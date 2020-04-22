@@ -35,6 +35,8 @@ class Preproccesing:
             plt.title(self.labels[i])
             plt.show()
 
+
+
     def Mel_Batch(self, Batch):
         if type(Batch) is not list:
             Batch = [Batch]
@@ -42,8 +44,7 @@ class Preproccesing:
         device = torch.device("cuda" if use_cuda else "cpu")
 
         Mels = []
-        uncorrupted = []
-        corrupted = []
+        uncorrupted = np.ones(len(Batch), dtype = np.bool)
         print("Creating Mel Spectrograms...")
 
         for i, wav in tqdm(enumerate(Batch)):
@@ -65,11 +66,11 @@ class Preproccesing:
 
                 X = torch.from_numpy(X.T).to(device).unsqueeze(0)
                 Mels.append(X)
-                uncorrupted.append(i)
+
             except:
                 print("Issue with Wav file")
-                corrupted.append(i)
-        return Mels, uncorrupted, corrupted
+                uncorrupted[i] = False
+        return Mels, uncorrupted
 
 
 
