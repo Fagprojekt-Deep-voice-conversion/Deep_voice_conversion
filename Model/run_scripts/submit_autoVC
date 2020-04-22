@@ -5,13 +5,9 @@
 ### -- set the job Name --
 #BSUB -J AutoVC
 ### -- ask for number of cores (default: 1) --
-
-#BSUB -n 6
-=======
-#BSUB -n 9
+#BSUB -n 1
 ### -- set span if number of cores is more than 1
 #BSUB -R "span[hosts=1]"
-
 ### -- Select the resources: 1 gpu in exclusive process mode --
 #BSUB -gpu "num=1:mode=exclusive_process"
 ### -- set walltime limit: hh:mm --  maximum 24 hours for GPU-queues right now
