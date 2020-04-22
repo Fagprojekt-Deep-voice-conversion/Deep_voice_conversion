@@ -523,3 +523,5 @@ resemblyzer/pretrained.pt
 Real_Time_Voice_Cloning/
 *.ckpt
 Model/Models/trainedModeltest.pt
+*.pt
+*.pth
