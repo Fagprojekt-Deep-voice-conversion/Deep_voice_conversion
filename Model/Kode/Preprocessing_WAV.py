@@ -43,6 +43,7 @@ class Preproccesing:
 
         Mels = []
         uncorrupted = []
+        corrupted = []
         print("Creating Mel Spectrograms...")
 
         for i, wav in tqdm(enumerate(Batch)):
@@ -67,7 +68,7 @@ class Preproccesing:
                 uncorrupted.append(i)
             except:
                 print("Issue with Wav file")
-
+                corrupted.append(i)
         return Mels, uncorrupted
 
 
