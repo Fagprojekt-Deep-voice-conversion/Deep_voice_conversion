@@ -42,26 +42,34 @@ class Preproccesing:
         device = torch.device("cuda" if use_cuda else "cpu")
 
         Mels = []
+        uncorrupted = []
+        corrupted = []
         print("Creating Mel Spectrograms...")
-        for wav in tqdm(Batch):
-            y, _ = librosa.load(wav, sr = self.sampling_rate)
-            y = preprocess_wav(y)
-            #y = y / np.max(np.abs(y)) * self.rescaling_max
 
-            X = librosa.feature.melspectrogram(y, sr = self.sampling_rate,
-                                               n_fft = self.n_fft,
-                                               hop_length = self.hop_length,
-                                               n_mels = self.n_mels,
-                                               fmin = self.fmin,
-                                               fmax = self.fmax,
-                                               power = self.power,
-                                               )
-            X = librosa.amplitude_to_db(X, ref = self.ref_db)
-            X = np.clip((X - self.min_db) / - self.min_db, 0 ,1)
+        for i, wav in tqdm(enumerate(Batch)):
+            try:
+                y, _ = librosa.load(wav, sr = self.sampling_rate)
+                y = preprocess_wav(y)
+                #y = y / np.max(np.abs(y)) * self.rescaling_max
 
-            X = torch.from_numpy(X.T).to(device).unsqueeze(0)
-            Mels.append(X)
-        return Mels
+                X = librosa.feature.melspectrogram(y, sr = self.sampling_rate,
+                                                   n_fft = self.n_fft,
+                                                   hop_length = self.hop_length,
+                                                   n_mels = self.n_mels,
+                                                   fmin = self.fmin,
+                                                   fmax = self.fmax,
+                                                   power = self.power,
+                                                   )
+                X = librosa.amplitude_to_db(X, ref = self.ref_db)
+                X = np.clip((X - self.min_db) / - self.min_db, 0 ,1)
+
+                X = torch.from_numpy(X.T).to(device).unsqueeze(0)
+                Mels.append(X)
+                uncorrupted.append(i)
+            except:
+                print("Issue with Wav file")
+                corrupted.append(i)
+        return Mels, uncorrupted, corrupted
 
 
 
