@@ -34,9 +34,9 @@
 BASE_DIRECTORY=$(echo "$PWD" | cut -d "/" -f2)
 if [ $BASE_DIRECTORY = "work1" ]
 then 
-	run_dir=/work1/s183920/Deep_voice_conversion/Model/run_scripts
+	run_dir=/work1/s183920/Deep_voice_conversion/AutoVC/run_scripts
 else
-	run_dir=~/Desktop/Deep_voice_conversion/Model/run_scripts
+	run_dir=~/Desktop/Deep_voice_conversion/AutoVC/run_scripts
 fi
 
 
