@@ -48,7 +48,7 @@ if __name__ == "__main__":
 	### Data
 	data_path = "../data/VCTK-Data/VCTK-Corpus/wav48"
 	data, labels = DataLoad2(data_path)
-	data, labels = data[:20], labels[:20]
+	data, labels = data[:30000], labels[:30000]
 	
 	batch_size = 2
 	num_workers = 0
@@ -59,15 +59,15 @@ if __name__ == "__main__":
 	n_steps = 100#000
 	save_every = 10#000
 	models_dir = "Models"
-	model_path_name = "trainedModel"
+	model_path_name = "trainedModeltest"
 	loss_path_name = "loss"
 	
 	print("Number of wav files: {:}".format(len(data)))
 	
 	
 	# execute
-	trainloader = TrainLoader(data, labels, batch_size = batch_size, shuffle = shuffle, num_workers = num_workers, pin_memory = pin_memory)
-
+	trainloader, corrupted = TrainLoader(data, labels, batch_size = batch_size, shuffle = shuffle, num_workers = num_workers, pin_memory = pin_memory)
+	print("Number of corrupted files: ", len(corrupted))
 	model = Generator(32, 256, 512, 32).eval().to(device)
 	g_checkpoint = torch.load('AutoVC/autovc.ckpt', map_location=torch.device(device))
 	model.load_state_dict(g_checkpoint['model'])
