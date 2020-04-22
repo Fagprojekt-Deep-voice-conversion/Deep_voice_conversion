@@ -23,11 +23,11 @@ device = torch.device("cuda" if use_cuda else "cpu")
 
 encoder = load_encoder("../Model/Speaker_encoder/pretrained_encoder.pt").float()
 
-loss0 = pickle.load(open("Models/loss30k", "rb"))
-loss1 = pickle.load(open("Models/loss", "rb"))
-plt.plot(loss0)
-plt.plot(loss1)
-plt.show()
+#loss0 = pickle.load(open("Models/loss30k", "rb"))
+#loss1 = pickle.load(open("Models/loss", "rb"))
+##plt.plot(loss0)
+#plt.plot(loss1)
+#plt.show()
 
 
 def SpeakerIdentity(Data):
@@ -55,7 +55,7 @@ def EvalEmbedding(embedding, labels):
 #embedding = SpeakerIdentity(Data)
 #EvalEmbedding(embedding, labels)
 #P = Preproccesing()
-
+"""
 G = Generator(32,256,512,32).eval().to(device)
 g_checkpoint = torch.load('Models/trainedModel30k.pt', map_location=torch.device(device))
 G.load_state_dict(g_checkpoint["model_state"])
@@ -92,7 +92,7 @@ plt.show()
 
 plt.matshow(Y.squeeze(0).detach().numpy())
 plt.show()
-
+"""
 
 
 
