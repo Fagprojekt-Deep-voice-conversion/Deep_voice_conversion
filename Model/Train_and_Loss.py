@@ -130,8 +130,7 @@ def Train(model, trainloader, n_steps, save_every, models_dir, model_path_name, 
 	model.train()
 
 	while step < n_steps:
-		for batch in tqdm(trainloader):
-			X, c_org = batch[0], batch[1]
+		for X, c_org in tqdm(trainloader):
 
 			""" Outputs and loss"""
 			mel, post, codes = model(X, c_org, c_org)
