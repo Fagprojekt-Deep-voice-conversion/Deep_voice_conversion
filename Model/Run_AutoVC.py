@@ -49,7 +49,7 @@ if __name__ == "__main__":
 	"""
 	data_path = "../data/VCTK-Data/VCTK-Corpus/wav48"
 	data, labels = DataLoad2(data_path)
-	data, labels = data[:30000], labels[:30000]
+	data, labels = data[:20], labels[:20]
 	
 	batch_size = 2
 	num_workers = 0
@@ -65,18 +65,18 @@ if __name__ == "__main__":
 	
 	print("Number of wav files: {:}".format(len(data)))
 	"""
-	
+
 	### Init
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--seed', type=int, default=20, help='Seed to use')
 	
 	### Trainloader
-	parser.add_argument('--data_path', type=str, default="../data/VCTK-Data/VCTK-Corpus/wav48", help='Path to the training data.')
+	parser.add_argument('--data_path', type=str, default='../data/VCTK-Data/VCTK-Corpus/wav48', help='Path to the training data.')
 	parser.add_argument('--num_train_data', type=int, default=None, help='Number of training samples to use. Will not be taken random, but from the beginning.')
 	parser.add_argument('--batch_size', type=int, default=2, help='The batch size used for training')
 	parser.add_argument('--num_workers', type=int, default=0, help='The number of workers used when loading data for the trainloader')
-	parser.add_argument('--shuffle', type=bool, default=True, help='Whether to shuffle the data or not when using it for training')
-	parser.add_argument('--pin_memory', type=bool, default=False, help='Whether to pin the memory or not')
+	parser.add_argument('--shuffle', action='store_true', default=True, help='Whether to shuffle the data or not when using it for training')
+	parser.add_argument('--pin_memory', action='store_false', default=False, help='Whether to pin the memory or not')
 
 	### Model
 	parser.add_argument('--pretrained_model_path', type=str, default='AutoVC/autovc.ckpt', help='Path to pretrained model')
@@ -84,10 +84,9 @@ if __name__ == "__main__":
 	### Train
 	parser.add_argument('--n_steps', type=int, default=100000, help='Number of training steps')
 	parser.add_argument('--save_every', type=int, default=10000, help='Number of steps between each save of the model')
-	parser.add_argument('--models_dir', type=str, default="Models", help="Directory to save the training results in")
-	parser.add_argument('--model_path_name', type=str, default="trained_model", help='Name of the trained model')
-	parser.add_argument('--loss_path_name', type=str, default="loss", help='Name of file containing loss values')
-
+	parser.add_argument('--models_dir', type=str, default='Models', help="Directory to save the training results in")
+	parser.add_argument('--model_path_name', type=str, default='trained_model', help='Name of the trained model')
+	parser.add_argument('--loss_path_name', type=str, default='loss', help='Name of file containing loss values')
 	
 	# execute
 	"""
@@ -111,7 +110,7 @@ if __name__ == "__main__":
 	if config.num_train_data is not None:
 		data, labels = data[:config.num_train_data ], labels[:config.num_train_data ]
 	print("Number of wav files: {:}".format(len(data)))
-	trainloader = TrainLoader(data, labels, batch_size = config.batch_size, shuffle = config.shuffle, 
+	trainloader, corrupted = TrainLoader(data, labels, batch_size = config.batch_size, shuffle = config.shuffle, 
 								num_workers = config.num_workers, pin_memory = config.pin_memory)
 	
 	### Make model
@@ -122,3 +121,4 @@ if __name__ == "__main__":
 	
 	### Train model
 	Train(model, trainloader, config.n_steps, config.save_every, config.models_dir, config.model_path_name, config.loss_path_name)
+

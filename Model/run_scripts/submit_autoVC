@@ -52,7 +52,7 @@ source AutoVC-env/bin/activate
 echo $PWD
 
 ### Run python script
-python3 ../Run_AutoVC.py --num_train_data 20
+python3 ../Run_AutoVC.py
 
 
 
