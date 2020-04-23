@@ -22,13 +22,14 @@ def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pi
     Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
     Prep = Preproccesing()
     embeddings, uncorrupted = SpeakerIdentity(Data)
+    labels = labels[uncorrupted]
     emb = []
     for person in sorted(set(labels)):
         index = np.where(labels == person)
-        X = embeddings[index]
+        X = embeddings[index].cpu()
         X = X.mean(0).unsqueeze(0).expand(len(index[0]), -1)
         emb.append(X)
-    emb = torch.cat(emb, dim = 0)
+    emb = torch.cat(emb, dim = 0).to(device)
     Mels, uncorrupted = Prep.Mel_Batch(list(Data[uncorrupted]))
     emb = emb[uncorrupted]
     C = torch.utils.data.DataLoader(ConcatDataset(Mels, emb), shuffle = shuffle,

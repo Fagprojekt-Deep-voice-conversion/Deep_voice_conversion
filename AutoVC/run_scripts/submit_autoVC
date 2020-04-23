@@ -52,7 +52,7 @@ source AutoVC-env/bin/activate
 echo $PWD
 
 ### Run python script
-python3 ../Run_AutoVC.py
+python3 ../Run_AutoVC.py --model_path_name trained_model20k --loss_path_name loss20k --n_steps 20000
 
 
 
