@@ -18,6 +18,9 @@ https://join.slack.com/t/voicefakesnet/invite/enQtOTUwMzQ1MDE5NDMxLTc3ZjgwODU2NT
 # GitHub repository
 https://github.com/Fagprojekt-Deep-voice-conversion/Deep_voice_conversion
 
+How to seith to remote branches:<br>
+https://stackoverflow.com/questions/1783405/how-do-i-check-out-a-remote-git-branch
+
 # Google drive
 https://drive.google.com/drive/folders/1cBMH_hiwOsA_Vr3Og4rz7pZZrMPPtF3e?usp=sharing
 
