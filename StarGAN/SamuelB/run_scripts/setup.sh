@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/*/Deep_voice_conversion/StarGAN/run_scripts
+cd ~/*/Deep_voice_conversion/StarGAN/SamuelB/run_scripts
 
 
 ### Make python environment
