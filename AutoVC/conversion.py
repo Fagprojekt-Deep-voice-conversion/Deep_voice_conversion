@@ -7,9 +7,10 @@ from dataload import DataLoad2
 from Preprocessing_WAV import Preproccesing
 from Speaker_identity import SpeakerIdentity
 import seaborn as sns
+from Train_and_Loss import TrainLoader
 
 data, labels = DataLoad2("Test_Data")
-data = data[:20]
+data,labels  = data[:20], labels[:20]
 def Conversion(source, target, model):
     P = Preproccesing()
     S, _  = P.Mel_Batch(source)
@@ -17,6 +18,8 @@ def Conversion(source, target, model):
 
     s_emb, _ = SpeakerIdentity(source)
     t_emb, _ = SpeakerIdentity(target)
+
+
 
     S, T = S[0], T[0]
     mel, post, codes = model(S, s_emb, t_emb)
@@ -27,8 +30,6 @@ def Conversion(source, target, model):
     plt.matshow(post)
     plt.show()
 
-
-
 s = data[2]
 t = data[10]
 
@@ -36,7 +37,14 @@ t = data[10]
 model = Generator(32, 256, 512, 32).eval().to("cpu")
 g_checkpoint = torch.load("Models/trainedModel30k.pt", map_location=torch.device("cpu"))
 model.load_state_dict(g_checkpoint['model_state'])
-Conversion(s,t, model)
+#Conversion(s,t, model)
+
+
+C, _  = TrainLoader(data, labels, num_workers = 0)
+
+for c in C:
+    x = c
+    print(c)
 """
 data, labels = DataLoad2("Test_Data")
 data = data[:20]
