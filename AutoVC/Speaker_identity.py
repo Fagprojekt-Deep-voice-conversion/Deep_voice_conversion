@@ -24,7 +24,7 @@ encoder = load_encoder("Speaker_encoder/pretrained_encoder.pt").float()
 
 def SpeakerIdentity(Data):
     if type(Data) is str:
-        Data = [[Data]]
+        Data = [Data]
     embedding = []
     uncorrupted = np.ones(len(Data), dtype = np.bool)
     print("Creating Speaker Embeddings...")
