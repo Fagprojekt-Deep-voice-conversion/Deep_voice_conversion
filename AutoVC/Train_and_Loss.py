@@ -111,62 +111,93 @@ def loss(output, target, model, mu = 1, lambd = 1):
 """ A bit of init stuff ... Checking for GPU and loading data """
 
 
-def Train(model, trainloader, n_steps, save_every, models_dir, model_path_name, loss_path_name):
-	if torch.cuda.is_available():
-		print(f"Training beginning on {torch.cuda.get_device_name(0)}")
-	else:
-		print(f"Training beginning on cpu")
-    #model = Generator(32, 256, 512, 32).eval().to(device)
-    #g_checkpoint = torch.load('AutoVC/autovc.ckpt', map_location=torch.device(device))
-    #model.load_state_dict(g_checkpoint['model'])
 
-	optimiser = torch.optim.Adam(model.parameters(), lr=1e-3)
+class lr_scheduler_Adam:
+    def __init__(self, model, init_lr, betas = (0.9, 0.999), eps = 1e-8, amsgrad = False, weight_decay = 0):
+        self.init_lr = init_lr
+        self.optimiser = torch.optim.Adam(model.parameters(), lr=init_lr, betas = betas , eps = eps, amsgrad= amsgrad, weight_decay= weight_decay)
 
-	step = 1
-	running_loss = []
-	state_fpath = models_dir + "/" + model_path_name + ".pt"
-	loss_fpath = models_dir + "/" + loss_path_name
+    def noam_learning_rate_decay(self, init_lr, global_step, warmup_steps=4000):
+        # Noam scheme from tensor2tensor:
+        warmup_steps = float(warmup_steps)
+        step = global_step + 1.
+        lr = init_lr * warmup_steps ** 0.5 * np.minimum(
+            step * warmup_steps ** -1.5, step ** -0.5)
+        return lr
 
-	model.train()
+    def step(self, global_step):
+        self.optimiser.step()
+        self.optimiser.param_groups[0]["lr"] = self.noam_learning_rate_decay(self.init_lr, global_step)
 
-	while step < n_steps:
-		for X, c_org in tqdm(trainloader):
+def load_params(model, flattened):
+    offset = 0
+    for param in model.parameters():
+        param.data.copy_(flattened[offset:offset + param.nelement()].view(param.size()))
+        offset += param.nelement()
+def flatten_params(model):
+    return torch.cat([param.data.view(-1) for param in model.parameters()], 0)
 
-			""" Outputs and loss"""
-			mel, post, codes = model(X, c_org, c_org)
-			error = loss([mel, post, codes], [X, c_org], model)
 
-			""" Zeros the gradient for every step """
-			""" Computes gradient and do optimiser step"""
-			optimiser.zero_grad()
-			error.backward()
-			optimiser.step()
-			step += 1
+def Train(model, trainloader, init_lr, n_steps, save_every, models_dir, model_path_name, loss_path_name):
+    if torch.cuda.is_available():
+        print(f"Training beginning on {torch.cuda.get_device_name(0)}")
+    else:
+        print(f"Training beginning on cpu")
 
-			if step % 100 == 0:
-				""" Append current error to L for plotting """
-				r = error.cpu().detach().numpy()
-				running_loss.append(r)
-				pickle.dump(running_loss, open(loss_fpath, "wb"))
+    step = 1
+    ema = 0.9999
+    running_loss = []
 
-			if step % save_every == 0:
-				print("Saving the model (step %d)" % step)
-				torch.save({
-					"step": step + 1,
-					"model_state": model.state_dict(),
-					"optimizer_state": optimiser.state_dict(),
-				}, state_fpath)
+    loss_fpath = models_dir + "/" + loss_path_name
+    scheduler = lr_scheduler_Adam(model, init_lr)
+    model.train()
+    avg_params = flatten_params(model)
+    while step < n_steps:
+        for X, c_org in tqdm(trainloader):
 
-			if step >= n_steps:
-				break
-				
-	pickle.dump(running_loss, open(loss_fpath, "wb"))
-	print("Saving the model (step %d)" % step)
-	torch.save({
-		"step": step + 1,
-		"model_state": model.state_dict(),
-		"optimizer_state": optimiser.state_dict(),
-	}, state_fpath)
+            """ Outputs and loss"""
+            mel, post, codes = model(X, c_org, c_org)
+            error = loss([mel, post, codes], [X, c_org], model)
+
+            """ Zeros the gradient for every step """
+            """ Computes gradient and do optimiser step"""
+            scheduler.optimiser.zero_grad()
+            error.backward()
+
+            scheduler.step(step)
+            avg_params = ema * avg_params + (1-ema) * flatten_params(model)
+            step += 1
+            load_params(model, avg_params)
+
+            if step % 100 == 0:
+                """ Append current error to L for plotting """
+                r = error.cpu().detach().numpy()
+                running_loss.append(r)
+                pickle.dump(running_loss, open(loss_fpath, "wb"))
+
+            if step % save_every == 0:
+                original_param = flatten_params(model)
+                load_params(model, avg_params)
+                print("Saving the model (step %d)" % step)
+                torch.save({
+                "step": step + 1,
+                "model_state": model.state_dict(),
+                "optimizer_state": scheduler.optimiser.state_dict(),
+                }, models_dir + "/" + model_path_name + "/" + f"_step{step}" ".pt")
+                load_params(model, original_param)
+            if step >= n_steps:
+                break
+
+
+    load_params(model, avg_params)
+    pickle.dump(running_loss, open(loss_fpath, "wb"))
+    print("Saving the model (step %d)" % step)
+    torch.save({
+    "step": step + 1,
+    "model_state": model.state_dict(),
+    "optimizer_state": scheduler.optimiser.state_dict(),
+    }, models_dir + "/" + model_path_name + "/" + f"_step{step}" ".pt")
+
 
 
 

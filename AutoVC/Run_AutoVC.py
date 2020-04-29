@@ -82,6 +82,7 @@ if __name__ == "__main__":
 	parser.add_argument('--pretrained_model_path', type=str, default='Generator_autoVC/autovc.ckpt', help='Path to pretrained model')
 	
 	### Train
+	parser.add_argument('--init_lr', type=float, default=1e-3, help='Initial Learning Rate')
 	parser.add_argument('--n_steps', type=int, default=100000, help='Number of training steps')
 	parser.add_argument('--save_every', type=int, default=10000, help='Number of steps between each save of the model')
 	parser.add_argument('--models_dir', type=str, default='Models', help="Directory to save the training results in")
@@ -108,7 +109,7 @@ if __name__ == "__main__":
 	### Run trainloader
 	
 	data, labels = DataLoad2(config.data_path)
-	data, labels = data[:20], labels[:20]
+
 	if config.num_train_data is not None:
 		data, labels = data[:config.num_train_data ], labels[:config.num_train_data ]
 	print("Number of wav files: {:}".format(len(data)))
@@ -122,5 +123,5 @@ if __name__ == "__main__":
 	model.share_memory()
 	
 	### Train model
-	Train(model, trainloader, config.n_steps, config.save_every, config.models_dir, config.model_path_name, config.loss_path_name)
+	Train(model, trainloader, config.init_lr, config.n_steps, config.save_every, config.models_dir, config.model_path_name, config.loss_path_name)
 
