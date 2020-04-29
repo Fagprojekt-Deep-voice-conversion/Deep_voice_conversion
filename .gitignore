@@ -24,6 +24,12 @@ data/VCTK-Data/*
 ### Pre trained model ###
 resemblyzer/pretrained.pt
 Model/WaveNetVC_pretrained.pth
+Real_Time_Voice_Cloning/
+*.ckpt
+Model/Models/trainedModeltest.pt
+*.pt
+*.pth
+
 
 ### shell scripts for cluster ###
 
@@ -36,6 +42,38 @@ StarGAN/run_scripts/StarGAN-env/
 
 ### AutoVC run setups
 Model/run_scripts/AutoVC-env/
+
+
+# Own additions
+
+Model/WaveNetVC_pretrained.pth
+
+### json settings ###
+settings.json
+.idea/workspace.xml
+
+### Wav files ###
+Model/Reconstruction_Test.wav
+Model/Reconstruction_Test.wav
+Model/Test_spec_to_audio (2).wav
+Model/Test_spec_to_audio_ny.wav
+Model/Test_spec_to_audio.wav
+Model/Reconstruction_Test.wav
+Model/Reconstruction_Test.wav
+*.wav
+data/VCTK-Data/*
+
+### Pre trained model ###
+resemblyzer/pretrained.pt
+
+### shell scripts for cluster ###
+
+Libraries
+
+### StarGAN run setups
+*.err
+*.out
+StarGAN/run_scripts/StarGAN-env/
 
 
 ### Python ###
@@ -505,20 +543,6 @@ MigrationBackup/
 
 # End of https://www.gitignore.io/api/python,visualstudio,visualstudiocode
 
-# json settings
-settings.json
-.idea/workspace.xml
-
-Model/Reconstruction_Test.wav
-Model/Reconstruction_Test.wav
-Model/Test_spec_to_audio (2).wav
-Model/Test_spec_to_audio_ny.wav
-Model/Test_spec_to_audio.wav
-Model/Reconstruction_Test.wav
-Model/Reconstruction_Test.wav
-
-
-resemblyzer/pretrained.pt
 
 Real_Time_Voice_Cloning/
 *.ckpt

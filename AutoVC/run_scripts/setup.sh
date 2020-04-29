@@ -1,6 +1,6 @@
 #!/bin/bash
 
-###cd ~/*/Deep_voice_conversion/Model/run_scripts
+###cd ~/*/Deep_voice_conversion/AutoVC/run_scripts
 ### Set directory
 
 if [ "$1" = "" ]
@@ -26,7 +26,7 @@ python3 -m venv AutoVC-env
 
 source AutoVC-env/bin/activate
 
-python -m pip install torch==1.4.0 sklearn tqdm librosa torchvision webrtcvad scipy matplotlib pandas
+python -m pip install torch==1.4.0 sklearn tqdm librosa torchvision webrtcvad scipy matplotlib pandas seaborn
 
 deactivate
 

@@ -71,7 +71,7 @@ if __name__ == "__main__":
 	parser.add_argument('--seed', type=int, default=20, help='Seed to use')
 	
 	### Trainloader
-	parser.add_argument('--data_path', type=str, default='Test_Data', help='Path to the training data.')
+	parser.add_argument('--data_path', type=str, default='../data/VCTK-Data/VCTK-Corpus/wav48/', help='Path to the training data.')
 	parser.add_argument('--num_train_data', type=int, default=None, help='Number of training samples to use. Will not be taken random, but from the beginning.')
 	parser.add_argument('--batch_size', type=int, default=2, help='The batch size used for training')
 	parser.add_argument('--num_workers', type=int, default=0, help='The number of workers used when loading data for the trainloader')
