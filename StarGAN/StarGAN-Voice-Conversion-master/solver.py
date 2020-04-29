@@ -1,12 +1,16 @@
 from model import Generator
 from model import Discriminator
-from model import DomainClassifier
+from torch.autograd import Variable
+from torchvision.utils import save_image
 import torch
 import torch.nn.functional as F
-from os.path import join, basename
+import numpy as np
+import os
+from os.path import join, basename, dirname, split
 import time
 import datetime
 from data_loader import to_categorical
+import librosa
 from utils import *
 from tqdm import tqdm
 
@@ -27,7 +31,6 @@ class Solver(object):
         self.lambda_cls = config.lambda_cls
         self.lambda_rec = config.lambda_rec
         self.lambda_gp = config.lambda_gp
-        self.lambda_id = config.lambda_id
 
         # Training configurations.
         self.batch_size = config.batch_size
@@ -35,7 +38,6 @@ class Solver(object):
         self.num_iters_decay = config.num_iters_decay
         self.g_lr = config.g_lr
         self.d_lr = config.d_lr
-        self.c_lr = config.c_lr
         self.n_critic = config.n_critic
         self.beta1 = config.beta1
         self.beta2 = config.beta2
@@ -66,21 +68,16 @@ class Solver(object):
 
     def build_model(self):
         """Create a generator and a discriminator."""
-        self.generator = Generator()
-        self.discriminator = Discriminator(num_speakers=self.num_speakers)
-        self.classifier = DomainClassifier()
+        self.G = Generator(num_speakers=self.num_speakers)
+        self.D = Discriminator(num_speakers=self.num_speakers)
 
-        self.g_optimizer = torch.optim.Adam(self.generator.parameters(), self.g_lr, [self.beta1, self.beta2])
-        self.d_optimizer = torch.optim.Adam(self.discriminator.parameters(), self.d_lr, [self.beta1, self.beta2])
-        self.c_optimizer = torch.optim.Adam(self.discriminator.parameters(), self.c_lr, [self.beta1, self.beta2])
-
-        self.print_network(self.generator, 'Generator')
-        self.print_network(self.discriminator, 'Discriminator')
-        self.print_network(self.classifier, 'Domain Classifier')
-
-        self.generator.to(self.device)
-        self.discriminator.to(self.device)
-        self.classifier.to(self.device)
+        self.g_optimizer = torch.optim.Adam(self.G.parameters(), self.g_lr, [self.beta1, self.beta2])
+        self.d_optimizer = torch.optim.Adam(self.D.parameters(), self.d_lr, [self.beta1, self.beta2])
+        self.print_network(self.G, 'G')
+        self.print_network(self.D, 'D')
+            
+        self.G.to(self.device)
+        self.D.to(self.device)
 
     def print_network(self, model, name):
         """Print out the network information."""
@@ -94,33 +91,27 @@ class Solver(object):
     def restore_model(self, resume_iters):
         """Restore the trained generator and discriminator."""
         print('Loading the trained models from step {}...'.format(resume_iters))
-        g_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(resume_iters))
-        d_path = os.path.join(self.model_save_dir, '{}-D.ckpt'.format(resume_iters))
-        c_path = os.path.join(self.model_save_dir, '{}-C.ckpt'.format(resume_iters))
-
-        self.generator.load_state_dict(torch.load(g_path, map_location=lambda storage, loc: storage))
-        self.discriminator.load_state_dict(torch.load(d_path, map_location=lambda storage, loc: storage))
-        self.classifier.load_state_dict(torch.load(c_path, map_location=lambda storage, loc: storage))
+        G_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(resume_iters))
+        D_path = os.path.join(self.model_save_dir, '{}-D.ckpt'.format(resume_iters))
+        self.G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
+        self.D.load_state_dict(torch.load(D_path, map_location=lambda storage, loc: storage))
 
     def build_tensorboard(self):
         """Build a tensorboard logger."""
         from logger import Logger
         self.logger = Logger(self.log_dir)
 
-    def update_lr(self, g_lr, d_lr, c_lr):
+    def update_lr(self, g_lr, d_lr):
         """Decay learning rates of the generator and discriminator."""
         for param_group in self.g_optimizer.param_groups:
             param_group['lr'] = g_lr
         for param_group in self.d_optimizer.param_groups:
             param_group['lr'] = d_lr
-        for param_group in self.c_optimizer.param_groups:
-            param_group['lr'] = c_lr
 
     def reset_grad(self):
-        """Reset the gradientgradient buffers."""
+        """Reset the gradient buffers."""
         self.g_optimizer.zero_grad()
         self.d_optimizer.zero_grad()
-        self.c_optimizer.zero_grad()
 
     def denorm(self, x):
         """Convert the range from [-1, 1] to [0, 1]."""
@@ -159,12 +150,13 @@ class Solver(object):
 
     def load_wav(self, wavfile, sr=16000):
         wav, _ = librosa.load(wavfile, sr=sr, mono=True)
-        return wav_padding(wav, sr=16000, frame_period=5, multiple = 4)
+        return wav_padding(wav, sr=16000, frame_period=5, multiple = 4)  # TODO
 
     def train(self):
         """Train StarGAN."""
         # Set data loader.
         train_loader = self.train_loader
+
         data_iter = iter(train_loader)
 
         # Read a batch of testdata
@@ -178,7 +170,6 @@ class Solver(object):
         # Learning rate cache for decaying.
         g_lr = self.g_lr
         d_lr = self.d_lr
-        c_lr = self.c_lr
 
         # Start training from scratch or resume training.
         start_iters = 0
@@ -191,6 +182,7 @@ class Solver(object):
         print('Start training...')
         start_time = time.time()
         for i in range(start_iters, self.num_iters):
+
             # =================================================================================== #
             #                             1. Preprocess input data                                #
             # =================================================================================== #
@@ -206,90 +198,65 @@ class Solver(object):
 
             # Generate target domain labels randomly.
             # spk_label_trg: int,   spk_c_trg:one-hot representation 
-            spk_label_trg, spk_c_trg = self.sample_spk_c(mc_real.size(0))
+            spk_label_trg, spk_c_trg = self.sample_spk_c(mc_real.size(0)) 
 
-            mc_real = mc_real.to(self.device)              # Input mc.
-            spk_label_org = spk_label_org.to(self.device)  # Original spk labels.
-            spk_c_org = spk_c_org.to(self.device)          # Original spk one-hot.
-            spk_label_trg = spk_label_trg.to(self.device)  # Target spk labels.
-            spk_c_trg = spk_c_trg.to(self.device)          # Target spk one-hot.
-
-            # =================================================================================== #
-            #                             2. Train the Domain Classifier                           #
-            # =================================================================================== #
-
-            # Compute real classification loss.
-            cls_real = self.classifier(mc_real)
-            cls_loss = self.classification_loss(cls_real, spk_label_org)
-
-            # Backwards and optimize
-            self.reset_grad()
-            cls_loss.backward()
-            self.c_optimizer.step()
-
-            # Logging.
-            loss = {}
-            loss['C/c_loss'] = cls_loss.item()
+            mc_real = mc_real.to(self.device)                         # Input mc.
+            spk_label_org = spk_label_org.to(self.device)             # Original spk labels.
+            spk_c_org = spk_c_org.to(self.device)                     # Original spk acc conditioning.
+            spk_label_trg = spk_label_trg.to(self.device)             # Target spk labels for classification loss for G.
+            spk_c_trg = spk_c_trg.to(self.device)                     # Target spk conditioning.
 
             # =================================================================================== #
-            #                             3. Train the Discriminator                              #
+            #                             2. Train the discriminator                              #
             # =================================================================================== #
 
             # Compute loss with real mc feats.
-            d_out_src = self.discriminator(mc_real, spk_c_org)
-            mc_fake = self.generator(mc_real, spk_c_trg)
-            d_out_fake = self.discriminator(mc_fake.detach(), spk_c_trg)
-            d_loss = F.binary_cross_entropy_with_logits(d_out_fake, torch.zeros_like(d_out_fake, dtype=torch.float)) + \
-                F.binary_cross_entropy_with_logits(d_out_src, torch.ones_like(d_out_src, dtype=torch.float))
+            out_src, out_cls_spks = self.D(mc_real)
+            d_loss_real = - torch.mean(out_src)
+            d_loss_cls_spks = self.classification_loss(out_cls_spks, spk_label_org)
+            
 
-            # Compute classification loss.
-            d_out_cls = self.classifier(mc_fake)
-            d_loss_cls = self.classification_loss(d_out_cls, spk_label_trg)
+            # Compute loss with fake mc feats.
+            mc_fake = self.G(mc_real, spk_c_trg)
+            out_src, out_cls_spks = self.D(mc_fake.detach())
+            d_loss_fake = torch.mean(out_src)
 
             # Compute loss for gradient penalty.
             alpha = torch.rand(mc_real.size(0), 1, 1, 1).to(self.device)
             x_hat = (alpha * mc_real.data + (1 - alpha) * mc_fake.data).requires_grad_(True)
-            d_out_src = self.discriminator(x_hat, spk_c_trg)
-            d_loss_gp = self.gradient_penalty(d_out_src, x_hat)
+            out_src, _ = self.D(x_hat)
+            d_loss_gp = self.gradient_penalty(out_src, x_hat)
 
             # Backward and optimize.
-            d_loss = d_loss + self.lambda_cls * d_loss_cls + self.lambda_gp * d_loss_gp
+            d_loss = d_loss_real + d_loss_fake + self.lambda_cls * d_loss_cls_spks + self.lambda_gp * d_loss_gp
             self.reset_grad()
             d_loss.backward()
             self.d_optimizer.step()
 
             # Logging.
+            loss = {}
+            loss['D/loss_real'] = d_loss_real.item()
+            loss['D/loss_fake'] = d_loss_fake.item()
+            loss['D/loss_cls_spks'] = d_loss_cls_spks.item()
             loss['D/loss_gp'] = d_loss_gp.item()
-            loss['D/loss'] = d_loss.item()
-
+            
             # =================================================================================== #
-            #                               4. Train the generator                                #
+            #                               3. Train the generator                                #
             # =================================================================================== #
-
+            
             if (i+1) % self.n_critic == 0:
                 # Original-to-target domain.
-                mc_fake = self.generator(mc_real, spk_c_trg)
-                g_out_src = self.discriminator(mc_fake, spk_c_trg)
-                g_loss_fake = - torch.mean(g_out_src)
+                mc_fake = self.G(mc_real, spk_c_trg)
+                out_src, out_cls_spks = self.D(mc_fake)
+                g_loss_fake = - torch.mean(out_src)
+                g_loss_cls_spks = self.classification_loss(out_cls_spks, spk_label_trg)
 
-                # Classification loss.
-                g_out_cls = self.classifier(mc_fake)
-                g_loss_cls = self.classification_loss(g_out_cls, spk_label_trg)
-
-                # Target-to-original domain. Cycle-consistent.
-                mc_reconst = self.generator(mc_fake, spk_c_org)
+                # Target-to-original domain.
+                mc_reconst = self.G(mc_fake, spk_c_org)
                 g_loss_rec = torch.mean(torch.abs(mc_real - mc_reconst))
 
-                # Original-to-original, Id mapping loss. Mapping
-                mc_fake_id = self.generator(mc_real, spk_c_org)
-                g_loss_id = torch.mean(torch.abs(mc_real - mc_fake_id))
-
                 # Backward and optimize.
-                g_loss = g_loss_fake \
-                    + self.lambda_rec * g_loss_rec \
-                    + self.lambda_cls * g_loss_cls \
-                    + self.lambda_id * g_loss_id
-
+                g_loss = g_loss_fake + self.lambda_rec * g_loss_rec + self.lambda_cls * g_loss_cls_spks
                 self.reset_grad()
                 g_loss.backward()
                 self.g_optimizer.step()
@@ -297,11 +264,10 @@ class Solver(object):
                 # Logging.
                 loss['G/loss_fake'] = g_loss_fake.item()
                 loss['G/loss_rec'] = g_loss_rec.item()
-                loss['G/loss_cls'] = g_loss_cls.item()
-                loss['G/loss'] = g_loss.item()
+                loss['G/loss_cls_spks'] = g_loss_cls_spks.item()
 
             # =================================================================================== #
-            #                                 5. Miscellaneous                                    #
+            #                                 4. Miscellaneous                                    #
             # =================================================================================== #
 
             # Print out training information.
@@ -318,55 +284,51 @@ class Solver(object):
                         self.logger.scalar_summary(tag, value, i+1)
 
             if (i+1) % self.sample_step == 0:
-                sampling_rate = 16000
-                num_mcep = 36
-                frame_period = 5
+                sampling_rate=16000
+                num_mcep=36
+                frame_period=5
                 with torch.no_grad():
                     for idx, wav in tqdm(enumerate(test_wavs)):
                         wav_name = basename(test_wavfiles[idx])
                         # print(wav_name)
                         f0, timeaxis, sp, ap = world_decompose(wav=wav, fs=sampling_rate, frame_period=frame_period)
-                        f0_converted = pitch_conversion(f0=f0,
-                            mean_log_src=self.test_loader.logf0s_mean_src, std_log_src=self.test_loader.logf0s_std_src,
+                        f0_converted = pitch_conversion(f0=f0, 
+                            mean_log_src=self.test_loader.logf0s_mean_src, std_log_src=self.test_loader.logf0s_std_src, 
                             mean_log_target=self.test_loader.logf0s_mean_trg, std_log_target=self.test_loader.logf0s_std_trg)
                         coded_sp = world_encode_spectral_envelop(sp=sp, fs=sampling_rate, dim=num_mcep)
-
+                        
                         coded_sp_norm = (coded_sp - self.test_loader.mcep_mean_src) / self.test_loader.mcep_std_src
                         coded_sp_norm_tensor = torch.FloatTensor(coded_sp_norm.T).unsqueeze_(0).unsqueeze_(1).to(self.device)
                         conds = torch.FloatTensor(self.test_loader.spk_c_trg).to(self.device)
                         # print(conds.size())
-                        coded_sp_converted_norm = self.generator(coded_sp_norm_tensor, conds).data.cpu().numpy()
+                        coded_sp_converted_norm = self.G(coded_sp_norm_tensor, conds).data.cpu().numpy()
                         coded_sp_converted = np.squeeze(coded_sp_converted_norm).T * self.test_loader.mcep_std_trg + self.test_loader.mcep_mean_trg
                         coded_sp_converted = np.ascontiguousarray(coded_sp_converted)
                         # decoded_sp_converted = world_decode_spectral_envelop(coded_sp = coded_sp_converted, fs = sampling_rate)
-                        wav_transformed = world_speech_synthesis(f0=f0_converted, coded_sp=coded_sp_converted,
+                        wav_transformed = world_speech_synthesis(f0=f0_converted, coded_sp=coded_sp_converted, 
                                                                 ap=ap, fs=sampling_rate, frame_period=frame_period)
-
+                        
                         librosa.output.write_wav(
                             join(self.sample_dir, str(i+1)+'-'+wav_name.split('.')[0]+'-vcto-{}'.format(self.test_loader.trg_spk)+'.wav'), wav_transformed, sampling_rate)
                         if cpsyn_flag:
-                            wav_cpsyn = world_speech_synthesis(f0=f0, coded_sp=coded_sp,
+                            wav_cpsyn = world_speech_synthesis(f0=f0, coded_sp=coded_sp, 
                                                         ap=ap, fs=sampling_rate, frame_period=frame_period)
                             librosa.output.write_wav(join(self.sample_dir, 'cpsyn-'+wav_name), wav_cpsyn, sampling_rate)
                     cpsyn_flag = False
 
             # Save model checkpoints.
             if (i+1) % self.model_save_step == 0:
-                g_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(i+1))
-                d_path = os.path.join(self.model_save_dir, '{}-D.ckpt'.format(i+1))
-                c_path = os.path.join(self.model_save_dir, '{}-C.ckpt'.format(i+1))
-
-                torch.save(self.generator.state_dict(), g_path)
-                torch.save(self.discriminator.state_dict(), d_path)
-                torch.save(self.classifier.state_dict(), c_path)
+                G_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(i+1))
+                D_path = os.path.join(self.model_save_dir, '{}-D.ckpt'.format(i+1))
+                torch.save(self.G.state_dict(), G_path)
+                torch.save(self.D.state_dict(), D_path)
                 print('Saved model checkpoints into {}...'.format(self.model_save_dir))
 
             # Decay learning rates.
             if (i+1) % self.lr_update_step == 0 and (i+1) > (self.num_iters - self.num_iters_decay):
                 g_lr -= (self.g_lr / float(self.num_iters_decay))
                 d_lr -= (self.d_lr / float(self.num_iters_decay))
-                c_lr -= (self.c_lr / float(self.num_iters_decay))
-                self.update_lr(g_lr, d_lr, c_lr)
-                print('Decayed learning rates, g_lr: {}, d_lr: {}, c_lr: {}.'.format(g_lr, d_lr, c_lr))
+                self.update_lr(g_lr, d_lr)
+                print ('Decayed learning rates, g_lr: {}, d_lr: {}.'.format(g_lr, d_lr))
 
 

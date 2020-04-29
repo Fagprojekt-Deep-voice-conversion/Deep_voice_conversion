@@ -60,14 +60,14 @@ def load_wav(wavfile, sr=16000):
 
 
 def convert(config):
-    os.makedirs(join(config.convert_dir, str(config.resume_iters)), exist_ok=True)
-    sampling_rate, num_mcep, frame_period = 16000, 36, 5
+    os.makedirs(join(config.convert_dir, config.resume_model), exist_ok=True)
+    sampling_rate, num_mcep, frame_period = config.sampling_rate, 36, 5
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Restore model
-    print(f'Loading the trained models from step {config.resume_iters}...')
+    print(f'Loading the trained models from step {config.resume_model}...')
     generator = Generator().to(device)
-    g_path = join(config.model_save_dir, f'{config.resume_iters}-G.ckpt')
+    g_path = join(config.model_save_dir, f'{config.resume_model}-G.ckpt')
     generator.load_state_dict(torch.load(g_path, map_location=lambda storage, loc: storage))
 
     # for all possible speaker pairs in config.speakers
@@ -75,7 +75,7 @@ def convert(config):
         for j in range(0, len(config.speakers)):
             if i != j:
                 target_dir = join(config.convert_dir,
-                                  str(config.resume_iters),
+                                  str(config.resume_model),
                                   f'{config.speakers[i]}_to_{config.speakers[j]}')
 
                 os.makedirs(target_dir, exist_ok=True)
@@ -138,21 +138,22 @@ if __name__ == '__main__':
     # Model configuration.
     parser.add_argument('--num_speakers', type=int, default=10, help='Dimension of speaker labels.')
     parser.add_argument('--num_converted_wavs', type=int, default=8, help='Number of wavs to convert.')
-    parser.add_argument('--resume_iters', type=int, default=None, help='Step to resume for testing.')
+    parser.add_argument('--resume_model', type=str, default=None, help='Model to resume for testing.')
     parser.add_argument('--speakers', type=str, nargs='+', required=True, help='Speakers to be converted.')
 
     # Directories.
-    parser.add_argument('--train_data_dir', type=str, default='./data/mc/train')
-    parser.add_argument('--test_data_dir', type=str, default='./data/mc/test')
-    parser.add_argument('--wav_dir', type=str, default="./data/VCTK-Corpus/wav16")
-    parser.add_argument('--log_dir', type=str, default='./logs')
-    parser.add_argument('--model_save_dir', type=str, default='./models')
-    parser.add_argument('--convert_dir', type=str, default='./converted')
+    parser.add_argument('--train_data_dir', type=str, default='./data/mc/train', help='Path to train data directory.')
+    parser.add_argument('--test_data_dir', type=str, default='./data/mc/test', help='Path to test data directory.')
+    parser.add_argument('--wav_dir', type=str, default="./data/VCTK-Corpus/wav16", help='Path to wav data directory.')
+    parser.add_argument('--model_save_dir', type=str, default='./models', help='Path to model save directory.')
+    parser.add_argument('--convert_dir', type=str, default='./converted', help='Patht to converted wavs directory.')
+
+    parser.add_argument('--sampling_rate', type=int, default=16000, help='Sampling rate for converted wavs.')
 
     config = parser.parse_args()
     print(config)
 
-    if config.resume_iters is None:
+    if config.resume_model is None:
         raise RuntimeError("Please specify the step number for resuming.")
     if len(config.speakers) < 2:
         raise RuntimeError("Need at least 2 speakers to convert audio.")
