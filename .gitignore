@@ -544,4 +544,12 @@ MigrationBackup/
 # End of https://www.gitignore.io/api/python,visualstudio,visualstudiocode
 
 
-
+Real_Time_Voice_Cloning/
+*.ckpt
+Model/Models/trainedModeltest.pt
+*.pt
+*.pth
+AutoVC/Models/loss5k
+AutoVC/Models/loss1k
+AutoVC/Models/loss30k
+AutoVC/Models/loss

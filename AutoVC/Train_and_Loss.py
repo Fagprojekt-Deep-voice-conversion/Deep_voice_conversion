@@ -91,18 +91,18 @@ def loss(output, target, model, mu = 1, lambd = 1):
     Reconstruction error: 
         The mean of the squared p2 norm of (Postnet outputs - Original Mel Spectrograms)
     """
-    err_reconstruct  = torch.dist(X, out_post, 2)**2
+    err_reconstruct  = (torch.norm(out_post - X, p = 2, dim = (1,2))**2).mean()
     """
     Prenet Reconstruction error
         The mean of the squared p2 norm of (Decoder outputs - Original Mel Spectrograms)
     """
-    err_reconstruct0 = torch.dist(X, out_decoder, 2)**2
+    err_reconstruct0 = (torch.norm(out_decoder - X, p = 2, dim = (1,2))**2).mean()
 
     """
     Content reconstruction Error
         The mean of the p1 norm of (Content codes of postnet output - Content codes)
     """
-    err_content      = torch.dist(ReconCodes, codes, 1)
+    err_content      = torch.norm(ReconCodes - codes, p = 1, dim = 0).mean()
 
     return err_reconstruct + mu * err_reconstruct0 + lambd * err_content
 

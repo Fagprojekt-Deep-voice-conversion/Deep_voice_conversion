@@ -106,7 +106,9 @@ if __name__ == "__main__":
 	torch.manual_seed(config.seed)
 	
 	### Run trainloader
+	
 	data, labels = DataLoad2(config.data_path)
+	data, labels = data[:20], labels[:20]
 	if config.num_train_data is not None:
 		data, labels = data[:config.num_train_data ], labels[:config.num_train_data ]
 	print("Number of wav files: {:}".format(len(data)))
