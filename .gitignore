@@ -525,3 +525,7 @@ Real_Time_Voice_Cloning/
 Model/Models/trainedModeltest.pt
 *.pt
 *.pth
+AutoVC/Models/loss5k
+AutoVC/Models/loss1k
+AutoVC/Models/loss30k
+AutoVC/Models/loss
