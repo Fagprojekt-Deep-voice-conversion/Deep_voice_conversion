@@ -1,357 +1,105 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import numpy as np
-import argparse
-from data_loader import get_loader, to_categorical
+# from data_loader import get_loader
 
 
-class DownSampleBlock(nn.Module):
-    """Down-sampling layers."""
-    def __init__(self, dim_in, dim_out, kernel_size, stride, padding, bias):
-        super(DownSampleBlock, self).__init__()
-
-        self.conv_layer = nn.Conv2d(in_channels=dim_in,
-                                    out_channels=dim_out,
-                                    kernel_size=kernel_size,
-                                    stride=stride,
-                                    padding=padding,
-                                    bias=bias)
-
-        self.batch_norm = nn.BatchNorm2d(dim_out, affine=True, track_running_stats=True)
-        self.relu = nn.ReLU(inplace=True)
+class ResidualBlock(nn.Module):
+    """Residual Block with instance normalization."""
+    def __init__(self, dim_in, dim_out):
+        super(ResidualBlock, self).__init__()
+        self.main = nn.Sequential(
+            nn.Conv2d(dim_in, dim_out, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.InstanceNorm2d(dim_out, affine=True, track_running_stats=True),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(dim_out, dim_out, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.InstanceNorm2d(dim_out, affine=True, track_running_stats=True))
 
     def forward(self, x):
-        x = self.conv_layer(x)
-        x = self.batch_norm(x)
-        x = self.relu(x)
-
-        return x
-
-
-class UpSampleBlock(nn.Module):
-    """Up-sampling layers."""
-    def __init__(self, dim_in, dim_out, kernel_size, stride, padding, bias):
-        super(UpSampleBlock, self).__init__()
-
-        self.conv_layer = nn.ConvTranspose2d(in_channels=dim_in,
-                                             out_channels=dim_out,
-                                             kernel_size=kernel_size,
-                                             stride=stride,
-                                             padding=padding,
-                                             bias=bias)
-
-        self.batch_norm = nn.BatchNorm2d(dim_out, affine=True, track_running_stats=True)
-        self.relu = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv_layer(x)
-        x = self.batch_norm(x)
-        x = self.relu(x)
-
-        return x
-
+        return x + self.main(x)
 
 class Generator(nn.Module):
     """Generator network."""
-    def __init__(self):
+    def __init__(self, conv_dim=64, num_speakers=10, repeat_num=6):
         super(Generator, self).__init__()
+        c_dim = num_speakers
+        layers = []
+        layers.append(nn.Conv2d(1+c_dim, conv_dim, kernel_size=(3, 9), padding=(1, 4), bias=False))
+        layers.append(nn.InstanceNorm2d(conv_dim, affine=True, track_running_stats=True))
+        layers.append(nn.ReLU(inplace=True))
 
         # Down-sampling layers.
-        self.down_sample_1 = DownSampleBlock(dim_in=1,
-                                             dim_out=32,
-                                             kernel_size=(3, 9),
-                                             stride=(1, 1),
-                                             padding=(1, 4),
-                                             bias=False)
+        curr_dim = conv_dim
+        for i in range(2):
+            layers.append(nn.Conv2d(curr_dim, curr_dim*2, kernel_size=(4, 8), stride=(2, 2), padding=(1, 3), bias=False))
+            layers.append(nn.InstanceNorm2d(curr_dim*2, affine=True, track_running_stats=True))
+            layers.append(nn.ReLU(inplace=True))
+            curr_dim = curr_dim * 2
 
-        self.down_sample_2 = DownSampleBlock(dim_in=32,
-                                             dim_out=64,
-                                             kernel_size=(4, 8),
-                                             stride=(2, 2),
-                                             padding=(1, 3),
-                                             bias=False)
-
-        self.down_sample_3 = DownSampleBlock(dim_in=64,
-                                             dim_out=128,
-                                             kernel_size=(4, 8),
-                                             stride=(2, 2),
-                                             padding=(1, 3),
-                                             bias=False)
-
-        self.down_sample_4 = DownSampleBlock(dim_in=128,
-                                             dim_out=64,
-                                             kernel_size=(3, 5),
-                                             stride=(1, 1),
-                                             padding=(1, 2),
-                                             bias=False)
-
-        self.down_sample_5 = DownSampleBlock(dim_in=64,
-                                             dim_out=5,
-                                             kernel_size=(9, 5),
-                                             stride=(9, 1),
-                                             padding=(1, 2),
-                                             bias=False)
+        # Bottleneck layers.
+        for i in range(repeat_num):
+            layers.append(ResidualBlock(dim_in=curr_dim, dim_out=curr_dim))
 
         # Up-sampling layers.
-        self.up_sample_1 = UpSampleBlock(dim_in=9,
-                                         dim_out=64,
-                                         kernel_size=(9, 5),
-                                         stride=(9, 1),
-                                         padding=(0, 2),
-                                         bias=False)
+        for i in range(2):
+            layers.append(nn.ConvTranspose2d(curr_dim, curr_dim//2, kernel_size=4, stride=2, padding=1, bias=False))
+            layers.append(nn.InstanceNorm2d(curr_dim//2, affine=True, track_running_stats=True))
+            layers.append(nn.ReLU(inplace=True))
+            curr_dim = curr_dim // 2
 
-        self.up_sample_2 = UpSampleBlock(dim_in=68,
-                                         dim_out=128,
-                                         kernel_size=(3, 5),
-                                         stride=(1, 1),
-                                         padding=(1, 2),
-                                         bias=False)
-
-        self.up_sample_3 = UpSampleBlock(dim_in=132,
-                                         dim_out=64,
-                                         kernel_size=(4, 8),
-                                         stride=(2, 2),
-                                         padding=(1, 3),
-                                         bias=False)
-
-        self.up_sample_4 = UpSampleBlock(dim_in=68,
-                                         dim_out=32,
-                                         kernel_size=(4, 8),
-                                         stride=(2, 2),
-                                         padding=(1, 3),
-                                         bias=False)
-
-        # Deconv
-        self.deconv_layer = nn.ConvTranspose2d(in_channels=36,
-                                               out_channels=1,
-                                               kernel_size=(3, 9),
-                                               stride=(1, 1),
-                                               padding=(1, 4),
-                                               bias=False)
+        layers.append(nn.Conv2d(curr_dim, 1, kernel_size=7, stride=1, padding=3, bias=False))
+        self.main = nn.Sequential(*layers)
 
     def forward(self, x, c):
-        # Replicate spatially..
+        # Replicate spatially and concatenate domain information.
         c = c.view(c.size(0), c.size(1), 1, 1)
-
-        x = self.down_sample_1(x)
-        x = self.down_sample_2(x)
-        x = self.down_sample_3(x)
-        x = self.down_sample_4(x)
-        x = self.down_sample_5(x)
-
-        # concat domain specific information
-        c1 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c1], dim=1)
-        x = self.up_sample_1(x)
-
-        c2 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c2], dim=1)
-        x = self.up_sample_2(x)
-
-        c3 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c3], dim=1)
-        x = self.up_sample_3(x)
-
-        c4 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c4], dim=1)
-        x = self.up_sample_4(x)
-
-        c5 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c5], dim=1)
-        x = self.deconv_layer(x)
-
-        return x
-
+        c = c.repeat(1, 1, x.size(2), x.size(3))
+        x = torch.cat([x, c], dim=1)
+        return self.main(x)
 
 class Discriminator(nn.Module):
     """Discriminator network with PatchGAN."""
-    def __init__(self, num_speakers):
+    def __init__(self, input_size=(36, 256), conv_dim=64, repeat_num=5, num_speakers=10):
         super(Discriminator, self).__init__()
-        i = num_speakers + 1
+        layers = []
+        layers.append(nn.Conv2d(1, conv_dim, kernel_size=4, stride=2, padding=1))
+        layers.append(nn.LeakyReLU(0.01))
 
-        # Downsample
-        self.down_sample_1 = DownSampleBlock(dim_in=i,
-                                             dim_out=32,
-                                             kernel_size=(3, 9),
-                                             stride=(1, 1),
-                                             padding=(1, 4),
-                                             bias=False)
+        curr_dim = conv_dim
+        for i in range(1, repeat_num):
+            layers.append(nn.Conv2d(curr_dim, curr_dim*2, kernel_size=4, stride=2, padding=1))
+            layers.append(nn.LeakyReLU(0.01))
+            curr_dim = curr_dim * 2
 
-        self.down_sample_2 = DownSampleBlock(dim_in=36,
-                                             dim_out=32,
-                                             kernel_size=(3, 8),
-                                             stride=(1, 1),
-                                             padding=(1, 3),
-                                             bias=False)
-
-        self.down_sample_3 = DownSampleBlock(dim_in=36,
-                                             dim_out=32,
-                                             kernel_size=(3, 8),
-                                             stride=(1, 1),
-                                             padding=(1, 3),
-                                             bias=False)
-
-        self.down_sample_4 = DownSampleBlock(dim_in=36,
-                                             dim_out=32,
-                                             kernel_size=(3, 6),
-                                             stride=(1, 1),
-                                             padding=(1, 2),
-                                             bias=False)
-
-        self.conv_layer = nn.Conv2d(in_channels=36,
-                                    out_channels=1,
-                                    kernel_size=(36, 5),
-                                    stride=(36, 1),
-                                    padding=(0, 2),
-                                    bias=False)
-
-        self.pool = nn.AvgPool2d(kernel_size=(1, 64))
-
-    def forward(self, x, c):
-        # Replicate spatially..
-        c = c.view(c.size(0), c.size(1), 1, 1)
-
-        # concat domain specific information
-        c1 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c1], dim=1)
-        x = self.down_sample_1(x)
-
-        c2 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c2], dim=1)
-        x = self.down_sample_2(x)
-
-        c3 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c3], dim=1)
-        x = self.down_sample_3(x)
-
-        c4 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c4], dim=1)
-        x = self.down_sample_4(x)
-
-        c5 = c.repeat(1, 1, x.size(2), x.size(3))
-        x = torch.cat([x, c5], dim=1)
-        x = self.conv_layer(x)
-
-        x = self.pool(x)
-        x = torch.squeeze(x)
-        x = torch.sigmoid(x)
-
-        return x
-
-
-class DomainClassifier(nn.Module):
-    def __init__(self):
-        super(DomainClassifier, self).__init__()
-
-        # Down sample.
-        self.down_sample_1 = DownSampleBlock(dim_in=1,
-                                             dim_out=8,
-                                             kernel_size=(4, 4),
-                                             stride=(2, 2),
-                                             padding=(5, 1),
-                                             bias=False)
-
-        self.down_sample_2 = DownSampleBlock(dim_in=8,
-                                             dim_out=16,
-                                             kernel_size=(4, 4),
-                                             stride=(2, 2),
-                                             padding=(1, 1),
-                                             bias=False)
-
-        self.down_sample_3 = DownSampleBlock(dim_in=16,
-                                             dim_out=32,
-                                             kernel_size=(4, 4),
-                                             stride=(2, 2),
-                                             padding=(0, 1),
-                                             bias=False)
-
-        self.down_sample_4 = DownSampleBlock(dim_in=32,
-                                             dim_out=16,
-                                             kernel_size=(3, 4),
-                                             stride=(1, 2),
-                                             padding=(1, 1),
-                                             bias=False)
-
-        self.conv_layer = nn.Conv2d(in_channels=16, out_channels=4, kernel_size=(1, 4), stride=(1, 2), padding=(0, 1))
-        self.pool = nn.AvgPool2d((1, 16))
-        self.softmax = nn.Softmax()
-
+        kernel_size_0 = int(input_size[0] / np.power(2, repeat_num)) # 1
+        kernel_size_1 = int(input_size[1] / np.power(2, repeat_num)) # 8
+        self.main = nn.Sequential(*layers)
+        self.conv_dis = nn.Conv2d(curr_dim, 1, kernel_size=(kernel_size_0, kernel_size_1), stride=1, padding=0, bias=False) # padding should be 0
+        self.conv_clf_spks = nn.Conv2d(curr_dim, num_speakers, kernel_size=(kernel_size_0, kernel_size_1), stride=1, padding=0, bias=False)  # for num_speaker
+        
     def forward(self, x):
-        # slice
-        x = x[:, :, 0:8, :]
+        h = self.main(x)
+        out_src = self.conv_dis(h)
+        out_cls_spks = self.conv_clf_spks(h)
+        return out_src, out_cls_spks.view(out_cls_spks.size(0), out_cls_spks.size(1))
 
-        x = self.down_sample_1(x)
-        x = self.down_sample_2(x)
-        x = self.down_sample_3(x)
-        x = self.down_sample_4(x)
-
-        x = self.conv_layer(x)
-        x = self.pool(x)
-        x = self.softmax(x)
-
-        x = x.view(x.size(0), x.size(1))
-
-        return x
-
-
-# Just for testing shapes of architecture.
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Test G and D architecture')
-
-    train_dir_default = '../data/VCTK-Data/mc/train'
-    speaker_default = 'p229'
-
-    # Data config.
-    parser.add_argument('--train_dir', type=str, default=train_dir_default, help='Train dir path')
-    parser.add_argument('--speakers', type=str, nargs='+', required=True, help='Speaker dir names')
-    num_speakers = 4
-
-    argv = parser.parse_args()
-    train_dir = argv.train_dir
-    speakers_using = argv.speaker
-
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    # Load models
-    generator = Generator().to(device)
-    discriminator = Discriminator(num_speakers=num_speakers).to(device)
-    classifier = DomainClassifier().to(device)
-
-    # Load data
-    train_loader = get_loader(speakers_using, train_dir, 8, 'train', num_workers=1)
+    train_loader = get_loader('/scratch/sxliu/data_exp/VCTK-Corpus-22.05k/mc/train', 16, 'train', num_workers=1)
     data_iter = iter(train_loader)
+    G = Generator().to(device)
+    D = Discriminator().to(device)
+    for i in range(10):
+        mc_real, spk_label_org, acc_label_org, spk_acc_c_org = next(data_iter)
+        mc_real.unsqueeze_(1) # (B, D, T) -> (B, 1, D, T) for conv2d
+        mc_real = mc_real.to(device)                         # Input mc.
+        spk_label_org = spk_label_org.to(device)             # Original spk labels.
+        acc_label_org = acc_label_org.to(device)             # Original acc labels.
+        spk_acc_c_org = spk_acc_c_org.to(device)             # Original spk acc conditioning.
+        mc_fake = G(mc_real, spk_acc_c_org)
+        print(mc_fake.size())
+        out_src, out_cls_spks, out_cls_emos = D(mc_fake)
 
-    mc_real, spk_label_org, spk_c_org = next(data_iter)
-    mc_real.unsqueeze_(1)  # (B, D, T) -> (B, 1, D, T) for conv2d
 
-    spk_c = np.random.randint(0, num_speakers, size=mc_real.size(0))
-    spk_c_cat = to_categorical(spk_c, num_speakers)
-    spk_label_trg = torch.LongTensor(spk_c)
-    spk_c_trg = torch.FloatTensor(spk_c_cat)
 
-    mc_real = mc_real.to(device)              # Input mc.
-    spk_label_org = spk_label_org.to(device)  # Original spk labels.
-    spk_c_org = spk_c_org.to(device)          # Original spk acc conditioning.
-    spk_label_trg = spk_label_trg.to(device)  # Target spk labels for classification loss for G.
-    spk_c_trg = spk_c_trg.to(device)          # Target spk conditioning.
-
-    print('Testing Domain Classifier')
-    print('-------------------------')
-    print(f'Shape in: {mc_real.shape}')
-    cls_real = classifier(mc_real)
-    print(f'Shape out: {cls_real.shape}')
-    print('------------------------')
-
-    print('Testing Discriminator')
-    print('-------------------------')
-    print(f'Shape in: {mc_real.shape}')
-    dis_real = discriminator(mc_real, spk_c_org)
-    print(f'Shape out: {dis_real.shape}')
-    print('------------------------')
-
-    print('Testing Generator')
-    print('-------------------------')
-    print(f'Shape in: {mc_real.shape}')
-    mc_fake = generator(mc_real, spk_c_trg)
-    print(f'Shape out: {mc_fake.shape}')
-    print('------------------------')
