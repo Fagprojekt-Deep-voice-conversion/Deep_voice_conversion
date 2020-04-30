@@ -9,6 +9,12 @@ from Speaker_identity import SpeakerIdentity
 import seaborn as sns
 from Train_and_Loss import TrainLoader
 
+loss = pickle.load(open("Models/loss10k", "rb"))
+
+plt.plot(loss)
+plt.show()
+
+
 data, labels = DataLoad2("Test_Data")
 data,labels  = data[:20], labels[:20]
 def Conversion(source, target, model):
@@ -30,12 +36,12 @@ def Conversion(source, target, model):
     plt.matshow(post)
     plt.show()
 
-s = data[2]
+s = data[0]
 t = data[10]
 
 
 model = Generator(32, 256, 512, 32).eval().to("cpu")
-g_checkpoint = torch.load("Models/trainedModel30k.pt", map_location=torch.device("cpu"))
+g_checkpoint = torch.load("Models/_step100000.pt", map_location=torch.device("cpu"))
 model.load_state_dict(g_checkpoint['model_state'])
 Conversion(s,t, model)
 

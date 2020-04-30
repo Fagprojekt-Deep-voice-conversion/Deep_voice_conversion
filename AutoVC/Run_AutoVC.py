@@ -107,7 +107,8 @@ if __name__ == "__main__":
 	torch.manual_seed(config.seed)
 	
 	### Run trainloader
-	
+	config.data_path = "Test_Data"
+	config.num_train_data = 20
 	data, labels = DataLoad2(config.data_path)
 
 	if config.num_train_data is not None:
