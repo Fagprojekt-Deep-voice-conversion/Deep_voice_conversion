@@ -21,12 +21,25 @@ else
 fi
 
 ### Download StarGAN repo from Samuel Broughton
-if [ -d "StarGAN-Voice-Conversion-master" ]
+if [ -d "SamuelB/StarGAN-Voice-Conversion-master" ]
 then 
-	echo -e "\e[32mStarGAN model repo already downloaded\e[0m"
+	echo -e "\e[32mStarGAN model repo from Samuel B already downloaded\e[0m"
 else
 	echo -e "\e[93mDownloading StarGAN repo from Samuel Broghton\e[0m"
 	wget https://github.com/SamuelBroughton/StarGAN-Voice-Conversion/archive/master.zip
+	unzip master.zip -d ./SamuelB
+	rm master.zip
+
+
+fi
+
+### Download StarGAN repo from liusongxiang
+if [ -d "StarGAN-Voice-Conversion-master" ]
+then 
+	echo -e "\e[32mStarGAN model repo from liusongxiang already downloaded\e[0m"
+else
+	echo -e "\e[93mDownloading StarGAN repo from Samuel Broghton\e[0m"
+	wget https://github.com/liusongxiang/StarGAN-Voice-Conversion/archive/master.zip
 	unzip master.zip -d ./
 	rm master.zip
 
