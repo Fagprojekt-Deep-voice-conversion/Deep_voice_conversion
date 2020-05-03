@@ -54,7 +54,7 @@ source StarGAN-env/bin/activate
 sh preprocess.sh
 
 ### Train model
-python main.py
+python ../StarGAN-Voice-Conversion-master/main.py
 
 
 
