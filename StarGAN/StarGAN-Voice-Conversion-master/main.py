@@ -64,9 +64,12 @@ if __name__ == '__main__':
     parser.add_argument('--use_tensorboard', type=str2bool, default=True)
 
     # Directories.
-    parser.add_argument('--train_data_dir', type=str, default='./data/mc/train')
-    parser.add_argument('--test_data_dir', type=str, default='./data/mc/test')
-    parser.add_argument('--wav_dir', type=str, default="./data/VCTK-Corpus/wav16")
+    #parser.add_argument('--train_data_dir', type=str, default='./data/mc/train')
+    #parser.add_argument('--test_data_dir', type=str, default='./data/mc/test')
+    parser.add_argument('--train_data_dir', type=str, default='././data/VCTK-Data/StarGAN/mc/train')
+    parser.add_argument('--test_data_dir', type=str, default='././data/VCTK-Data/StarGAN/mc/test')
+    #parser.add_argument('--wav_dir', type=str, default="./data/VCTK-Corpus/wav16")
+    parser.add_argument('--wav_dir', type=str, default="././data/VCTK-Data/StarGAN/wav16")
     parser.add_argument('--log_dir', type=str, default='./logs')
     parser.add_argument('--model_save_dir', type=str, default='./models')
     parser.add_argument('--sample_dir', type=str, default='./samples')
