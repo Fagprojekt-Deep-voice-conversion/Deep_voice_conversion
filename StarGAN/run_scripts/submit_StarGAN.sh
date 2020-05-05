@@ -49,7 +49,13 @@ module load cuda
 ### Run setup
 sh setup.sh $run_dir || exit 1
 source StarGAN-env/bin/activate
-echo $PWD
 
-### Run python script
+### Preprocess data
+sh preprocess.sh
+
+### Train model
+python main.py
+
+
+
 
