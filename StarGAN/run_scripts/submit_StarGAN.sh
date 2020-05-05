@@ -65,9 +65,9 @@ python ../StarGAN-Voice-Conversion-master/preprocess.py --sample_rate 16000 \
 python ../StarGAN-Voice-Conversion-master/main.py \
 		--train_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
 		--test_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
-		--wav_dir /work1/s183920/Deep_voice_conversion/data/results/wavs \
-		--log_dir /work1/s183920/Deep_voice_conversion/data/results/logs \
-		--sample_dir /work1/s183920/Deep_voice_conversion/data/results/samples		
+		--wav_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/wavs \
+		--log_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/logs \
+		--sample_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/samples		
 
 
 
