@@ -64,14 +64,16 @@ hparams = Map({
 	# this is only valid for mulaw is True
 	'silence_threshold': 2,
 	'num_mels': 80,
-	'fmin': 125,
+	'fmin': 90,
 	'fmax': 7600,
 	'fft_size': 1024,
+	'win_length': 1024,
+	'window': 'hann',
 	# shift can be specified by either hop_size or frame_shift_ms
 	'hop_size': 256,
 	'frame_shift_ms': None,
 	'min_level_db': -100,
-	'ref_level_db': 20,
+	'ref_level_db': 16,
 	# whether to rescale waveform or not.
 	# Let x is an input waveform, rescaled waveform y is given by:
 	# y = x / np.abs(x).max() * rescaling_max

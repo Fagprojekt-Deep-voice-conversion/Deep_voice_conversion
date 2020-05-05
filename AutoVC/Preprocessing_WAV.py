@@ -7,10 +7,11 @@ import numpy as np
 from tqdm import tqdm
 from Speaker_encoder.audio import preprocess_wav
 import torch
+from Generator_autoVC.AutoVC_preprocessing import load_wav, trim
 
 class Preproccesing:
-    def __init__(self, sr = 16000, n_fft = 1024, hop = 256, n_mels = 80, ref_db = 20,
-                 fmax = 7600, fmin = 125, min_db = -100, rescaling_max = 0.99, power = 1):
+    def __init__(self, sr = 16000, n_fft = 1024, hop = 256, n_mels = 80, ref_db = 16,
+                 fmax = 7600, fmin = 90, min_db = -100, rescaling_max = 0.99, power = 1):
         self.sampling_rate, self.n_fft, self.hop_length = sr, n_fft, hop
         self.n_mels, self.ref_db, self.min_db = n_mels, ref_db, min_db
         self.fmax, self.fmin, self.rescaling_max = fmax, fmin, rescaling_max
@@ -47,9 +48,10 @@ class Preproccesing:
 
         for i, wav in tqdm(enumerate(Batch)):
             try:
-                y, _ = librosa.load(wav, sr = self.sampling_rate)
-                y = preprocess_wav(y)
-                #y = y / np.max(np.abs(y)) * self.rescaling_max
+                y = load_wav(wav)
+
+                y = y / np.abs(y).max() * self.rescaling_max
+                y = trim(y)
 
                 X = librosa.feature.melspectrogram(y, sr = self.sampling_rate,
                                                    n_fft = self.n_fft,
