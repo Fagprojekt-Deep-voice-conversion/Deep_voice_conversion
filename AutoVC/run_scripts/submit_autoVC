@@ -52,7 +52,7 @@ source AutoVC-env/bin/activate
 echo $PWD
 
 ### Run python script
-python3 ../Run_AutoVC.py --model_path_name trained_model10k --loss_path_name loss10k --save_every 10000 --num_train_data 10000
+python3 ../Run_AutoVC.py --model_path_name trained_model_20k --loss_path_name loss20k --save_every 20000 --num_train_data 20000
 
 
 
