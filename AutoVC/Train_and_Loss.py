@@ -4,13 +4,12 @@ The loss and training script for AutoVC (home made but inspired by AutoVC paper)
 """
 import os, sys
 import numpy as np
-
 import torch
 from tqdm import tqdm
-from Generator_autoVC.model_vc import Generator
 from Speaker_identity import SpeakerIdentity
-from Preprocessing_WAV import Preproccesing
+from Preprocessing_WAV import Mel_Batch
 import pickle
+
 
 path = sys.path[0]
 os.chdir(path)
@@ -18,9 +17,9 @@ os.chdir(path)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
-def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pin_memory = False):
+def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pin_memory = False, vocoder = "autovc"):
+
     Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
-    Prep = Preproccesing()
     embeddings, uncorrupted = SpeakerIdentity(Data)
     labels = labels[uncorrupted]
     emb = []
@@ -30,8 +29,10 @@ def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pi
         X = X.mean(0).unsqueeze(0).expand(len(index[0]), -1)
         emb.append(X)
     emb = torch.cat(emb, dim = 0).to(device)
-    Mels, uncorrupted = Prep.Mel_Batch(list(Data[uncorrupted]))
+    Mels, uncorrupted = Mel_Batch(list(Data[uncorrupted]), vocoder = vocoder)
     emb = emb[uncorrupted]
+
+
     C = torch.utils.data.DataLoader(ConcatDataset(Mels, emb), shuffle = shuffle,
                                     batch_size = batch_size, collate_fn = collate,
                                     num_workers = num_workers,
@@ -120,12 +121,6 @@ def noam_learning_rate_decay(init_lr, global_step, warmup_steps=4000):
         step * warmup_steps ** -1.5, step ** -0.5)
     return lr
 
-
-def step_learning_rate_decay(init_lr, global_step,
-                             anneal_rate=0.5,
-                             anneal_interval=50000):
-    return init_lr * anneal_rate ** (global_step // anneal_interval)
-
 def load_params(model, flattened):
     offset = 0
     for param in model.parameters():
@@ -136,7 +131,7 @@ def flatten_params(model):
     return torch.cat([param.data.view(-1) for param in model.parameters()], 0)
 
 
-def Train(model, trainloader, init_lr, n_steps, save_every, models_dir, model_path_name, loss_path_name):
+def Train(model, trainloader, init_lr, n_steps, save_every, models_dir, loss_dir, model_path_name, loss_path_name):
     if torch.cuda.is_available():
         print(f"Training beginning on {torch.cuda.get_device_name(0)}")
     else:
@@ -146,7 +141,7 @@ def Train(model, trainloader, init_lr, n_steps, save_every, models_dir, model_pa
     ema = 0.9999
     running_loss = []
 
-    loss_fpath = models_dir + "/" + loss_path_name
+    loss_fpath = loss_dir + "/" + loss_path_name
     optimiser = torch.optim.Adam(model.parameters(), lr=init_lr, betas = (0.9, 0.999),
                                  eps = 1e-8, weight_decay=0.0, amsgrad = False)
     model.train()

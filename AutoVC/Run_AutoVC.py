@@ -26,7 +26,6 @@ print("""
 import os, sys
 os.chdir(sys.path[0])
 import torch
-import torch.multiprocessing as mp
 from Generator_autoVC.model_vc import Generator
 from Train_and_Loss import TrainLoader, loss, Train
 from dataload import DataLoad2
@@ -79,13 +78,15 @@ if __name__ == "__main__":
 	parser.add_argument('--pin_memory', action='store_false', default=False, help='Whether to pin the memory or not')
 
 	### Model
-	parser.add_argument('--pretrained_model_path', type=str, default='Generator_autoVC/autovc.ckpt', help='Path to pretrained model')
+	parser.add_argument('--pretrained_model_path', type=str, default='Models/AutoVC/autovc_origin.ckpt', help='Path to pretrained model')
 	
 	### Train
 	parser.add_argument('--init_lr', type=float, default=1e-3, help='Initial Learning Rate')
 	parser.add_argument('--n_steps', type=int, default=100000, help='Number of training steps')
 	parser.add_argument('--save_every', type=int, default=10000, help='Number of steps between each save of the model')
-	parser.add_argument('--models_dir', type=str, default='Models', help="Directory to save the training results in")
+	parser.add_argument('--models_dir', type=str, default='Models/AutoVC', help="Directory to save the training results in")
+	parser.add_argument('--vocoder', type=str, default='wavernn', help="Sets vocoder training parameters")
+	parser.add_argument('--loss_dir', type=str, default='Models', help="Directory to save loss curve in")
 	parser.add_argument('--model_path_name', type=str, default='trained_model', help='Name of the trained model')
 	parser.add_argument('--loss_path_name', type=str, default='loss', help='Name of file containing loss values')
 	
@@ -107,14 +108,15 @@ if __name__ == "__main__":
 	torch.manual_seed(config.seed)
 	
 	### Run trainloader
-	
+	config.data_path = "Test_Data"
+	config.num_train_data = 20
 	data, labels = DataLoad2(config.data_path)
 
 	if config.num_train_data is not None:
 		data, labels = data[:config.num_train_data ], labels[:config.num_train_data ]
 	print("Number of wav files: {:}".format(len(data)))
 	trainloader, uncorrupted = TrainLoader(data, labels, batch_size = config.batch_size, shuffle = config.shuffle, 
-								num_workers = config.num_workers, pin_memory = config.pin_memory)
+								num_workers = config.num_workers, pin_memory = config.pin_memory, vocoder = config.vocoder)
 	
 	### Make model
 	model = Generator(32, 256, 512, 32).eval().to(device)
@@ -123,5 +125,5 @@ if __name__ == "__main__":
 	model.share_memory()
 	
 	### Train model
-	Train(model, trainloader, config.init_lr, config.n_steps, config.save_every, config.models_dir, config.model_path_name, config.loss_path_name)
+	Train(model, trainloader, config.init_lr, config.n_steps, config.save_every, config.models_dir, config.loss_dir, config.model_path_name, config.loss_path_name)
 

@@ -1,10 +1,7 @@
-from Speaker_encoder.params_data import *
+from AutoVC.hparams import  hparams_SpeakerEncoder as hp
 from Speaker_encoder.model import SpeakerEncoder
-from Speaker_encoder.audio import preprocess_wav   # We want to expose this function from here
-#from matplotlib import cm
 from Speaker_encoder import audio
 from pathlib import Path
-#import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
@@ -56,7 +53,7 @@ def embed_frames_batch(frames_batch):
     return embed
 
 
-def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_frames,
+def compute_partial_slices(n_samples, partial_utterance_n_frames=hp.partials_n_frames,
                            min_pad_coverage=0.75, overlap=0.5):
     """
     Computes where to split an utterance waveform and its corresponding mel spectrogram to obtain 
@@ -85,7 +82,7 @@ def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_fram
     assert 0 <= overlap < 1
     assert 0 < min_pad_coverage <= 1
     
-    samples_per_frame = int((sampling_rate * mel_window_step / 1000))
+    samples_per_frame = int((hp.sampling_rate * hp.mel_window_step / 1000))
     n_frames = int(np.ceil((n_samples + 1) / samples_per_frame))
     frame_step = max(int(np.round(partial_utterance_n_frames * (1 - overlap))), 1)
 
@@ -156,23 +153,4 @@ def embed_utterance(wav, using_partials=True, return_partials=False, **kwargs):
     return embed
 
 
-def embed_speaker(wavs, **kwargs):
-    raise NotImplemented()
 
-
-def plot_embedding_as_heatmap(embed, ax=None, title="", shape=None, color_range=(0, 0.30)):
-    if ax is None:
-        ax = plt.gca()
-    
-    if shape is None:
-        height = int(np.sqrt(len(embed)))
-        shape = (height, -1)
-    embed = embed.reshape(shape)
-    
-    cmap = cm.get_cmap()
-    mappable = ax.imshow(embed, cmap=cmap)
-    cbar = plt.colorbar(mappable, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_clim(*color_range)
-    
-    ax.set_xticks([]), ax.set_yticks([])
-    ax.set_title(title)
