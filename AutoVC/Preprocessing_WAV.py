@@ -3,8 +3,8 @@
 import librosa
 import numpy as np
 from tqdm import tqdm
-from AutoVC.hparams import hparams_autoVC as hp
-from AutoVC.hparams import hparams_waveRNN as hp1
+from hparams import hparams_autoVC as hp
+from hparams import hparams_waveRNN as hp1
 import torch
 from scipy.io import wavfile
 

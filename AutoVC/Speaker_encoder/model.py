@@ -1,7 +1,7 @@
 """
 Speaker Identity encoder from https://github.com/CorentinJ/Real-Time-Voice-Cloning/tree/master/encoder. See LICENSE.txt
 """
-from AutoVC.hparams import hparams_SpeakerEncoder as hp
+from hparams import hparams_SpeakerEncoder as hp
 from scipy.interpolate import interp1d
 from sklearn.metrics import roc_curve
 from torch.nn.utils import clip_grad_norm_

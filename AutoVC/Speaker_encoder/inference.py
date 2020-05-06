@@ -1,4 +1,4 @@
-from AutoVC.hparams import  hparams_SpeakerEncoder as hp
+from hparams import  hparams_SpeakerEncoder as hp
 from Speaker_encoder.model import SpeakerEncoder
 from Speaker_encoder import audio
 from pathlib import Path
