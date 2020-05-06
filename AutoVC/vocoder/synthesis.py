@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm
 import librosa
-from AutoVC.Generator_autoVC.hparams import hparams
+from Generator_autoVC.hparams import hparams
 from wavenet_vocoder import builder
 
 torch.set_num_threads(4)

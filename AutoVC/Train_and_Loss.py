@@ -11,27 +11,40 @@ from Generator_autoVC.model_vc import Generator
 from Speaker_identity import SpeakerIdentity
 from Preprocessing_WAV import Preproccesing
 import pickle
-
+from multiprocessing import Pool
+from functools import partial
 path = sys.path[0]
 os.chdir(path)
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
-def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pin_memory = False):
-    Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
-    Prep = Preproccesing()
-    embeddings, uncorrupted = SpeakerIdentity(Data)
-    labels = labels[uncorrupted]
-    emb = []
-    for person in sorted(set(labels)):
-        index = np.where(labels == person)
-        X = embeddings[index].cpu()
-        X = X.mean(0).unsqueeze(0).expand(len(index[0]), -1)
-        emb.append(X)
-    emb = torch.cat(emb, dim = 0).to(device)
-    Mels, uncorrupted = Prep.Mel_Batch(list(Data[uncorrupted]))
-    emb = emb[uncorrupted]
+def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pin_memory = False, multiprocess = False):
+    def Preprocess(Data, labels):
+        Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
+        Prep = Preproccesing()
+        embeddings, uncorrupted = SpeakerIdentity(Data)
+        labels = labels[uncorrupted]
+        emb = []
+        for person in sorted(set(labels)):
+            index = np.where(labels == person)
+            X = embeddings[index].cpu()
+            X = X.mean(0).unsqueeze(0).expand(len(index[0]), -1)
+            emb.append(X)
+        emb = torch.cat(emb, dim = 0).to(device)
+        Mels, uncorrupted = Prep.Mel_Batch(list(Data[uncorrupted]))
+        emb = emb[uncorrupted]
+        return Mels, emb
+    Mels, emb = Preprocess(Data, labels)
+    if multiprocess:
+        P = Pool()
+        def Prep2(data):
+            return Preprocess(data[0], data[1])
+        result = P.map(Prep2, (Data, labels))
+        P.close()
+        P.join()
+        Mels, emb = result[0], result[1]
+
     C = torch.utils.data.DataLoader(ConcatDataset(Mels, emb), shuffle = shuffle,
                                     batch_size = batch_size, collate_fn = collate,
                                     num_workers = num_workers,

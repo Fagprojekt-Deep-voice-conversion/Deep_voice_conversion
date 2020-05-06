@@ -1,7 +1,7 @@
 import librosa
 import librosa.filters
 import numpy as np
-from AutoVC.Generator_autoVC.hparams import hparams
+from Generator_autoVC.hparams import hparams
 from scipy.io import wavfile
 #from nnmnkwii import preprocessing as P
 
