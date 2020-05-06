@@ -1,30 +1,10 @@
-"""
-HEJ!
-Det her script er stadig in the making og lidt Peters rodekasse :-)
-
-Du vil nok ikke få meget ud af det pt.
-
-
-"""
-
-
-
-
-
-
-
-
-
-
-
-
 import matplotlib.pyplot as plt
 
 import os, sys; os.chdir(sys.path[0])
 from Generator_autoVC.model_vc import Generator
 import torch
 from dataload import DataLoad2
-from Preprocessing_WAV import Preproccesing
+from Preprocessing_WAV import Mel_Batch
 from Speaker_identity import SpeakerIdentity
 
 import librosa
@@ -37,9 +17,9 @@ data,labels  = data[:20], labels[:20]
 
 
 def Conversion(source, target, model, embs = None):
-    P = Preproccesing()
-    S1, _  = P.Mel_Batch(source)
-    T1, _  = P.Mel_Batch(target)
+
+    S1, _  = Mel_Batch(source)
+    T1, _  = Mel_Batch(target)
 
     #s_emb, _ = SpeakerIdentity(source)
     #t_emb, _ = SpeakerIdentity(target)
@@ -97,7 +77,7 @@ ST, S , T = Conversion(s, t, model, embs)
 
 
 model = build_model().to("cpu")
-checkpoint = torch.load("vocoder/WaveNetVC_pretrained.pth", map_location=torch.device("cpu"))
+checkpoint = torch.load("vocoder/utils/WaveNetVC_pretrained.pth", map_location=torch.device("cpu"))
 model.load_state_dict(checkpoint["state_dict"])
 
 
