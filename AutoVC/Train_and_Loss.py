@@ -17,7 +17,7 @@ os.chdir(path)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
-def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pin_memory = False, multiprocess = False):
+def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pin_memory = False, vocoder = "autovc"):
 
     Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
     embeddings, uncorrupted = SpeakerIdentity(Data)
@@ -29,7 +29,7 @@ def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pi
         X = X.mean(0).unsqueeze(0).expand(len(index[0]), -1)
         emb.append(X)
     emb = torch.cat(emb, dim = 0).to(device)
-    Mels, uncorrupted = Mel_Batch(list(Data[uncorrupted]), vocoder = "wavernn")
+    Mels, uncorrupted = Mel_Batch(list(Data[uncorrupted]), vocoder = vocoder)
     emb = emb[uncorrupted]
 
 
@@ -131,7 +131,7 @@ def flatten_params(model):
     return torch.cat([param.data.view(-1) for param in model.parameters()], 0)
 
 
-def Train(model, trainloader, init_lr, n_steps, save_every, models_dir, model_path_name, loss_path_name):
+def Train(model, trainloader, init_lr, n_steps, save_every, models_dir, loss_dir, model_path_name, loss_path_name):
     if torch.cuda.is_available():
         print(f"Training beginning on {torch.cuda.get_device_name(0)}")
     else:
@@ -141,7 +141,7 @@ def Train(model, trainloader, init_lr, n_steps, save_every, models_dir, model_pa
     ema = 0.9999
     running_loss = []
 
-    loss_fpath = models_dir + "/" + loss_path_name
+    loss_fpath = loss_dir + "/" + loss_path_name
     optimiser = torch.optim.Adam(model.parameters(), lr=init_lr, betas = (0.9, 0.999),
                                  eps = 1e-8, weight_decay=0.0, amsgrad = False)
     model.train()

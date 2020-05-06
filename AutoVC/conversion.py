@@ -64,7 +64,7 @@ s = data[1]
 t = data[11]
 
 model = Generator(32, 256, 512, 32).eval().to("cpu")
-g_checkpoint = torch.load("Models/trained_model_fullaverage_step200k.pt", map_location=torch.device("cpu"))
+g_checkpoint = torch.load("Models/AutoVC/autovc_200k_average_wavenet.pt", map_location=torch.device("cpu"))
 model.load_state_dict(g_checkpoint['model_state'])
 
 emb, _ = SpeakerIdentity(data)
@@ -77,7 +77,7 @@ ST, S , T = Conversion(s, t, model, embs)
 
 
 model = build_model().to("cpu")
-checkpoint = torch.load("vocoder/utils/WaveNetVC_pretrained.pth", map_location=torch.device("cpu"))
+checkpoint = torch.load("Models/WaveNet/WaveNetVC_pretrained.pth", map_location=torch.device("cpu"))
 model.load_state_dict(checkpoint["state_dict"])
 
 

@@ -53,7 +53,7 @@ def embed_frames_batch(frames_batch):
     return embed
 
 
-def compute_partial_slices(n_samples, partial_utterance_n_frames=partials_n_frames,
+def compute_partial_slices(n_samples, partial_utterance_n_frames=hp.partials_n_frames,
                            min_pad_coverage=0.75, overlap=0.5):
     """
     Computes where to split an utterance waveform and its corresponding mel spectrogram to obtain 
