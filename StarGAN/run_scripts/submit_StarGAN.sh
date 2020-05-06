@@ -53,22 +53,22 @@ source StarGAN-env/bin/activate
 ### Preprocess data
 #sh preprocess.sh
 
-python ../StarGAN-Voice-Conversion-master/preprocess.py --sample_rate 16000 \
-                    --origin_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/VCTK-Corpus/wav48 \
-                    --target_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
-                    --mc_dir_train /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
-                    --mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test
+#python ../StarGAN-Voice-Conversion-master/preprocess.py --sample_rate 16000 \
+                    #--origin_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/VCTK-Corpus/wav48 \
+                    #--target_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
+                    #--mc_dir_train /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
+                    #--mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test
 
 ### Train model
 #python ../StarGAN-Voice-Conversion-master/main.py
 
-python ../StarGAN-Voice-Conversion-master/main.py \
-		--train_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
-		--test_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
-		--wav_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/wavs \
-		--log_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/logs \
-		--sample_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/samples		
+#python ../StarGAN-Voice-Conversion-master/main.py \
+#		--train_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
+#		--test_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
+#		--wav_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/wavs \
+#		--log_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/logs \
+#		--sample_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/samples		
 
 
 
-
+sh train.sh

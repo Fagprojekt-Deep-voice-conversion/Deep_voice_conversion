@@ -26,7 +26,7 @@ python3 -m venv StarGAN-env
 source StarGAN-env/bin/activate
 
 python -m pip install --upgrade cython
-python -m pip install torch==1.4.0 pyworld tqdm librosa tensorboardX tensorboard torchvision
+python -m pip install torch==1.4.0 pyworld tqdm librosa tensorboardX tensorboard torchvision==0.5.0
 
 #sudo apt-get install sox
 
