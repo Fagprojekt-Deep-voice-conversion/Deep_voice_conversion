@@ -12,7 +12,7 @@
 #BSUB -gpu "num=1:mode=exclusive_process"
 ### -- set walltime limit: hh:mm --  maximum 24 hours for GPU-queues right now
 #BSUB -W 24:00
-# request 30GB of system-memory
+# request 60GB of system-memory
 #BSUB -R "rusage[mem=30GB]"
 ### -- set the email address --
 # please uncomment the following line and put in your e-mail address,
@@ -53,22 +53,10 @@ source StarGAN-env/bin/activate
 ### Preprocess data
 #sh preprocess.sh
 
-#python ../StarGAN-Voice-Conversion-master/preprocess.py --sample_rate 16000 \
-                    #--origin_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/VCTK-Corpus/wav48 \
-                    #--target_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
-                    #--mc_dir_train /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
-                    #--mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test
 
 ### Train model
-#python ../StarGAN-Voice-Conversion-master/main.py
-
-#python ../StarGAN-Voice-Conversion-master/main.py \
-#		--train_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
-#		--test_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
-#		--wav_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/wavs \
-#		--log_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/logs \
-#		--sample_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/samples		
+sh train.sh		
 
 
 
-sh train.sh
+

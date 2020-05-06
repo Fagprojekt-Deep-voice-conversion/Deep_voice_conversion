@@ -29,5 +29,6 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--test_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
 		--wav_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
 		--log_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/logs \
-		--sample_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/samples		
+		--sample_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/samples
+		--model_save_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/models 	
 
