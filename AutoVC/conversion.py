@@ -8,6 +8,10 @@ from vocoder.WaveNet import build_model
 from vocoder.WaveNet import wavegen
 import librosa
 from vocoder.WaveRNN_inference import Generate
+from vocoder.WaveRNN_model import WaveRNN
+import time
+
+from hparams import hparams_waveRNN as hp
 def Conversion(source, target, model,  vocoder = "wavenet", sound_out = False, Visualize = False):
 
     if vocoder == "wavenet":
@@ -30,7 +34,7 @@ def Conversion(source, target, model,  vocoder = "wavenet", sound_out = False, V
         Out1 = Out.squeeze(0).squeeze(0).detach().numpy()
         converted_numpy.append(Out1)
         converted_tensor.append(Out)
-   
+    return S.squeeze(0).detach().numpy(), T.squeeze(0).detach().numpy(), tuple(converted_numpy)
     if Visualize:
         
         titles = ["Source", "Source-Source", "Target-Target", "Target", "Target-Target", "Target-Source"]
@@ -65,42 +69,49 @@ def Conversion(source, target, model,  vocoder = "wavenet", sound_out = False, V
         else:
             for i, spectrogram in enumerate(converted_numpy):
                 Generate(spectrogram.T)
-    return S, T
-
-
-data, labels = DataLoad2("Test_Data")
-data,labels  = data[:20], labels[:20]
-
-
-s = data[0]
-t = data[10]
+    
 
 model = Generator(32, 256, 512, 32).eval().to("cpu")
-g_checkpoint = torch.load("Models/AutoVC/autovc_200k_average_wavenet.pt", map_location=torch.device("cpu"))
+g_checkpoint = torch.load("Models/AutoVC/autoVC_full_wavenet_original_step200k.pt", map_location=torch.device("cpu"))
 model.load_state_dict(g_checkpoint['model_state'])
+data, labels = DataLoad2("Test_Data")
+
+
+# Instantiate WaveRNN Model
+voc_model = WaveRNN(rnn_dims=hp.voc_rnn_dims,
+                    fc_dims=hp.voc_fc_dims,
+                    bits=hp.bits,
+                    pad=hp.voc_pad,
+                    upsample_factors=hp.voc_upsample_factors,
+                    feat_dims=hp.num_mels,
+                    compute_dims=hp.voc_compute_dims,
+                    res_out_dims=hp.voc_res_out_dims,
+                    res_blocks=hp.voc_res_blocks,
+                    hop_length=hp.hop_length,
+                    sample_rate=hp.sample_rate,
+                    mode='MOL').to("cpu")
+
+voc_model.load('Models/WaveRNN/WaveRNN_Pretrained.pyt')
 
 
 
-ST, S  = Conversion(s, t, model, vocoder = "wavenet", Visualize= False, sound_out= True)
 
-# Auto VC vocoder 
+start = time.time()
 
-"""
-model = build_model().to("cpu")
-checkpoint = torch.load("Models/WaveNet/WaveNetVC_pretrained.pth", map_location=torch.device("cpu"))
-model.load_state_dict(checkpoint["state_dict"])
+s = data[len(data)-7]
+t = data[25]
 
+S, T, (SS, ST, TT, TS)  = Conversion(s, t, model, vocoder = "wavernn", Visualize= False, sound_out= False)
 
-waveform = wavegen(model, c = S[0].squeeze(0))
-librosa.output.write_wav("source"+'.wav', waveform, sr=16000)
-waveform = wavegen(model, c = T[0].squeeze(0))
-librosa.output.write_wav("target"+'.wav', waveform, sr=16000)
+A = ["source", "target", "Source_Source", "Source_Target", "Target_Target", "Target_Source"]
+B = [S, T, SS, ST, TT, TS]
+for i, a in enumerate(A):
+    Generate(B[i].T, "ConvertedWavs/" + a + "1", voc_model)
 
-waveform = wavegen(model, c = ST.squeeze(0).squeeze(0))
-librosa.output.write_wav("conversion "+'.wav', waveform, sr=16000)
+end = time.time()
 
+print(f"\nTotal time: {end - start}")
 
 
-"""
 
 
