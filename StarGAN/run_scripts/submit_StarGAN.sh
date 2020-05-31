@@ -55,8 +55,10 @@ source StarGAN-env/bin/activate
 
 
 ### Train model
-sh train.sh		
+#sh train.sh		
 
+### convert samples
+sh convert.sh
 
 
 
