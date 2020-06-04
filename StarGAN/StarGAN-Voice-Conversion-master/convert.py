@@ -73,6 +73,10 @@ def load_wav(wavfile, sr=16000):
     # return wav
 
 def test(config):
+	# Set seed
+	torch.manuel_seed(config.seed)
+	np.random.seed(config.seed)
+	
     os.makedirs(join(config.convert_dir, str(config.resume_iters)), exist_ok=True)
     sampling_rate, num_mcep, frame_period=16000, 36, 5
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -120,7 +124,10 @@ def test(config):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-
+	
+	# Misc
+	parser.add_argument('--seed', type=int, default=420, help='seed used when converting')
+	
     # Model configuration.
     parser.add_argument('--num_speakers', type=int, default=10, help='dimension of speaker labels')
     parser.add_argument('--num_converted_wavs', type=int, default=8, help='number of wavs to convert.')

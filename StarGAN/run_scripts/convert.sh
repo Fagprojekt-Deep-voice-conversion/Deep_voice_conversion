@@ -22,12 +22,14 @@ fi
 source StarGAN-env/bin/activate
 
 ### Convert
+### Must set the speakers that was used for preprocessing in script
 python ../StarGAN-Voice-Conversion-master/convert.py \
+		--seed 420 \
 		--num_speakers 10 \
-		--num_converted_wavs 8 \
+		--num_converted_wavs 1 \
 		--resume_iters 176000 \
-		--src_spk p262 \
-		--trg_spk p272 \
+		--src_spk p225 \
+		--trg_spk p226 \
 		--train_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
 		--test_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
 		--wav_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
