@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ### Set directory
 
 if [ "$1" = "setup" ]
@@ -10,14 +12,15 @@ then
 		run_dir=~/Desktop/Deep_voice_conversion/StarGAN/run_scripts/
 	fi
 	
-	### Load modules
-	module load python3
-	module load cuda
 
 	### Run setup
 	sh setup.sh $run_dir || exit 1
 
 fi
+
+### Load modules
+module load python3
+module load cuda
 
 source StarGAN-env/bin/activate
 

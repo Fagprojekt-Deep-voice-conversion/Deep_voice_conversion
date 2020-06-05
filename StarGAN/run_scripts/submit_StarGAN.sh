@@ -47,7 +47,7 @@ module load python3
 module load cuda
 
 ### Run setup
-sh setup.sh $run_dir || exit 1
+#sh setup.sh $run_dir || exit 1
 source StarGAN-env/bin/activate
 
 ### Preprocess data

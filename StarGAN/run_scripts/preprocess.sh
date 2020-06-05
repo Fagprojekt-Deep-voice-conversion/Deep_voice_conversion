@@ -1,3 +1,4 @@
+#!/bin/bash
 ### Set directory
 
 BASE_DIRECTORY=$(echo "$PWD" | cut -d "/" -f2)

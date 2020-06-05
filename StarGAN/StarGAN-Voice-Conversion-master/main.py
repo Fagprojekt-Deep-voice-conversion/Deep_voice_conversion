@@ -4,7 +4,7 @@ from solver import Solver
 from data_loader import get_loader, TestDataset
 from torch.backends import cudnn
 import numpy.random.seed as seed_np
-import torch.manuel_seed as seed_t
+import torch.manual_seed as seed_t
 
 
 def str2bool(v):
