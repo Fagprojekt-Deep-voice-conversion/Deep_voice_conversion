@@ -9,7 +9,7 @@ from tqdm import tqdm
 from Speaker_identity import SpeakerIdentity
 from Preprocessing_WAV import Mel_Batch
 import pickle
-
+from dataload import DataLoad2
 
 path = sys.path[0]
 os.chdir(path)
@@ -23,12 +23,13 @@ def TrainLoader(Data, labels, batch_size = 2, shuffle = True, num_workers = 1, p
     embeddings, uncorrupted = SpeakerIdentity(Data)
     labels = labels[uncorrupted]
     emb = []
-    for person in sorted(set(labels)):
-        index = np.where(labels == person)
-        X = embeddings[index].cpu()
-        X = X.mean(0).unsqueeze(0).expand(len(index[0]), -1)
-        emb.append(X)
-    emb = torch.cat(emb, dim = 0).to(device)
+    # for person in sorted(set(labels)):
+        # index = np.where(labels == person)
+    #     X = embeddings[index].cpu()
+    #     X = X.mean(0).unsqueeze(0).expand(len(index[0]), -1)
+    #     emb.append(X)
+    # emb = torch.cat(emb, dim = 0).to(device)
+    emb = embeddings
     Mels, uncorrupted = Mel_Batch(list(Data[uncorrupted]), vocoder = vocoder)
     emb = emb[uncorrupted]
 
@@ -38,7 +39,9 @@ def TrainLoader(Data, labels, batch_size = 2, shuffle = True, num_workers = 1, p
                                     num_workers = num_workers,
                                     pin_memory = pin_memory)
     return C, uncorrupted
+data, labels = DataLoad2("Test_Data")
 
+TrainLoader(data[:20], labels[:20])
 def collate(batch):
     batch = list(zip(*batch))
     lengths = torch.tensor([t.shape[1] for t in batch[0]])
