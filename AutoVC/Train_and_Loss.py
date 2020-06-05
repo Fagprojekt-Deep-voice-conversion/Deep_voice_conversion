@@ -17,7 +17,7 @@ os.chdir(path)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
-def TrainLoader(Data,labels, batch_size = 2, shuffle = True, num_workers = 1, pin_memory = False, vocoder = "autovc"):
+def TrainLoader(Data, labels, batch_size = 2, shuffle = True, num_workers = 1, pin_memory = False, vocoder = "autovc"):
 
     Data, labels = np.array(Data)[np.argsort(labels)], np.array(labels)[np.argsort(labels)]
     embeddings, uncorrupted = SpeakerIdentity(Data)

@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import librosa, time, torch
 from dataload import DataLoad2
 from Preprocessing_WAV import AutoVC_Mel, WaveRNN_Mel
@@ -11,6 +12,7 @@ from Speaker_encoder.inference import embed_utterance
 from vocoder.WaveRNN_inference import Generate
 from vocoder.WaveRNN_model import WaveRNN
 from hparams import hparams_waveRNN as hp
+import pickle
 
 def Conversion(source, target, model,  vocoder = "wavenet", sound_out = False, Visualize = False):
 
@@ -33,6 +35,7 @@ def Conversion(source, target, model,  vocoder = "wavenet", sound_out = False, V
         Out1 = Out.squeeze(0).squeeze(0).detach().numpy()
         converted_numpy.append(Out1)
         converted_tensor.append(Out)
+        
     return S.squeeze(0).detach().numpy(), T.squeeze(0).detach().numpy(), tuple(converted_numpy)
 
 def embed(path):
@@ -43,7 +46,7 @@ def embed(path):
 load_encoder("Models/SpeakerEncoder/SpeakerEncoder.pt").float()
 
 model = Generator(32, 256, 512, 32).eval().to("cpu")
-g_checkpoint = torch.load("Models/AutoVC/autoVC_full_wavenetaverage_step200k.pt", map_location=torch.device("cpu"))
+g_checkpoint = torch.load("Models/AutoVC/autoVC_full_wavenet_original_step200k.pt", map_location=torch.device("cpu"))
 model.load_state_dict(g_checkpoint['model_state'])
 data, labels = DataLoad2("Test_Data")
 
@@ -65,24 +68,18 @@ voc_model = WaveRNN(rnn_dims=hp.voc_rnn_dims,
 voc_model.load('Models/WaveRNN/WaveRNN_Pretrained.pyt')
 
 
-
-
-start = time.time()
-
 s = data[len(data)-7]
-t = "Peter.wav"
+t = data[len(data)-25]
+print(labels[len(data)-25], labels[len(data)-7])
 
 S, T, (SS, ST, TT, TS)  = Conversion(s, t, model, vocoder = "wavernn", Visualize= False, sound_out= False)
 
-A = ["source", "target", "Source_Source", "Source_Target", "Target_Target", "Target_Source"]
-B = [S, T, SS, ST, TT, TS]
-for i, a in enumerate(A):
-    Generate(B[i].T, "ConvertedWavs/" + a + "1" , voc_model)
-
-end = time.time()
-
-print(f"\nTotal time: {end - start}")
+Generate(ST.T, "Test101", voc_model)
 
 
 
-
+# X = pickle.load(open("Models/loss_from_scratch", "rb"))
+# print(len(X))
+# print(len(X[5000:]))
+# plt.plot(np.convolve(np.asarray(X[100:]), np.ones(50)/50, "valid"))
+# plt.show()
