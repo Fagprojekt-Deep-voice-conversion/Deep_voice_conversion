@@ -39,9 +39,7 @@ def TrainLoader(Data, labels, batch_size = 2, shuffle = True, num_workers = 1, p
                                     num_workers = num_workers,
                                     pin_memory = pin_memory)
     return C, uncorrupted
-data, labels = DataLoad2("Test_Data")
 
-TrainLoader(data[:20], labels[:20])
 def collate(batch):
     batch = list(zip(*batch))
     lengths = torch.tensor([t.shape[1] for t in batch[0]])
