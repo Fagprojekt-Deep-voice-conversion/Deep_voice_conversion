@@ -1,8 +1,12 @@
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir) 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from utils.distribution import sample_from_discretized_mix_logistic
-from utils.display import *
+from vocoder.utils.distribution import sample_from_discretized_mix_logistic
+from vocoder.utils.display import *
 import numpy as np
 from pathlib import Path
 from typing import Union

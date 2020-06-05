@@ -3,12 +3,18 @@ import argparse
 from solver import Solver
 from data_loader import get_loader, TestDataset
 from torch.backends import cudnn
+import numpy.random.seed as seed_np
+import torch.manuel_seed as seed_t
 
 
 def str2bool(v):
     return v.lower() in ('true')
 
 def main(config):
+	# Set seed
+	seed_np(config.seed)
+	seed_t(config.seed)
+	
     # For fast training.
     cudnn.benchmark = True
 
@@ -59,6 +65,7 @@ if __name__ == '__main__':
     parser.add_argument('--test_iters', type=int, default=100000, help='test model from this step')
 
     # Miscellaneous.
+    parser.add_argument('--seed', type=int, default=420, help='seed used for training')
     parser.add_argument('--num_workers', type=int, default=1)
     parser.add_argument('--mode', type=str, default='train', choices=['train', 'test'])
     parser.add_argument('--use_tensorboard', type=str2bool, default=True)
