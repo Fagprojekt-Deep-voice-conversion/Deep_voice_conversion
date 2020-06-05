@@ -119,3 +119,8 @@ https://towardsdatascience.com/generative-adversarial-networks-explained-3447271
 
 ## WaveRNN
 https://arxiv.org/abs/1802.08435v1
+
+
+# Survey
+## Google drive and shiny
+https://medium.com/@joyplumeri/using-r-shiny-to-create-web-surveys-display-instant-feedback-and-store-data-on-google-drive-68f46eea0f8b

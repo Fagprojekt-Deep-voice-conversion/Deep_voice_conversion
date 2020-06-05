@@ -12,7 +12,7 @@
 #BSUB -gpu "num=1:mode=exclusive_process"
 ### -- set walltime limit: hh:mm --  maximum 24 hours for GPU-queues right now
 #BSUB -W 24:00
-# request 30GB of system-memory
+# request 60GB of system-memory
 #BSUB -R "rusage[mem=30GB]"
 ### -- set the email address --
 # please uncomment the following line and put in your e-mail address,
@@ -51,11 +51,14 @@ sh setup.sh $run_dir || exit 1
 source StarGAN-env/bin/activate
 
 ### Preprocess data
-sh preprocess.sh
+#sh preprocess.sh
+
 
 ### Train model
-python main.py
+#sh train.sh		
 
+### convert samples
+sh convert.sh
 
 
 

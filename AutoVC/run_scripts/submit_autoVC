@@ -52,7 +52,7 @@ source AutoVC-env/bin/activate
 echo $PWD
 
 ### Run python script
-python3 ../Run_AutoVC.py --model_path_name autoVC_full_wavenet --loss_path_name loss_full --save_every 50000 --n_steps 200000
+python3 ../Run_AutoVC.py --model_path_name autoVC_seed20_from_scratch --loss_path_name loss_from_scratch --save_every 50000 --n_steps 200000 --seed 20
 
 
 
