@@ -1,0 +1,12 @@
+name: voice-conversion-survey
+title: voice-conversion-survey
+username:
+account: s183920
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2412947
+bundleId: 3231777
+url: https://s183920.shinyapps.io/voice-conversion-survey/
+when: 1591348572.66529
+asMultiple: FALSE
+asStatic: FALSE
