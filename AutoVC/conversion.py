@@ -46,7 +46,7 @@ def embed(path):
 load_encoder("Models/SpeakerEncoder/SpeakerEncoder.pt").float()
 
 model = Generator(32, 256, 512, 32).eval().to("cpu")
-g_checkpoint = torch.load("Models/AutoVC/autoVC_full_wavenet_original_step200k.pt", map_location=torch.device("cpu"))
+g_checkpoint = torch.load("Models/AutoVC/autoVC_seed40_original_200k.pt", map_location=torch.device("cpu"))
 model.load_state_dict(g_checkpoint['model_state'])
 data, labels = DataLoad2("Test_Data")
 
@@ -68,18 +68,17 @@ voc_model = WaveRNN(rnn_dims=hp.voc_rnn_dims,
 voc_model.load('Models/WaveRNN/WaveRNN_Pretrained.pyt')
 
 
-s = data[len(data)-7]
-t = data[len(data)-25]
-print(labels[len(data)-25], labels[len(data)-7])
+t = data[23]
+s = data[len(data)-25]
+print(labels[len(data)-25], labels[23])
 
-S, T, (SS, ST, TT, TS)  = Conversion(s, t, model, vocoder = "wavernn", Visualize= False, sound_out= False)
+# S, T, (SS, ST, TT, TS)  = Conversion(s, t, model, vocoder = "wavernn", Visualize= False, sound_out= False)
 
-Generate(ST.T, "Test101", voc_model)
+# Generate(ST.T, "Test303", voc_model)
 
 
 
-# X = pickle.load(open("Models/loss_from_scratch", "rb"))
+# X = pickle.load(open("Models/loss_scratch60", "rb"))
 # print(len(X))
-# print(len(X[5000:]))
 # plt.plot(np.convolve(np.asarray(X[100:]), np.ones(50)/50, "valid"))
 # plt.show()
