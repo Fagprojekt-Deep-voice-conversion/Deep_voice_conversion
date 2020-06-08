@@ -35,14 +35,14 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--lambda_gp 10 \
 		--sampling_rate 16000 \
 		--batch_size 32 \
-		--num_iters 200000 \
-		--num_iters_decay 100000
+		--num_iters 180000 \
+		--resume_iters 176000\
+		--num_iters_decay 100000 \
 		--g_lr 0.0001 \
 		--d_lr 0.0001 \
 		--n_critic 5 \
 		--beta1 0.5 \
 		--beta2 0.999 \
-		#--resume_iters \
 		--test_iters 100000 \
 		--num_workers 1 \
 		--mode train \
