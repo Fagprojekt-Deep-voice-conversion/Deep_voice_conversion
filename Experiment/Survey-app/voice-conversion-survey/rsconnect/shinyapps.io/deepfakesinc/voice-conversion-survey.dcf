@@ -4,9 +4,9 @@ username:
 account: deepfakesinc
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 2414920
-bundleId: 3233602
+appId: 2426725
+bundleId: 3243754
 url: https://deepfakesinc.shinyapps.io/voice-conversion-survey/
-when: 1591378574.08054
+when: 1591640145.54482
 asMultiple: FALSE
 asStatic: FALSE

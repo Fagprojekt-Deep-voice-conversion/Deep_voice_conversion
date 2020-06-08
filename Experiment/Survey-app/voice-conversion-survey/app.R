@@ -1,44 +1,29 @@
 #load libraries
 library(shiny)
-# library(shinydashboard)
+library(googlesheets4)
+library(googledrive)
+source("Combination.R")
+options(gargle_oauth_cache = ".secrets")
 
+drive_auth(cache = ".secrets", email = "peter@groenning.net")
+gs4_auth(token = drive_token())
 
 ui <- fluidPage(
-    titlePanel("Deep fakes"),
+    titlePanel("Deep Fakes inc."),
     sidebarPanel(
-        h3("Please enter your name"),
-        textInput("name", ""),
+  
+        h3("By Nazi Tubbies"),
         h6(textOutput("save.results")),
         h6(textOutput("checkcategory")),
         h6(textOutput("checkcategory1")),
-    
-       
-        # h3("First sample"),
-        # h4("Sound 1"),
-        # tags$audio(src = "3.wav", type = " 'audio/wav", controls = NA),
-        # h4("Sound 2"),
-        # tags$audio(src = "3.wav", type = " 'audio/wav", controls = NA),
-        # h4("Sound 3"),
-        # tags$audio(src = "3.wav", type = " 'audio/wav", controls = NA),
         
-        textOutput("ty"),
-        h3("First sample"),
-        actionButton("play1", "Play sound 1"),
-        actionButton("play2", "Play sound 2"),
-        actionButton("play3", "Play sound 3"),
-        # h4("How well does it sound"),
-        sliderInput("item1", "How well does it sound?", 0, 10, value = 5),
-        textOutput("score1"),
-        h3("Second sample"),
-        actionButton("play1", "Play sound 1"),
-        actionButton("play2", "Play sound 2"),
-        actionButton("play3", "Play sound 3"),
-        # h4("How well does it sound"),
-        sliderInput("item2", "How well does it sound?", 0, 10, value = 5),
-        actionButton("submit1", "Submit"),
-        textOutput("ty1")),
-       
-        #actionButton("scared", "Get haunted!")
+        h6(textOutput("checkcategory2")),
+    
+
+       actionButton("play1", ""),
+       actionButton("play2", ""),
+       actionButton("play3", "")),
+     
         mainPanel(
             # Main Action is where most everything is happenning in the
             # object (where the welcome message, survey, and results appear)
@@ -47,6 +32,7 @@ ui <- fluidPage(
             actionButton("Click.Counter", textOutput("Button")), 
             
             textOutput("test")
+            
         )
         
         
@@ -55,126 +41,151 @@ ui <- fluidPage(
 )
 
 server <- function(input, output){
-    # sliderValues <- reactive({
-    #     data.frame(Name = c("Sound 1"),
-    #                Value = c(input$item1),
-    #                stringsAsFactors = F)})
-    
-    
-    #observeEvent(input$Click.Counter, {output$ty <- renderText({paste0("You gave a score of ",counter)})})
-    observeEvent(input$play11, {insertUI(ui = tags$audio(src = sprintf("%s/%s/%s.wav",
-                                                                       categories[catsamples[input$Click.Counter]],
-                                                                       subcategories[subcatsamples[input$Click.Counter]],
+
+    observeEvent(input$play11, {insertUI(ui = tags$audio(src = sprintf("%s/%s/%s/%s.wav",
+                                                                       models[X[Samples,][input$Click.Counter,][1]],
+                                                                       categories[X[Samples,][input$Click.Counter,][2]],
+                                                                       subcategories[X[Samples,][input$Click.Counter,][3]],
                                                                        samples[1]), type = " 'audio/wav", autoplay = NA,
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
     
-    observeEvent(input$play21, {insertUI(ui = tags$audio(src = sprintf("%s/%s/%s.wav", 
-                                                                       categories[catsamples[input$Click.Counter]], 
-                                                                       subcategories[subcatsamples[input$Click.Counter]], 
-                                                                       samples[2]), type = " 'audio/wav", autoplay = NA, 
-                                                         controls = NA, style="display:none;"), selector = "#play2", where = "afterEnd")})
-    
-    observeEvent(input$play31, {insertUI(ui = tags$audio(src = sprintf("%s/%s/%s.wav", 
-                                                                       categories[catsamples[input$Click.Counter]],
-                                                                       subcategories[subcatsamples[input$Click.Counter]],
+    observeEvent(input$play21, {insertUI(ui = tags$audio(src = sprintf("%s/%s/%s/%s.wav",
+                                                                       models[X[Samples,][input$Click.Counter,][1]],
+                                                                       categories[X[Samples,][input$Click.Counter,][2]],
+                                                                       subcategories[X[Samples,][input$Click.Counter,][3]],
+                                                                       samples[2]), type = " 'audio/wav", autoplay = NA,
+                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+
+    observeEvent(input$play31, {insertUI(ui = tags$audio(src = sprintf("%s/%s/%s/%s.wav",
+                                                                       models[X[Samples,][input$Click.Counter,][1]],
+                                                                       categories[X[Samples,][input$Click.Counter,][2]],
+                                                                       subcategories[X[Samples,][input$Click.Counter,][3]],
                                                                        samples[3]), type = " 'audio/wav", autoplay = NA,
-                                                         controls = NA, style="display:none;"), selector = "#play3", where = "afterEnd")})
+                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+    
+    
     
     observeEvent(input$item1, {output$score1 <- renderText({paste0("You gave a score of ", input$item1)})})
     
-    #observeEvent(input$submit, {output$ty <- renderText({paste0("Thanks for answering the survey ", input$name, "!")})})
-    #observeEvent(input$scared, {insertUI(ui = img(src = "test.png", width = 350, height = 350), selector = "#scared", where = "afterEnd")})
+    
     observeEvent(input$submit1, {output$ty1 <- renderText({paste0("Thanks for answering the survey ", input$item1, input$item2, input$Click.Counter, "!")})})
     observeEvent(input$submit, {output$test <- renderText({paste0("Your number of clicks: ", input$Click.Counter, results, input$survey, "! omg crazy")})})
     output$MainAction <- renderUI( {
         dynamicUi()
     })
+
+    X <- combination()
+
+    n_questions <- 10
+    models = c("AutoVC", "StarGAN", "Baseline")
+    categories = c("Danish_Danish", "English_English", "Danish_English", "English_Danish", "5min", "2_5min", "0min", "Baseline")
+    subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Female", "Male_English", "Male_Danish", "Female_English", "Female_Danish")
     
-    sliderresults = rep(0, 5)
-    catresults = rep("", 5)
+    Samples <- sample(nrow(X), n_questions, replace = F)
     
-    categories = c("Danish_Danish", "English_English", "Danish_English", "English_Danish")
-    subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Female")
+    similarityresults = rep(NaN, 64)
+    qualityresults = rep(NaN, 64)
+    catresults = rep("", n_questions)
+    
+    
     
     samples <<- sample(3, 3, replace = F)
-    catsamples <<- sample(4,5, replace = T)
-    subcatsamples <<- sample(4,5, replace = T)
-    
+    modsamples <<- sample(2,n_questions, replace = T)
+    catsamples <<- sample(4,n_questions, replace = T)
+    subcatsamples <<- sample(4,n_questions, replace = T)
+    ss = "https://docs.google.com/spreadsheets/d/1Y2Hu04dY-chxSPdVgcUefXSTs6zvG6lkzAFlWhICPJA/edit#gid=0"
     dynamicUi <- reactive({
         if (input$Click.Counter==0)
             return(
                 list(
-                    h3("Welcome to Deep Fakes Inc.!"),
-                    h6("hej med dig")
+                    h2("Welcome to the Deep Fakes survey!"),
+                    h4("Deep fakes are instances of fake news in which artificial intelligence is used
+                       to synthesise realistic image and/or sound media."),
+                    h4("A Deep fake could e.g. be an synthesised video with the image and sound of a famous person
+                       or a person in power."),
+                    h4("If this new technology is put to use by malicious actors it could have severe, negative consequences."),
+                    h4("Imagine a synthesised video of a politician (or any other influential person) ridiculing himself/herself or making harmfull statements."),
+                    h4("This video could shift the public opinion about this person dramatically or some people might act upon his/her fake statements."),
+                    h3("| "),
+                    h3("| "),
+                    h4("We wish to investigate how far the deep fakes tehcnology is within voice conversion (faking peoples' voices)"),
+                    h4("To do so, we wish to test two different methods for voice conversion on a set of different subtask with both english and danish voice"),
+                    h4("This survey consists of 20 questions of 2 parts each. In the first part you are asked to rate the similarity of two voices and in the second part you are asked to rate the quality of a converted voice"),
+                    h4("Please listen carefully to each audio file before rating."),
+                    h4("Whenever you are ready click")
+                
                    
                 )
             )
         
         
-        if (input$Click.Counter>0 & input$Click.Counter<=5 ){
+        if (input$Click.Counter>0 & input$Click.Counter<=n_questions ){
             
             
-            #observeEvent(eval(parse(text=sprintf("input$play1%s", input$Click.Counter))), {insertUI(ui = tags$audio(src = sprintf("%s.wav", samples[1]), type = " 'audio/wav", autoplay = NA, controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
-            #observeEvent(eval(parse(text=sprintf("input$play2%s", input$Click.Counter))), {insertUI(ui = tags$audio(src = sprintf("%s.wav", samples[2]), type = " 'audio/wav", autoplay = NA, controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
-            #observeEvent(eval(parse(text=sprintf("input$play3%s", input$Click.Counter))), {insertUI(ui = tags$audio(src = sprintf("%s.wav", samples[3]), type = " 'audio/wav", autoplay = NA, controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
-            
-            #observeEvent(input$play21, {insertUI(ui = tags$audio(src = sprintf("%s.wav", samples[2]), type = " 'audio/wav", autoplay = NA, controls = NA, style="display:none;"), selector = "#play2", where = "afterEnd")})
-            #observeEvent(input$play31, {insertUI(ui = tags$audio(src = sprintf("%s.wav", samples[3]), autoplay = NA, controls = NA, style="display:none;"), selector = "#play3", where = "afterEnd")})
             return(
                 list(
-                    h3("Welcome to Deep Fakes Inc.!"),
-                    h3(input$Click.Counter),
-                    h3("Sound test number: ", input$Click.Counter),
-                    h4(samples[1], samples[2], samples[3]),
-                    h6(results[length(results)]),
+
+                    h3("Question: ", input$Click.Counter),
+                    
+                    h4("Part A: Similarity"),
                     actionButton("play11", "Play sound 1"),
                     actionButton("play21", "Play sound 2"),
-                    actionButton("play31", "Play sound 3"),
-                    sliderInput("survey", "How well does it sound?", 0, 10, value = 5),
-                    actionButton(sprintf("Click%s", input$Click.Counter), "Click Me")
                     
+                    sliderInput("survey", "How similar do the two voices sound?", 0, 10, value = 5),
+                    h4("Part B: Quality"),
+                    actionButton("play31", "Play sound 3"),
+                    sliderInput("survey1", "How well does it sound?", 0, 10, value = 5)
                 )
             )}
-        if (input$Click.Counter>5)
+        if (input$Click.Counter>n_questions)
             return(
                 list(
-                    h3("Welcome to Deep Fakes Inc.!"),
-                    h3(input$Click.Counter),
-                    h3("Sound test number: ", input$Click.Counter),
-                    h4(samples[1], samples[2], samples[3]),
-                    h6(results[length(results)]),
-                    actionButton("play11", "Play sound 1"),
-                    actionButton("play21", "Play sound 2"),
-                    actionButton("play31", "Play sound 3"),
-                    h4("Thanks for taking the survey!"),
-                    h5("Your results: ", sliderresults[1], sliderresults[2], 
-                       sliderresults[3], sliderresults[4], sliderresults[5])
+                    h3("Thanks for taking the survey!"),
+                    
+                    h4("This has truly been a great help to our project")
+                    # h4("Your results: "),
+                    # h5("Similarity: ", similarityresults[1], similarityresults[2], 
+                    #    similarityresults[3], similarityresults[4], similarityresults[5]),
+                    # h5("Quality: ", qualityresults[1], qualityresults[2], 
+                    #    qualityresults[3], qualityresults[4], qualityresults[5]),
+                    # tableOutput("resultTable")
                 )
             ) 
             
     })
     output$checkcategory <- renderText({
-        if (input$Click.Counter <= 5){
-        return(
-                categories[catsamples[input$Click.Counter]])}
+        if (input$Click.Counter <= n_questions){
+            return(
+                models[X[Samples,][input$Click.Counter,][1]])}
         else{
             return()}
         
         
-            
+        
     })
     output$checkcategory1 <- renderText({
-        if (input$Click.Counter <= 5){
-        return(
-            subcategories[subcatsamples[input$Click.Counter]])}
+        if (input$Click.Counter <= n_questions){
+            return(
+                categories[X[Samples,][input$Click.Counter,][2]])}
         else{
             return()}
         
         
         
     })
+    output$checkcategory2 <- renderText({
+        if (input$Click.Counter <= n_questions){
+            return(
+                subcategories[X[Samples,][input$Click.Counter,][3]])}
+        else{
+            return()}
+        
+        
+        
+    })
+    
     output$Button <- renderText({
-        if (input$Click.Counter >= 5){
+        if (input$Click.Counter >= n_questions){
             return("Submit")
         }
         else{
@@ -183,22 +194,23 @@ server <- function(input, output){
     })
     output$save.results <- renderText({
         # After each click, save the results of the radio buttons.
-        if ((input$Click.Counter>0)&(input$Click.Counter<=5)){
-            try(sliderresults[input$Click.Counter] <<- input$survey)
+        if ((input$Click.Counter>0)&(input$Click.Counter<=n_questions)){
+            try(similarityresults[Samples[input$Click.Counter]] <<- input$survey)
+            try(qualityresults[Samples[input$Click.Counter]] <<- input$survey1)
             return()}
+        if (input$Click.Counter == n_questions + 1){
+          
+          try(sheet_append(ss, data.frame(t(similarityresults)), sheet = "Similarity"))
+          try(sheet_append(ss, data.frame(t(similarityresults)), sheet = "Quality"))
+            return("Shiiit son you did it!")
+        }
     })
-    output$save.results1 <- renderText({
-        # After each click, save the results of the radio buttons.
-        if ((input$Click.Counter>0)&(input$Click.Counter<=5)){
-            try(sliderresults[input$Click.Counter] <<- input$survey)
-            return()}
-        
-    })
-    A = 0
-    observeEvent(eval(parse(text=sprintf("input$Click%s", input$Click.Counter))), {A = A + 1}) 
-    output$A <- renderText({return(A)})
-}
 
-
+    
+    output$resultTable <- renderTable({
+      return(cbind(similarityresults, qualityresults))
+        })
+   
+    }
 shinyApp(ui = ui, server = server)
 
