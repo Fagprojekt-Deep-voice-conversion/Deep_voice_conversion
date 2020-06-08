@@ -11,9 +11,9 @@
 ### -- Select the resources: 1 gpu in exclusive process mode --
 #BSUB -gpu "num=1:mode=exclusive_process"
 ### -- set walltime limit: hh:mm --  maximum 24 hours for GPU-queues right now
-#BSUB -W 24:00
-# request 60GB of system-memory
-#BSUB -R "rusage[mem=30GB]"
+#BSUB -W 6:00
+# request xGB of system-memory
+#BSUB -R "rusage[mem=6GB]"
 ### -- set the email address --
 # please uncomment the following line and put in your e-mail address,
 # if you want to receive e-mail notifications on a non-default address
@@ -47,7 +47,7 @@ module load python3
 module load cuda
 
 ### Run setup
-sh setup.sh $run_dir || exit 1
+#sh setup.sh $run_dir || exit 1
 source StarGAN-env/bin/activate
 
 ### Preprocess data
@@ -55,10 +55,10 @@ source StarGAN-env/bin/activate
 
 
 ### Train model
-#sh train.sh		
+sh train.sh		
 
 ### convert samples
-sh convert.sh
+#sh convert.sh
 
 
 

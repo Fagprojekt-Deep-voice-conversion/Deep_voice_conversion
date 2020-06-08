@@ -40,6 +40,10 @@ Yamagishi, Junichi
 
 MacDonald, Kirsten
 
+## Test data
+https://archive.org/ <br>
+https://www.learnoutloud.com/Free-Audio/Politics/Political-Figures
+
 # Reading material
 
 ## Licenses from arxiv
@@ -111,3 +115,12 @@ https://vimeo.com/287766904
 ## GAN
 https://pathmind.com/wiki/generative-adversarial-network-gan 
 https://towardsdatascience.com/generative-adversarial-networks-explained-34472718707a
+
+
+## WaveRNN
+https://arxiv.org/abs/1802.08435v1
+
+
+# Survey
+## Google drive and shiny
+https://medium.com/@joyplumeri/using-r-shiny-to-create-web-surveys-display-instant-feedback-and-store-data-on-google-drive-68f46eea0f8b

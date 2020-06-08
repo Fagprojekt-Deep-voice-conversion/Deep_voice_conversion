@@ -9,7 +9,6 @@ from Speaker_encoder.audio import preprocess_wav
 import librosa
 from Speaker_encoder.inference import embed_utterance
 from sklearn.manifold import TSNE
-from Preprocessing_WAV import Preproccesing
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -20,7 +19,7 @@ os.chdir(path)
 # Check for GPU
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
-encoder = load_encoder("Speaker_encoder/pretrained_encoder.pt").float()
+encoder = load_encoder("Models/SpeakerEncoder/SpeakerEncoder.pt").float()
 
 def SpeakerIdentity(Data):
     if type(Data) is str:
