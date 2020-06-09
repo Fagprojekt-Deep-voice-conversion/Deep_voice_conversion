@@ -144,25 +144,9 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
 
 
 if __name__ == "__main__":
-    # data, labels = DataLoad2("Test_Data", mins = 10)
 
-    # s = data[0]
-    # t = data[-1]
-    # print(labels[0], labels[-1])
-
-    # model, voc_model = Instantiate_Models(model_path = "autovc_origin.ckpt", vocoder = "wavenet")
-
-    # Conversion(s, t, model, voc_model, task = "English_English", voc_type="wavenet", subtask = "Male_Male")
     Experiment("AutoVC_seed40_200k.pt", "5min")
     
-    # X = pickle.load(open("Models/loss_scratch40", "rb"))
-    # Y = pickle.load(open("Models/loss_scratch60", "rb"))
-    # Z = pickle.load(open("Models/loss_transfer20", "rb"))
-
-
-    # plt.plot(X); plt.plot(Y); plt.plot(Z)
-    # plt.grid()
-    # plt.show()
     
     
 
