@@ -119,9 +119,9 @@ if __name__ == "__main__":
 	
 	### Make model
 	model = Generator(32, 256, 512, 32).eval().to(device)
-	#g_checkpoint = torch.load(config.pretrained_model_path, map_location=torch.device(device))
-	#model.load_state_dict(g_checkpoint['model'])
-	#model.share_memory()
+	g_checkpoint = torch.load(config.pretrained_model_path, map_location=torch.device(device))
+	model.load_state_dict(g_checkpoint['model'])
+	model.share_memory()
 	
 	### Train model
 	np.random.seed(config.seed)
