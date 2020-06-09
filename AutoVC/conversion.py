@@ -87,9 +87,12 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
     S_emb, T_emb = embed(source), embed(target)
     
     conversions = {"Source": (S, S_emb, S_emb), "Converted": (S, S_emb, T_emb), "Target": (T, T_emb, T_emb)}
-    
-    dir_size = len(list(os.walk(f"Experiments/{task}/{subtask}"))[0][1]) + 1
-    os.mkdir(f"Experiments/{task}/{subtask}/{dir_size}")
+    try:
+        dir_size = len(list(os.walk(f"Experiments/AutoVC/{task}/{subtask}"))[0][1]) + 1
+    except:
+        dir_size = 1
+
+    os.mkdir(f"Experiments/AutoVC/{task}/{subtask}/{dir_size}")
 
     for key, (X, c_org, c_trg) in conversions.items():
         if key == "Converted":
@@ -98,22 +101,24 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
             Out = X.unsqueeze(0)
         
         
-        path = f"Experiments/{task}/{subtask}/{dir_size}/{key}"
+        path = f"Experiments/AutoVC/{task}/{subtask}/{dir_size}/{key}"
         print(f"\n Generating {key} sound")
         Generate(Out, path, voc_model, voc_type)
 
 
 if __name__ == "__main__":
     data, labels = DataLoad2("Test_Data")
-    t = data[39]
-    s = data[len(data)-25]
-    model, voc_model = Instantiate_Models(model_path = "autoVC_seed80_200k", vocoder = "wavernn", Visualize= False, sound_out= False)
+
+    s = data[0]
+    t = data[-1]
+    model, voc_model = Instantiate_Models(model_path = "autoVC_seed20_200k", vocoder = "wavernn", Visualize= False, sound_out= False)
 
     Conversion(s, t, model, voc_model, task = "English_English", subtask = "Male_Male")
     
     # X = pickle.load(open("Models/loss_scratch40", "rb"))
     # Y = pickle.load(open("Models/loss_scratch60", "rb"))
-    # Z = pickle.load(open("Models/loss_scratch80", "rb"))
+    # Z = pickle.load(open("Models/loss_transfer20", "rb"))
+
 
     # plt.plot(X); plt.plot(Y); plt.plot(Z)
     # plt.grid()
