@@ -107,10 +107,12 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
 
 
 if __name__ == "__main__":
-    data, labels = DataLoad2("Test_Data")
+    data, labels = DataLoad2("../Kode/fiveSecondFiles", mins = 10)
 
-    s = data[0]
+    s = data[200]
     t = data[-1]
+    print(labels[200], labels[-1])
+
     model, voc_model = Instantiate_Models(model_path = "autoVC_seed20_200k", vocoder = "wavernn", Visualize= False, sound_out= False)
 
     Conversion(s, t, model, voc_model, task = "English_English", subtask = "Male_Male")

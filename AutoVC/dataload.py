@@ -22,7 +22,7 @@ def DataLoad(directory):
     return DataFrame
 
 
-def DataLoad2(directory):
+def DataLoad2(directory, mins = None):
     path = sys.path[0]
     os.chdir(path)
 
@@ -40,9 +40,17 @@ def DataLoad2(directory):
     data = []
     labels = []
 
+    if mins is not None:
+        mins = int(mins * 12)
+
     for key in dictionary:
-        data.extend(dictionary[key])
-        labels.extend([key for i in dictionary[key]])
+        try:
+            data.extend(dictionary[key][:mins])
+            labels.extend([key for i in dictionary[key][:mins]])
+        except:
+            data.extend(dictionary[key])
+            labels.extend([key for i in dictionary[key]])
+        
 
     return data, labels
 

@@ -89,7 +89,7 @@ if __name__ == "__main__":
 	parser.add_argument('--loss_dir', type=str, default='Models', help="Directory to save loss curve in")
 	parser.add_argument('--model_path_name', type=str, default='trained_model', help='Name of the trained model')
 	parser.add_argument('--loss_path_name', type=str, default='loss', help='Name of file containing loss values')
-	
+	parser.add_argument('--mins', type=int, default = None, help = 'How many minutes of each speaker')
 	# execute
 	"""
 	trainloader, corrupted = TrainLoader(data, labels, batch_size = batch_size, shuffle = shuffle, num_workers = num_workers, pin_memory = pin_memory)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 	
 	### Run trainloader
 	
-	data, labels = DataLoad2(config.data_path)
+	data, labels = DataLoad2(config.data_path, mins = config.mins)
 
 	if config.num_train_data is not None:
 		data, labels = data[:config.num_train_data ], labels[:config.num_train_data ]
