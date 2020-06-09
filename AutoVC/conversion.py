@@ -12,9 +12,10 @@ from Speaker_encoder.inference import embed_utterance
 from vocoder.WaveRNN_model import WaveRNN
 from hparams import hparams_waveRNN as hp
 import pickle
-import os
+import os 
+import pandas as pd
 
-def Instantiate_Models(model_path,  vocoder = "wavernn", sound_out = False, Visualize = False):
+def Instantiate_Models(model_path,  vocoder = "wavernn"):
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
 
@@ -48,8 +49,11 @@ def Instantiate_Models(model_path,  vocoder = "wavernn", sound_out = False, Visu
 
     # Prepare AutoVC model
     model = Generator(32, 256, 512, 32).eval().to(device)
-    g_checkpoint = torch.load("Models/AutoVC/" + model_path + ".pt", map_location=torch.device(device))
-    model.load_state_dict(g_checkpoint['model_state'])
+    g_checkpoint = torch.load("Models/AutoVC/" + model_path, map_location=torch.device(device))
+    if vocoder == "wavenet":
+        model.load_state_dict(g_checkpoint['model'])
+    else:
+        model.load_state_dict(g_checkpoint['model_state'])
 
     # Prepare Speaker Encoder Module
     load_encoder("Models/SpeakerEncoder/SpeakerEncoder.pt").float()
@@ -106,16 +110,32 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
         Generate(Out, path, voc_model, voc_type)
 
 
+def Experiment(Model):
+    # Load data about gender and language
+    dictionary = {}
+    X = pd.read_csv("../Kode/fiveSecondFiles/persons.csv", header = None)
+    for i, x in enumerate(X.iloc[:,0]):
+        dictionary.update({x: [X.iloc[i, 1], X.iloc[i, 2]]})
+
+    data, labels = DataLoad2("Test_Data")
+
+    
+
+
+
+    
+
+
 if __name__ == "__main__":
-    data, labels = DataLoad2("../Kode/fiveSecondFiles", mins = 10)
+    data, labels = DataLoad2("Test_Data", mins = 10)
 
-    s = data[200]
+    s = data[0]
     t = data[-1]
-    print(labels[200], labels[-1])
+    print(labels[0], labels[-1])
 
-    model, voc_model = Instantiate_Models(model_path = "autoVC_seed20_200k", vocoder = "wavernn", Visualize= False, sound_out= False)
+    model, voc_model = Instantiate_Models(model_path = "autovc_origin.ckpt", vocoder = "wavenet")
 
-    Conversion(s, t, model, voc_model, task = "English_English", subtask = "Male_Male")
+    Conversion(s, t, model, voc_model, task = "English_English", voc_type="wavenet", subtask = "Male_Male")
     
     # X = pickle.load(open("Models/loss_scratch40", "rb"))
     # Y = pickle.load(open("Models/loss_scratch60", "rb"))
@@ -125,3 +145,6 @@ if __name__ == "__main__":
     # plt.plot(X); plt.plot(Y); plt.plot(Z)
     # plt.grid()
     # plt.show()
+    
+    
+

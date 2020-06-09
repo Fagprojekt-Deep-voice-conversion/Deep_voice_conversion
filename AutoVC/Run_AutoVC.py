@@ -90,6 +90,7 @@ if __name__ == "__main__":
 	parser.add_argument('--model_path_name', type=str, default='trained_model', help='Name of the trained model')
 	parser.add_argument('--loss_path_name', type=str, default='loss', help='Name of file containing loss values')
 	parser.add_argument('--mins', type=int, default = None, help = 'How many minutes of each speaker')
+	parser.add_argument('--epochs', type = int, default = None, help = 'How many epochs - overwrites n_steps')
 	# execute
 	"""
 	trainloader, corrupted = TrainLoader(data, labels, batch_size = batch_size, shuffle = shuffle, num_workers = num_workers, pin_memory = pin_memory)
@@ -111,6 +112,10 @@ if __name__ == "__main__":
 	
 	data, labels = DataLoad2(config.data_path, mins = config.mins)
 
+	if config.epochs is not None:
+		n_files = len(data)
+		config.n_steps = n_files/config.batch_size * config.epochs
+
 	if config.num_train_data is not None:
 		data, labels = data[:config.num_train_data ], labels[:config.num_train_data ]
 	print("Number of wav files: {:}".format(len(data)))
@@ -119,9 +124,9 @@ if __name__ == "__main__":
 	
 	### Make model
 	model = Generator(32, 256, 512, 32).eval().to(device)
-	#g_checkpoint = torch.load(config.pretrained_model_path, map_location=torch.device(device))
-	#model.load_state_dict(g_checkpoint['model'])
-	#model.share_memory()
+	g_checkpoint = torch.load(config.pretrained_model_path, map_location=torch.device(device))
+	model.load_state_dict(g_checkpoint['model'])
+	model.share_memory()
 	
 	### Train model
 	np.random.seed(config.seed)
