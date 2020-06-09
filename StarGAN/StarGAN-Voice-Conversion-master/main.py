@@ -80,6 +80,7 @@ if __name__ == '__main__':
 	parser.add_argument('--log_dir', type=str, default='./logs')
 	parser.add_argument('--model_save_dir', type=str, default='./models')
 	parser.add_argument('--sample_dir', type=str, default='./samples')
+	parser.add_argument('--loss_name', type=str, default='loss', help='name to give the pickle files containing the losses')
 
 	# Step size.
 	parser.add_argument('--log_step', type=int, default=10)

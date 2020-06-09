@@ -54,6 +54,7 @@ class Solver(object):
 		self.log_dir = config.log_dir
 		self.sample_dir = config.sample_dir
 		self.model_save_dir = config.model_save_dir
+		self.loss_name = config.loss_name
 
 		# Step size.
 		self.log_step = config.log_step
@@ -182,6 +183,7 @@ class Solver(object):
 		print('Start training...')
 		start_time = time.time()
 		loss_log = {"d_loss_real":[], "d_loss_cls_spks":[], "d_loss_fake":[], "d_loss":[], "g_loss_fake":[], "g_loss_cls_spks":[], "g_loss_rec":[], "g_loss":[]}
+		losses = {"d_loss":[], "g_loss":[], "step":[]}
 		for i in range(start_iters, self.num_iters):
 
             # =================================================================================== #
@@ -331,9 +333,15 @@ class Solver(object):
 				torch.save(self.G.state_dict(), G_path)
 				torch.save(self.D.state_dict(), D_path)
 				print('Saved model checkpoints into {}...'.format(self.model_save_dir))
-				with open(self.log_dir+"/loss_log.pkl", "wb") as f:
+				with open(self.log_dir+f"/{self.loss_name}_log_ext.pkl", "wb") as f:
 					pickle.dump(loss_log, f)
-				print(f"Saved loss_log as {self.log_dir}/loss_log.pkl")
+				losses["d_loss"].append(d_loss.cpu().detach().numpy())
+				losses["g_loss"].append(g_loss.cpu().detach().numpy())
+				losses["step"].append(i+1)
+				with open(self.log_dir+f"/{self.loss_name}.pkl", "wb") as f:
+					pickle.dump(losses, f)
+				print(f"Saved loss_log as {self.log_dir}/{self.loss_name}_log_ext.pkl")
+				print(f"Saved losses as {self.log_dir}/{self.loss_name}.pkl")
 				
 
             # Decay learning rates.

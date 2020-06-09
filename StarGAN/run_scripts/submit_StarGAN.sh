@@ -24,8 +24,8 @@
 #BSUB -N
 ### -- Specify the output and error file. %J is the job-id --
 ### -- -o and -e mean append, -oo and -eo mean overwrite --
-#BSUB -o AutoVC_%J.out
-#BSUB -e AutoVC_%J.err
+#BSUB -o StarGAN_%J.out
+#BSUB -e StarGAN_%J.err
 # -- end of LSF options --
 
 

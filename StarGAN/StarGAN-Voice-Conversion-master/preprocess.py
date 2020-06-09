@@ -36,18 +36,17 @@ def resample_to_16k(origin_wavpath, target_wavpath, num_workers=1):
     result_list = [future.result() for future in tqdm(futures)]
     print(result_list)
 
-def split_data(paths):
+def split_data(paths, test_size = 0.1):
     indices = np.arange(len(paths))
-    test_size = 0.1
     train_indices, test_indices = train_test_split(indices, test_size=test_size, random_state=1234)
     train_paths = list(np.array(paths)[train_indices])
     test_paths = list(np.array(paths)[test_indices])
     return train_paths, test_paths
 
-def get_spk_world_feats(spk_fold_path, mc_dir_train, mc_dir_test, sample_rate=16000):
+def get_spk_world_feats(spk_fold_path, mc_dir_train, mc_dir_test, sample_rate=16000, test_size = 0.1):
     paths = glob.glob(join(spk_fold_path, '*.wav'))
     spk_name = basename(spk_fold_path)
-    train_paths, test_paths = split_data(paths)
+    train_paths, test_paths = split_data(paths, test_size)
     f0s = []
     coded_sps = []
     for wav_file in train_paths:
@@ -92,6 +91,8 @@ if __name__ == '__main__':
     parser.add_argument("--mc_dir_train", type = str, default = mc_dir_train_default, help = "The directory to store the training features.")
     parser.add_argument("--mc_dir_test", type = str, default = mc_dir_test_default, help = "The directory to store the testing features.")
     parser.add_argument("--num_workers", type = int, default = None, help = "The number of cpus to use.")
+    parser.add_argument("--speakers", nargs="+", default=["all"], help = "The folder for speakers to preprocess, if 'all' is given, all speakers from origin_wavpath is used")
+    parser.add_argument("--test_size", type=float, default=0.1, help="The percentage of data which should be but in the test folder")
 
     argv = parser.parse_args()
 
@@ -101,13 +102,17 @@ if __name__ == '__main__':
     mc_dir_train = argv.mc_dir_train
     mc_dir_test = argv.mc_dir_test
     num_workers = argv.num_workers if argv.num_workers is not None else cpu_count()
+    speakers = argv.speakers
+    test_size = argv.test_size if argv.test_size <= 1 else int(argv.test_size)
 
     # The original wav in VCTK is 48K, first we want to resample to 16K
     resample_to_16k(origin_wavpath, target_wavpath, num_workers=num_workers)
 
     # WE only use 10 speakers listed below for this experiment.
-    speaker_used = ['262', '272', '229', '232', '292', '293', '360', '361', '248', '251']
-    speaker_used = ['p'+i for i in speaker_used]
+    #speaker_used = ['262', '272', '229', '232', '292', '293', '360', '361', '248', '251']
+    #speaker_used = ['p'+i for i in speaker_used]
+    
+    speaker_used = [name for name in os.listdir(origin_wavpath) if os.path.isdir(origin_wavpath+"/"+name)] if speakers == ["all"] else speakers
 
     ## Next we are to extract the acoustic features (MCEPs, lf0) and compute the corresponding stats (means, stds). 
     # Make dirs to contain the MCEPs
@@ -126,7 +131,7 @@ if __name__ == '__main__':
     futures = []
     for spk in speaker_used:
         spk_path = os.path.join(work_dir, spk)
-        futures.append(executor.submit(partial(get_spk_world_feats, spk_path, mc_dir_train, mc_dir_test, sample_rate)))
+        futures.append(executor.submit(partial(get_spk_world_feats, spk_path, mc_dir_train, mc_dir_test, sample_rate, test_size)))
     result_list = [future.result() for future in tqdm(futures)]
     print(result_list)
     sys.exit(0)

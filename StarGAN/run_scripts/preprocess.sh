@@ -27,4 +27,6 @@ python ../StarGAN-Voice-Conversion-master/preprocess.py \
 		--origin_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/VCTK-Corpus/wav48 \
 		--target_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
 		--mc_dir_train /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
-		--mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test
+		--mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
+		--speakers p225 \
+		--test_size 0.1

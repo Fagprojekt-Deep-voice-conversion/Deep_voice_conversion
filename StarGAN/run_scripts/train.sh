@@ -27,23 +27,30 @@ source StarGAN-env/bin/activate
 ### Train model
 #python ../StarGAN-Voice-Conversion-master/main.py
 
+### Model config \
+### Training config \
+### Test config \
+### Miscellaneous \
+### Step size \
+### Directories \
+
 python ../StarGAN-Voice-Conversion-master/main.py \
-		--seed 420 \
 		--num_speakers 10 \
 		--lambda_cls 10 \
 		--lambda_rec 10 \
 		--lambda_gp 10 \
 		--sampling_rate 16000 \
 		--batch_size 32 \
-		--num_iters 180000 \
-		--resume_iters 176000\
+		--num_iters 184000 \
 		--num_iters_decay 100000 \
 		--g_lr 0.0001 \
 		--d_lr 0.0001 \
 		--n_critic 5 \
 		--beta1 0.5 \
 		--beta2 0.999 \
+		--resume_iters 180000\
 		--test_iters 100000 \
+		--seed 420 \
 		--num_workers 1 \
 		--mode train \
 		--log_step 10 \
@@ -55,5 +62,6 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--wav_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
 		--log_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/logs \
 		--sample_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/samples \
-		--model_save_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/models 	
+		--model_save_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/models \
+		--loss_name loss_test	
 
