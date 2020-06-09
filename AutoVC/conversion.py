@@ -41,7 +41,7 @@ def Instantiate_Models(model_path,  vocoder = "wavernn"):
                             res_blocks=hp.voc_res_blocks,
                             hop_length=hp.hop_length,
                             sample_rate=hp.sample_rate,
-                            mode='MOL').to("cpu")
+                            mode='MOL').to(device)
 
         voc_model.load('Models/WaveRNN/WaveRNN_Pretrained.pyt')
     else:
@@ -110,32 +110,50 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
         Generate(Out, path, voc_model, voc_type)
 
 
-def Experiment(Model):
-    # Load data about gender and language
+def Experiment(Model_path, train_length = None, test_data = None, name_list = None):
+    # Load data about gender and language and store in dictionary
     dictionary = {}
-    X = pd.read_csv("../Kode/fiveSecondFiles/persons.csv", header = None)
+    X = pd.read_csv(name_list, header = None)
     for i, x in enumerate(X.iloc[:,0]):
         dictionary.update({x: [X.iloc[i, 1], X.iloc[i, 2]]})
 
-    data, labels = DataLoad2("Test_Data")
+    data, labels = DataLoad2(test_data)
+    data, labels = np.array(data), np.array(labels)
 
-    
+    model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn")
+    for key, value in dictionary.items():
+        for source in data[labels == key]:
+            name_s = labels[labels == key][0]
+            
+            for i, target in enumerate(data[labels != key]):
+                name_t = labels[labels!=key][i]
+                print(name_s, name_t)
+                subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
+                if train_lenght is not None:
+                    task = train_lenght
+                    if dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English":
+                        Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn")
+                else:
+                    task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
+                    Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn")
+                
 
 
-
+                
     
 
 
 if __name__ == "__main__":
-    data, labels = DataLoad2("Test_Data", mins = 10)
+    # data, labels = DataLoad2("Test_Data", mins = 10)
 
-    s = data[0]
-    t = data[-1]
-    print(labels[0], labels[-1])
+    # s = data[0]
+    # t = data[-1]
+    # print(labels[0], labels[-1])
 
-    model, voc_model = Instantiate_Models(model_path = "autovc_origin.ckpt", vocoder = "wavenet")
+    # model, voc_model = Instantiate_Models(model_path = "autovc_origin.ckpt", vocoder = "wavenet")
 
-    Conversion(s, t, model, voc_model, task = "English_English", voc_type="wavenet", subtask = "Male_Male")
+    # Conversion(s, t, model, voc_model, task = "English_English", voc_type="wavenet", subtask = "Male_Male")
+    Experiment("AutoVC_seed40_200k.pt", "5min")
     
     # X = pickle.load(open("Models/loss_scratch40", "rb"))
     # Y = pickle.load(open("Models/loss_scratch60", "rb"))
