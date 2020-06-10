@@ -94,7 +94,7 @@ server <- function(input, output){
 
     n_questions <- 10
     models = c("AutoVC", "StarGAN", "Baseline")
-    categories = c("Danish_Danish", "English_English", "Danish_English", "English_Danish", "5min", "2_5min", "0min", "Baseline")
+    categories = c("Danish_Danish", "English_English", "20min", "10min", "0min", "Baseline")
     subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Female", "Male_English", "Male_Danish", "Female_English", "Female_Danish")
     
     voices = c("source", "target", "converted")
