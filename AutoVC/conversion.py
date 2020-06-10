@@ -156,17 +156,17 @@ def Experiment(Model_path, train_lenght = None, test_data = None, name_list = No
 
 
 if __name__ == "__main__":
-    # (data, labels), (_, _) = DataLoad2("../data/Test_Data")
-    # model, voc_model = Instantiate_Models(model_path = 'autoVC_seed40_200k.pt', vocoder = "wavernn")
-    # source, target = data[0], data[39]
-    # Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
+    (data, labels), (_, _) = DataLoad2("../data/Test_Data")
+    model, voc_model = Instantiate_Models(model_path = 'autoVC_seed40_200k.pt', vocoder = "wavernn")
+    source, target = data[0], data[39]
+    Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
 
 
-    #Experiment("AutoVC_seed40_200k.pt", "5min")
+    Experiment("AutoVC_seed40_200k.pt", "10min")
 
-    X = pickle.load(open("Models/loss10min", "rb"))
-    plt.plot(X)
-    plt.show()
+    # X = pickle.load(open("Models/loss10min", "rb"))
+    # plt.plot(X)
+    # plt.show()
 
     
     
