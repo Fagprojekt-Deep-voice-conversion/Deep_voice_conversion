@@ -49,7 +49,7 @@ def Instantiate_Models(model_path,  vocoder = "wavernn"):
 
     # Prepare AutoVC model
     model = Generator(32, 256, 512, 32).eval().to(device)
-    g_checkpoint = torch.load("Models/AutoVC/" + model_path, map_location=torch.device(device))
+    g_checkpoint = torch.load(model_path, map_location=torch.device(device))
     if vocoder == "wavenet":
         model.load_state_dict(g_checkpoint['model'])
     else:
@@ -115,37 +115,45 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
         Generate(Out, path, voc_model, voc_type)
 
 
-def Experiment(Model_path, train_lenght = None, test_data = None, name_list = None, test_size = 24, experiment = None):
-    # Load data about gender and language and store in dictionary
-    dictionary = {}
-    X = pd.read_csv(name_list, header = None)
-    for i, x in enumerate(X.iloc[:,0]):
-        dictionary.update({x: [X.iloc[i, 1], X.iloc[i, 2]]})
+def Experiment(Model_path, train_length = None, test_data = None, name_list = None, test_size = 24, experiment = None):
+# Load data about gender and language and store in dictionary
+	dictionary = {}
 
-    (_, _), (data, labels) = DataLoad2(test_data, test_size= test_size)
-    data, labels = np.array(data), np.array(labels)
+	X = pd.read_csv(name_list, header = None)
+	for i, x in enumerate(X.iloc[:,0]):
+		dictionary.update({x: [X.iloc[i, 1], X.iloc[i, 2]]})
 
-    model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn")
-    for key, value in dictionary.items():
-        for source in data[labels == key]:
-            name_s = labels[labels == key][0]
-            
-            for i, target in enumerate(data[labels != key]):
-                name_t = labels[labels!=key][i]
-                
-                if train_lenght is not None:
-                    task = train_lenght
-                    if dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English":
-                        subtask = "Male_Male"
-                        print(source, target)
-                        Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
-                      
-                elif (dictionary[name_s][1] == dictionary[name_t][1]):
-                    task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
-                    subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
+	(_, _), (data, labels) = DataLoad2(test_data, test_size= test_size)
+	data, labels = np.array(data), np.array(labels)
 
-                    print(source, target)
-                    Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+	model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn")
+	
+	print(labels)
+	for key, value in dictionary.items():
+		print(data[labels == key])
+
+	for key, value in dictionary.items():
+
+		for source in data[labels == key]:
+			name_s = labels[labels == key][0]
+
+			for i, target in enumerate(data[labels != key]):
+				name_t = labels[labels!=key][i]
+
+				if train_length is not None:
+					task = train_length
+					if dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English":
+						subtask = "Male_Male"
+						print(source, target)
+						Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+
+					elif (dictionary[name_s][1] == dictionary[name_t][1]):
+						task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
+						subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
+
+						print(source, target)
+						Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+
 
         
                 
