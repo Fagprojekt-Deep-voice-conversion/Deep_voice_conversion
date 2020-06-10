@@ -96,7 +96,7 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
     except:
         dir_size = 1
 
-    os.mkdir(f"{exp_folder}/AutoVC/{task}/{subtask}/{dir_size}")
+    # os.mkdir(f"{exp_folder}/AutoVC/{task}/{subtask}/{dir_size}")
 
     for key, (X, c_org, c_trg) in conversions.items():
         if key == "Converted":
@@ -117,65 +117,59 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
 
 def Experiment(Model_path, train_length = None, test_data = None, name_list = None, test_size = 24, experiment = None):
 # Load data about gender and language and store in dictionary
-	dictionary = {}
+    dictionary = {}
 
-	X = pd.read_csv(name_list, header = None)
-	for i, x in enumerate(X.iloc[:,0]):
-		dictionary.update({x: [X.iloc[i, 1], X.iloc[i, 2]]})
+    X = pd.read_csv(name_list, header = None)
+    for i, x in enumerate(X.iloc[:,0]):
+        dictionary.update({x: [X.iloc[i, 1], X.iloc[i, 2]]})
 
-	(_, _), (data, labels) = DataLoad2(test_data, test_size= test_size)
-	data, labels = np.array(data), np.array(labels)
+    (_, _), (data, labels) = DataLoad2(test_data, test_size= test_size)
+    data, labels = np.array(data), np.array(labels)
 
-	model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn")
-	
-	print(labels)
-	for key, value in dictionary.items():
-		print(data[labels == key])
-
-	for key, value in dictionary.items():
-
-		for source in data[labels == key]:
-			name_s = labels[labels == key][0]
-
-			for i, target in enumerate(data[labels != key]):
-				name_t = labels[labels!=key][i]
-
-				if train_length is not None:
-					task = train_length
-					if dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English":
-						subtask = "Male_Male"
-						print(source, target)
-						Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
-
-					elif (dictionary[name_s][1] == dictionary[name_t][1]):
-						task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
-						subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
-
-						print(source, target)
-						Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+    model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn")
 
 
-        
-                
+    for key, value in dictionary.items():
+
+        for source in data[labels == key]:
+            name_s = labels[labels == key][0]
+
+            for i, target in enumerate(data[labels != key]):
+                name_t = labels[labels!=key][i]
+
+                if train_length is not None:
+                    task = train_length
+                    if dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English":
+                        subtask = "Male_Male"
+                        print(name_s, name_t)
+                        Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+
+                elif dictionary[name_s][1] == dictionary[name_t][1]:
+                    task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
+                    subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
+
+                    print(name_s, name_t)
+                    Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
 
 
-                
-    
+
+
 
 
 if __name__ == "__main__":
-    (data, labels), (_, _) = DataLoad2("../data/Test_Data")
-    model, voc_model = Instantiate_Models(model_path = 'autoVC_seed40_200k.pt', vocoder = "wavernn")
-    source, target = data[0], data[39]
-    Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
+    # (data, labels), (_, _) = DataLoad2("../data/Test_Data")
+    # model, voc_model = Instantiate_Models(model_path = 'autoVC_seed40_200k.pt', vocoder = "wavernn")
+    # source, target = data[0], data[39]
+    # Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
 
 
-    Experiment("AutoVC_seed40_200k.pt", "10min")
+    Experiment(Model_path = "Models/AutoVC/AutoVC_seed40_200k.pt", train_length = "10min", test_data = "../data/test_data", name_list = "../data/persons2.csv", test_size = 3, experiment = "../Experiment" )
 
     # X = pickle.load(open("Models/loss10min", "rb"))
     # plt.plot(X)
     # plt.show()
 
+    
     
     
     
