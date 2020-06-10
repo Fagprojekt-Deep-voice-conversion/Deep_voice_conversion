@@ -92,22 +92,22 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
     
     conversions = {"source": (S, S_emb, S_emb), "Converted": (S, S_emb, T_emb), "target": (T, T_emb, T_emb)}
     try:
-        dir_size = len(list(os.walk(f"Experiments/AutoVC/{task}/{subtask}"))[0][1]) + 1
+        dir_size = len(list(os.walk(f"../Experiment/AutoVC/{task}/{subtask}"))[0][1]) + 1
     except:
         dir_size = 1
 
-    os.mkdir(f"Experiments/AutoVC/{task}/{subtask}/{dir_size}")
+    os.mkdir(f"../Experiment/AutoVC/{task}/{subtask}/{dir_size}")
 
     for key, (X, c_org, c_trg) in conversions.items():
         if key == "Converted":
             _, Out, _ = model(X, c_org, c_trg)
             name = source.split("/")[-1].split(".")[0] + "_to_" + target.split("/")[-1].split(".")[0]
-            path = f"Experiments/AutoVC/{task}/{subtask}/{name}"
+            path = f"../Experiment/AutoVC/{task}/{subtask}/{name}"
         else:
             Out = X.unsqueeze(0)
             name = eval(key).split("/")[-1].split(".")[0]
             name1 = name.split("_")[0]
-            path = f"Experiments/AutoVC/persons/{name1}/{name}"
+            path = f"../Experiment/AutoVC/persons/{name1}/{name}"
         
         
         
@@ -151,13 +151,18 @@ def Experiment(Model_path, train_lenght = None, test_data = None, name_list = No
 
 
 if __name__ == "__main__":
-    (data, labels), (_, _) = DataLoad2("../data/Test_Data")
-    model, voc_model = Instantiate_Models(model_path = 'autoVC_seed40_200k.pt', vocoder = "wavernn")
-    source, target = data[0], data[39]
-    Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
+    # (data, labels), (_, _) = DataLoad2("../data/Test_Data")
+    # model, voc_model = Instantiate_Models(model_path = 'autoVC_seed40_200k.pt', vocoder = "wavernn")
+    # source, target = data[0], data[39]
+    # Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
 
 
     #Experiment("AutoVC_seed40_200k.pt", "5min")
+
+    X = pickle.load(open("Models/loss10min", "rb"))
+    plt.plot(X)
+    plt.show()
+
     
     
     

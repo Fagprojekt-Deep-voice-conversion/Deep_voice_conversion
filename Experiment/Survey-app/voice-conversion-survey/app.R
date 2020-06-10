@@ -12,18 +12,25 @@ ui <- fluidPage(
     titlePanel("Deep Fakes inc."),
     sidebarPanel(
   
-        h3("By Nazi Tubbies"),
+        h3("By us..."),
         h6(textOutput("save.results")),
         h6(textOutput("checkcategory")),
         h6(textOutput("checkcategory1")),
-        h6(textOutput("tester")),
-        
         h6(textOutput("checkcategory2")),
-    
-
+        h6(textOutput("check")),
+        textInput("age", "Feel free to let us know your age"),
+        radioButtons("gender", "Feel free to let us know your gender", c("Male", "Female", "Other", "Prefer not to say"), selected = character(0)),
+        
+        
+      
+      
+       
        actionButton("play1", ""),
        actionButton("play2", ""),
-       actionButton("play3", "")),
+       actionButton("play3", ""),
+       actionButton("play4", "")
+       
+       ),
      
         mainPanel(
             # Main Action is where most everything is happenning in the
@@ -74,7 +81,8 @@ server <- function(input, output){
     
     
     
-    observeEvent(input$item1, {output$score1 <- renderText({paste0("You gave a score of ", input$item1)})})
+    # observeEvent(input$item1, {output$score1 <- renderText({paste0("You gave a score of ", input$item1)})})
+    
     
     
     
@@ -92,7 +100,7 @@ server <- function(input, output){
     voices = c("source", "target", "converted")
     
     Samples <- sample(nrow(X), n_questions, replace = F)
-    samples <- sample(4, 4, replace = F)
+    samples <- sample(3, 3, replace = F)
     
     
     
@@ -114,15 +122,16 @@ server <- function(input, output){
                     h4("If this new technology is put to use by malicious actors it could have severe, negative consequences."),
                     h4("Imagine a synthesised video of a politician (or any other influential person) ridiculing himself/herself or making harmfull statements."),
                     h4("This video could shift the public opinion about this person dramatically or some people might act upon his/her fake statements."),
-                    h3("| "),
-                    h3("| "),
+                    # h3("| "),
+                    # h3("| "),
+                    
                     h4("We wish to investigate how far the deep fakes tehcnology is within voice conversion (faking peoples' voices)"),
                     h4("To do so, we wish to test two different methods for voice conversion on a set of different subtask with both english and danish voice"),
                     h4("This survey consists of 20 questions of 2 parts each. In the first part you are asked to rate the similarity of two voices and in the second part you are asked to rate the quality of a converted voice"),
                     h4("Please listen carefully to each audio file before rating."),
-                    h4("Whenever you are ready click Next.")
+                    h4("Whenever you are ready click Next."),
                 
-                   
+                    checkboxInput("check", value = FALSE, label = "Agree to terms and conditions")
                 )
             )
         
@@ -146,7 +155,7 @@ server <- function(input, output){
                     sliderInput("survey", "How similar is X to A or B?", min = -5, max = 5, value = 0),
                   
                     h4("Part B: Quality"),
-                    h5("Please rate the quality of this converted voice"),
+                    h5("Please rate the quality of this voice"),
                     h5("A score of 0 indicates the voice to not be understandable at all"),
                     h5("A score of 10 indicates the voice to be real i.e. not synthesized"),
                     actionButton("play41", "Play sound 4"),
@@ -159,13 +168,8 @@ server <- function(input, output){
                     h3("Thanks for taking the survey!"),
                     
                     h4("This has truly been a great help to our project")
-                    # h4("Your results: "),
-                    # h5("Similarity: ", similarityresults[1], similarityresults[2], 
-                    #    similarityresults[3], similarityresults[4], similarityresults[5]),
-                    # h5("Quality: ", qualityresults[1], qualityresults[2], 
-                    #    qualityresults[3], qualityresults[4], qualityresults[5]),
-                    # tableOutput("resultTable")
-                )
+                    
+                                    )
             ) 
             
     })
@@ -225,11 +229,9 @@ server <- function(input, output){
     })
     
   
-
     
-    output$resultTable <- renderTable({
-      return(cbind(similarityresults, qualityresults))
-        })
+    
+  
    
     }
 shinyApp(ui = ui, server = server)
