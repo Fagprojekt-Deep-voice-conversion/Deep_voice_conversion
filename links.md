@@ -24,6 +24,9 @@ https://stackoverflow.com/questions/1783405/how-do-i-check-out-a-remote-git-bran
 # Google drive
 https://drive.google.com/drive/folders/1cBMH_hiwOsA_Vr3Og4rz7pZZrMPPtF3e?usp=sharing
 
+### Experiment data
+https://docs.google.com/spreadsheets/d/1Y2Hu04dY-chxSPdVgcUefXSTs6zvG6lkzAFlWhICPJA/edit?usp=sharing
+
 # Data
 SUPERSEDED - CSTR VCTK Corpus: English Multi-speaker Corpus for CSTR Voice Cloning Toolkit
 
