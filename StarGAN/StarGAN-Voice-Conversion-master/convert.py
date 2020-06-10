@@ -12,6 +12,7 @@ from data_loader import to_categorical
 import librosa
 from utils import *
 import glob
+import re
 
 # Below is the accent info for the used 10 speakers.
 spk2acc = {'262': 'Edinburgh', #F
@@ -25,12 +26,21 @@ spk2acc = {'262': 'Edinburgh', #F
            '248': 'India', #F
            '251': 'India'} #M
 
-speakers = ['p262', 'p272', 'p229', 'p232', 'p292', 'p293', 'p360', 'p361', 'p248', 'p251']
-spk2idx = dict(zip(speakers, range(len(speakers))))
+#speakers = ['p262', 'p272', 'p229', 'p232', 'p292', 'p293', 'p360', 'p361', 'p248', 'p251']
+
 
 class TestDataset(object):
 	"""Dataset for testing."""
 	def __init__(self, config):
+		speakers = ['p262', 'p272', 'p229', 'p232', 'p292', 'p293', 'p360', 'p361', 'p248', 'p251']
+		speakers = []
+		for f in os.listdir(config.test_data_dir):
+			s = re.search("(.*)_.*", f).group(1)
+			if s not in speakers:
+				speakers.append(s)
+		print("\n --------------------------\n", speakers, "\n---------------------------\n") 
+		#del speakers[-1]
+		spk2idx = dict(zip(speakers, range(len(speakers))))
 		assert config.trg_spk in speakers, f'The trg_spk should be chosen from {speakers}, but you choose {trg_spk}.'
 		# Source speaker
 		self.src_spk = config.src_spk
@@ -137,7 +147,7 @@ if __name__ == '__main__':
 	parser.add_argument('--seed', type=int, default=420, help='seed used when converting')
 
 	# Model configuration.
-	parser.add_argument('--num_speakers', type=int, default=10, help='dimension of speaker labels')
+	#parser.add_argument('--num_speakers', type=int, default=10, help='dimension of speaker labels')
 	parser.add_argument('--num_converted_wavs', type=int, default=8, help='number of wavs to convert.')
 	parser.add_argument('--resume_iters', type=int, default=None, help='step to resume for testing.')
 	parser.add_argument('--src_spk', type=str, default='p262', help = 'target speaker.')

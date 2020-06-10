@@ -21,12 +21,13 @@ sh setup.sh $run_dir || exit 1
 source StarGAN-env/bin/activate
 
 ### Preprocess
+### Submit must be set to CPU and mulitple cores can be requested
 ### Speakers must be set in the python script
 python ../StarGAN-Voice-Conversion-master/preprocess.py \
 		--sample_rate 16000 \
 		--origin_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/VCTK-Corpus/wav48 \
-		--target_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
-		--mc_dir_train /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
-		--mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
-		--speakers p225 \
+		--target_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16-3 \
+		--mc_dir_train /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train-3 \
+		--mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test-3 \
+		--speakers all \
 		--test_size 0.1

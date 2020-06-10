@@ -44,7 +44,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 
 	# Model configuration.
-	parser.add_argument('--num_speakers', type=int, default=10, help='dimension of speaker labels')
+	parser.add_argument('--num_speakers', type=int, default=None, help='dimension of speaker labels')
 	parser.add_argument('--lambda_cls', type=float, default=10, help='weight for domain classification loss')
 	parser.add_argument('--lambda_rec', type=float, default=10, help='weight for reconstruction loss')
 	parser.add_argument('--lambda_gp', type=float, default=10, help='weight for gradient penalty')

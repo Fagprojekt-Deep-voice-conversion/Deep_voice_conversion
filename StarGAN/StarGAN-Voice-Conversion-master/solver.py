@@ -14,6 +14,7 @@ import librosa
 from utils import *
 from tqdm import tqdm
 import pickle
+import re
 
 
 class Solver(object):
@@ -27,7 +28,12 @@ class Solver(object):
 		self.sampling_rate = config.sampling_rate
 
 		# Model configurations.
-		self.num_speakers = config.num_speakers
+		speakers = []
+		for f in os.listdir(config.test_data_dir):
+			s = re.search("(.*)_.*", f).group(1)
+			if s not in speakers:
+				speakers.append(s)
+		self.num_speakers = len(speakers) if config.num_speakers is None else config.num_speakers 
 		self.lambda_cls = config.lambda_cls
 		self.lambda_rec = config.lambda_rec
 		self.lambda_gp = config.lambda_gp

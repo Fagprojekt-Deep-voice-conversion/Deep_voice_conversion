@@ -106,6 +106,7 @@ if __name__ == '__main__':
     test_size = argv.test_size if argv.test_size <= 1 else int(argv.test_size)
 
     # The original wav in VCTK is 48K, first we want to resample to 16K
+    print("Resampling to 16000 Hz...")
     resample_to_16k(origin_wavpath, target_wavpath, num_workers=num_workers)
 
     # WE only use 10 speakers listed below for this experiment.
@@ -127,7 +128,7 @@ if __name__ == '__main__':
     # spk_folders = os.listdir(work_dir)
     # print("processing {} speaker folders".format(len(spk_folders)))
     # print(spk_folders)
-
+    print("Preprocessing the speakers...")
     futures = []
     for spk in speaker_used:
         spk_path = os.path.join(work_dir, spk)
