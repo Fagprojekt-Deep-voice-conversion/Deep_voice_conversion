@@ -40,7 +40,7 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--lambda_gp 10 \
 		--sampling_rate 16000 \
 		--batch_size 32 \
-		--num_iters 8000 \
+		--num_iters 4000 \
 		--num_iters_decay 100000 \
 		--g_lr 0.0001 \
 		--d_lr 0.0001 \
@@ -55,12 +55,12 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--sample_step 1000 \
 		--model_save_step 1000 \
 		--lr_update_step 1000 \
-		--train_data_dir /work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/mc/train \
-		--test_data_dir /work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/mc/test \
-		--wav_dir /work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/wav16 \
-		--log_dir /work1/s183920/Deep_voice_conversion_old/data/results/StarGAN/logs \
-		--sample_dir /work1/s183920/Deep_voice_conversion_old/data/results/StarGAN/samples \
-		--model_save_dir /work1/s183920/Deep_voice_conversion_old/data/results/StarGAN/models \
+		--train_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
+		--test_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
+		--wav_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
+		--log_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/logs/base \
+		--sample_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/samples/base \
+		--model_save_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/models/base \
 		--loss_name loss_test \
-		--resume_iters 4000\
+		#--resume_iters 4000\
 
