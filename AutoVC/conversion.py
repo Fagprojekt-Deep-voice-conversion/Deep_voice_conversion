@@ -110,14 +110,14 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
         Generate(Out, path, voc_model, voc_type)
 
 
-def Experiment(Model_path, train_length = None, test_data = None, name_list = None):
+def Experiment(Model_path, train_lenght = None, test_data = None, name_list = None, test_size = 24):
     # Load data about gender and language and store in dictionary
     dictionary = {}
     X = pd.read_csv(name_list, header = None)
     for i, x in enumerate(X.iloc[:,0]):
         dictionary.update({x: [X.iloc[i, 1], X.iloc[i, 2]]})
 
-    data, labels = DataLoad2(test_data)
+    (_, _), (data, labels) = DataLoad2(test_data, test_size= test_size)
     data, labels = np.array(data), np.array(labels)
 
     model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn")
@@ -127,14 +127,16 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
             
             for i, target in enumerate(data[labels != key]):
                 name_t = labels[labels!=key][i]
-                print(name_s, name_t)
+                
                 subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
                 if train_lenght is not None:
                     task = train_lenght
                     if dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English":
+                        print(name_s, name_t)
                         Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn")
                 else:
                     task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
+                    print(name_s, name_t)
                     Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn")
                 
 
@@ -144,8 +146,13 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
 
 
 if __name__ == "__main__":
+    (data, labels), (_, _) = DataLoad2("Test_Data")
+    model, voc_model = Instantiate_Models(model_path = 'autoVC_seed40_200k.pt', vocoder = "wavernn")
+    source, target = data[0], data[39]
+    Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
 
-    Experiment("AutoVC_seed40_200k.pt", "5min")
+
+    #Experiment("AutoVC_seed40_200k.pt", "5min")
     
     
     

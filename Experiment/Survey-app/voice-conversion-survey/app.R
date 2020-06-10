@@ -16,6 +16,7 @@ ui <- fluidPage(
         h6(textOutput("save.results")),
         h6(textOutput("checkcategory")),
         h6(textOutput("checkcategory1")),
+        h6(textOutput("tester")),
         
         h6(textOutput("checkcategory2")),
     
@@ -64,6 +65,14 @@ server <- function(input, output){
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
     
     
+    observeEvent(input$play41, {insertUI(ui = tags$audio(src = sprintf("%s/%s/%s/%s.wav",
+                                                                       models[X[Samples,][input$Click.Counter,][1]],
+                                                                       categories[X[Samples,][input$Click.Counter,][2]],
+                                                                       subcategories[X[Samples,][input$Click.Counter,][3]],
+                                                                       samples[4]), type = " 'audio/wav", autoplay = NA,
+                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+    
+    
     
     observeEvent(input$item1, {output$score1 <- renderText({paste0("You gave a score of ", input$item1)})})
     
@@ -87,9 +96,9 @@ server <- function(input, output){
     qualityresults = rep(NaN, 64)
     catresults = rep("", n_questions)
     
+    newSamples = c(0,0,0)
     
-    
-    samples <<- sample(3, 3, replace = F)
+    samples <<- sample(4, 4, replace = F)
     modsamples <<- sample(2,n_questions, replace = T)
     catsamples <<- sample(4,n_questions, replace = T)
     subcatsamples <<- sample(4,n_questions, replace = T)
@@ -120,20 +129,21 @@ server <- function(input, output){
         
         
         if (input$Click.Counter>0 & input$Click.Counter<=n_questions ){
-            
+          newSamples <<- sample(3, 3, replace = F)
             
             return(
                 list(
 
                     h3("Question: ", input$Click.Counter),
-                    
+                    h3(newSamples[1], newSamples[2], newSamples[3]),
                     h4("Part A: Similarity"),
                     actionButton("play11", "Play sound 1"),
                     actionButton("play21", "Play sound 2"),
-                    
-                    sliderInput("survey", "How similar do the two voices sound?", 0, 10, value = 5),
-                    h4("Part B: Quality"),
                     actionButton("play31", "Play sound 3"),
+                    
+                    sliderInput("survey", "How similar do the two voices sound?", min = -5, max = 5, value = 0, pre = "hej", post = "farvel"),
+                    h4("Part B: Quality"),
+                    actionButton("play41", "Play sound 4"),
                     sliderInput("survey1", "How well does it sound?", 0, 10, value = 5)
                 )
             )}
@@ -204,7 +214,11 @@ server <- function(input, output){
           try(sheet_append(ss, data.frame(t(similarityresults)), sheet = "Quality"))
             return("Shiiit son you did it!")
         }
+      
+        
     })
+    
+  
 
     
     output$resultTable <- renderTable({

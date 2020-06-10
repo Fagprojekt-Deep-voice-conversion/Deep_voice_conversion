@@ -91,6 +91,7 @@ if __name__ == "__main__":
 	parser.add_argument('--loss_path_name', type=str, default='loss', help='Name of file containing loss values')
 	parser.add_argument('--mins', type=int, default = None, help = 'How many minutes of each speaker')
 	parser.add_argument('--epochs', type = int, default = None, help = 'How many epochs - overwrites n_steps')
+	parser.add_argument('--test_size', type = int, default = 24, help = 'Size of test set')
 	# execute
 	"""
 	trainloader, corrupted = TrainLoader(data, labels, batch_size = batch_size, shuffle = shuffle, num_workers = num_workers, pin_memory = pin_memory)
@@ -110,7 +111,7 @@ if __name__ == "__main__":
 	
 	### Run trainloader
 	
-	data, labels = DataLoad2(config.data_path, mins = config.mins)
+	(data, labels), (_, _) = DataLoad2(config.data_path, mins = config.mins, test_size = config.test_size)
 
 	if config.epochs is not None:
 		n_files = len(data)
