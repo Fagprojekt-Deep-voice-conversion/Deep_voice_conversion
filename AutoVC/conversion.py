@@ -80,7 +80,7 @@ def Generate(m, fpath, model, modeltype = "wavernn"):
 
 
 
-def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = None, subtask = None):
+def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = None, subtask = None, exp_folder = None):
     if voc_type == "wavernn":
         s, t = WaveRNN_Mel(source), WaveRNN_Mel(target)
     else:
@@ -92,22 +92,22 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
     
     conversions = {"source": (S, S_emb, S_emb), "Converted": (S, S_emb, T_emb), "target": (T, T_emb, T_emb)}
     try:
-        dir_size = len(list(os.walk(f"../Experiment/AutoVC/{task}/{subtask}"))[0][1]) + 1
+        dir_size = len(list(os.walk(f"{exp_folder}/AutoVC/{task}/{subtask}"))[0][1]) + 1
     except:
         dir_size = 1
 
-    os.mkdir(f"../Experiment/AutoVC/{task}/{subtask}/{dir_size}")
+    os.mkdir(f"{exp_folder}/AutoVC/{task}/{subtask}/{dir_size}")
 
     for key, (X, c_org, c_trg) in conversions.items():
         if key == "Converted":
             _, Out, _ = model(X, c_org, c_trg)
             name = source.split("/")[-1].split(".")[0] + "_to_" + target.split("/")[-1].split(".")[0]
-            path = f"../Experiment/AutoVC/{task}/{subtask}/{name}"
+            path = f"{exp_folder}/AutoVC/{task}/{subtask}/{name}"
         else:
             Out = X.unsqueeze(0)
             name = eval(key).split("/")[-1].split(".")[0]
             name1 = name.split("_")[0]
-            path = f"../Experiment/AutoVC/persons/{name1}/{name}"
+            path = f"{exp_folder}/AutoVC/persons/{name1}/{name}"
         
         
         
@@ -115,7 +115,7 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
         Generate(Out, path, voc_model, voc_type)
 
 
-def Experiment(Model_path, train_lenght = None, test_data = None, name_list = None, test_size = 24):
+def Experiment(Model_path, train_lenght = None, test_data = None, name_list = None, test_size = 24, experiment = None):
     # Load data about gender and language and store in dictionary
     dictionary = {}
     X = pd.read_csv(name_list, header = None)
@@ -133,16 +133,21 @@ def Experiment(Model_path, train_lenght = None, test_data = None, name_list = No
             for i, target in enumerate(data[labels != key]):
                 name_t = labels[labels!=key][i]
                 
-                subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
                 if train_lenght is not None:
                     task = train_lenght
                     if dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English":
-                        print(name_s, name_t)
-                        Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn")
-                else:
+                        subtask = "Male_Male"
+                        print(source, target)
+                        Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+                      
+                elif (dictionary[name_s][1] == dictionary[name_t][1]):
                     task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
-                    print(name_s, name_t)
-                    Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn")
+                    subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
+
+                    print(source, target)
+                    Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+
+        
                 
 
 
