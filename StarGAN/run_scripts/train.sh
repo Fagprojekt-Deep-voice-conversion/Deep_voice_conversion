@@ -33,13 +33,13 @@ source StarGAN-env/bin/activate
 ### Miscellaneous \
 ### Step size \
 ### Directories \
-
+echo "Beginning training..."
 python ../StarGAN-Voice-Conversion-master/main.py \
 		--lambda_cls 10 \
 		--lambda_rec 10 \
 		--lambda_gp 10 \
 		--sampling_rate 16000 \
-		--batch_size 32 \
+		--batch_size 64 \
 		--num_iters 3000 \
 		--num_iters_decay 100000 \
 		--g_lr 0.0001 \
@@ -55,12 +55,12 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--sample_step 1000 \
 		--model_save_step 1000 \
 		--lr_update_step 1000 \
-		--train_data_dir /work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/mc/train \
-		--test_data_dir /work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/mc/test \
-		--wav_dir /work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/wav16 \
-		--log_dir /work1/s183920/Deep_voice_conversion/StarGAN/logs/base \
-		--sample_dir /work1/s183920/Deep_voice_conversion/StarGAN/samples/base \
-		--model_save_dir /work1/s183920/Deep_voice_conversion/StarGAN/models/base \
+		--train_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
+		--test_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
+		--wav_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
+		--log_dir /work1/s183920/Deep_voice_conversion/StarGAN/logs/base2 \
+		--sample_dir /work1/s183920/Deep_voice_conversion/StarGAN/samples/base2 \
+		--model_save_dir /work1/s183920/Deep_voice_conversion/StarGAN/models/base2 \
 		--loss_name loss_test \
 		#--resume_iters 4000\
 
