@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     config = parser.parse_args()
 
-    Experiment(Model_path = config.model, train_length = config.train_size, test_data = config.test_data, name_list = config.name_list, experiment = configt.experiment_folder)
+    Experiment(Model_path = config.model, train_length = config.train_size, test_data = config.test_data, name_list = config.name_list, experiment = config.experiment_folder)
 
 
 
