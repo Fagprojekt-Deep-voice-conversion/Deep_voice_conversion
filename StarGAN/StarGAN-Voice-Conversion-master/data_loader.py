@@ -116,6 +116,7 @@ class TestDataset(object):
 
     def get_batch_test_data(self, batch_size=8):
         batch_data = []
+        print("------------------------\n", self.mc_files, "\n--------------------------\n")
         for i in range(batch_size):
             mcfile = self.mc_files[i]
             filename = basename(mcfile).split('-')[-1]

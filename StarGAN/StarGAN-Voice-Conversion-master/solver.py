@@ -33,6 +33,13 @@ class Solver(object):
 			s = re.search("(.*)_.*", f).group(1)
 			if s not in speakers:
 				speakers.append(s)
+		print(speakers)
+		#speakers = []
+		#for f in os.listdir(config.train_data_dir):
+		#	s = re.search("(.*)_.*", f).group(1)
+		#	if s not in speakers:
+		#		speakers.append(s)
+		#print(speakers)
 		self.num_speakers = len(speakers) if config.num_speakers is None else config.num_speakers 
 		self.lambda_cls = config.lambda_cls
 		self.lambda_rec = config.lambda_rec

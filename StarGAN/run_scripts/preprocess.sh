@@ -26,8 +26,12 @@ source StarGAN-env/bin/activate
 python ../StarGAN-Voice-Conversion-master/preprocess.py \
 		--sample_rate 16000 \
 		--origin_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/VCTK-Corpus/wav48 \
-		--target_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16-3 \
-		--mc_dir_train /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train-3 \
-		--mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test-3 \
+		--target_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
+		--mc_dir_train /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
+		--mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
 		--speakers all \
-		--test_size 0.1
+		--test_size 0.1 \
+		--resample 0 \
+		--prep_train 0 \
+		--prep_test 1 \
+		--overwrite_old 0 \
