@@ -52,7 +52,7 @@ source AutoVC-env/bin/activate
 echo $PWD
 
 ### Run python script
-python3 ../Run_AutoVC.py --pretrained_model_path Models/AutoVC/AutoVC_seed40_200k.pt --epochs 50 --test_size 24 --model_path_name AutoVC30min --mins 30 --data_path ../data/test_data --loss_path_name loss30min --save_every 50000
+python3 ../ConductExperiment.py --model Models/AutoVC/AutoVC10min_step24k.pt --train_size 10min --test_data ../Data/test_data --name_list ../data/persons.csv
 
 
 
