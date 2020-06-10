@@ -70,7 +70,7 @@ def DataLoad2(directory, mins = None, test_size = 0.01):
 		data_test.extend(test)
 		labels_test.extend([key for i in test])
 	
-	print(labels_train)
+	print(labels_test)
 
 	return (data_train, labels_train), (data_test, labels_test)
 
