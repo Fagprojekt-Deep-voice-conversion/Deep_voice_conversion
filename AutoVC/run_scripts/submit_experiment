@@ -3,7 +3,7 @@
 ### ?- specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J AutoVC30min
+#BSUB -J AutoVCexperiment10min
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 1
 ### -- set span if number of cores is more than 1
@@ -11,9 +11,9 @@
 ### -- Select the resources: 1 gpu in exclusive process mode --
 #BSUB -gpu "num=1:mode=exclusive_process"
 ### -- set walltime limit: hh:mm --  maximum 24 hours for GPU-queues right now
-#BSUB -W 10:00
-# request 10GB of system-memory
-#BSUB -R "rusage[mem=10GB]"
+#BSUB -W 4:00
+# request 5GB of system-memory
+#BSUB -R "rusage[mem=5GB]"
 ### -- set the email address --
 # please uncomment the following line and put in your e-mail address,
 # if you want to receive e-mail notifications on a non-default address
@@ -52,7 +52,7 @@ source AutoVC-env/bin/activate
 echo $PWD
 
 ### Run python script
-python3 ../Run_AutoVC.py --pretrained_model_path Models/AutoVC/AutoVC_seed40_200k.pt --epochs 50 --test_size 24 --model_path_name AutoVC30min --mins 30 --data_path ../data/test_data --loss_path_name loss30min --save_every 50000
+python3 ../ConductExperiment.py --model Models/AutoVC/AutoVC30min_step72.pt --test_data ../data/test_data --name_list ../data/persons.csv --experiment_folder ../Experiment
 
 
 

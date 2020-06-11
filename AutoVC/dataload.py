@@ -33,43 +33,46 @@ def split_data(paths):
     return train_paths, test_paths
 
 def DataLoad2(directory, mins = None, test_size = 0.01):
-    path = sys.path[0]
-    os.chdir(path)
+	path = sys.path[0]
+	os.chdir(path)
 
-    dir = list(os.walk(directory))
-    name = dir[0][0]
+	dir = list(os.walk(directory))
+	name = dir[0][0]
 
-    for j, direct in enumerate(dir[1:]):
+	for j, direct in enumerate(dir[1:]):
 
-        for i in range(len(direct[2])):
-            direct[2][i] = name + '/' + dir[0][1][j] + '/' + direct[2][i]
+		for i in range(len(direct[2])):
+			direct[2][i] = name + '/' + dir[0][1][j] + '/' + direct[2][i]
+			
 
 
-    dictionary = {dir[i][0].replace(directory + '\\', ""): dir[i][2] for i in range(1,len(dir))}
+	dictionary = {dir[i][0].replace(directory + '/', ""): dir[i][2] for i in range(1,len(dir))}
+	
+	data_train = []
+	labels_train = []
 
-    data_train = []
-    labels_train = []
+	data_test = []
+	labels_test = []
 
-    data_test = []
-    labels_test = []
+	if mins is not None:
+		mins = int(mins * 12)
 
-    if mins is not None:
-        mins = int(mins * 12)
+	for key in dictionary:
+		
+		train, test = train_test_split(dictionary[key], test_size = test_size, random_state=1234)
+		try:
+			data_train.extend(train[:mins])
+			labels_train.extend([key for i in train[:mins]])
 
-    for key in dictionary:
-        train, test = train_test_split(dictionary[key], test_size = test_size, random_state=1234)
-        try:
-            data_train.extend(train[:mins])
-            labels_train.extend([key for i in train[:mins]])
 
-            
-        except:
-            data_train.extend(train)
-            labels_train.extend([key for i in train])
+		except:
+			data_train.extend(train)
+			labels_train.extend([key for i in train])
 
-        data_test.extend(test)
-        labels_test.extend([key for i in test])
-        
+		data_test.extend(test)
+		labels_test.extend([key for i in test])
+	
+	
 
-    return (data_train, labels_train), (data_test, labels_test)
+	return (data_train, labels_train), (data_test, labels_test)
 
