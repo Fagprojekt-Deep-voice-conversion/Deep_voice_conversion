@@ -27,24 +27,23 @@ def main(config):
 		os.makedirs(config.sample_dir)
 	if not os.path.exists(config.loader_dir):
 		os.makedirs(config.loader_dir)
-
-    # Data loader.
-    if not os.path.exists(config.loader_dir+"/trainloader.pkl"):
+	
+	# Data loader.
+	if os.path.exists(config.loader_dir+"/trainloader.pkl"):
+		with open(config.loader_dir+"/trainloader.pkl", "rb") as f:
+			train_loader = pickle.load(f)
+	else:
 		train_loader = get_loader(config.train_data_dir, config.batch_size, 'train', num_workers=config.num_workers)
 		with open(config.loader_dir+"/trainloader.pkl", "wb") as f:
 			pickle.dump(train_loader, f)
+			
+	if os.path.exists(config.loader_dir+"/testloader.pkl"):
+		with open(config.loader_dir+"/testloader.pkl", "rb") as f:
+			test_loader = pickle.load(f)
 	else:
-		with open(config.loader_dir+"/trainloader.pkl", "rb") as f:
-			train_loader = pickle.load(f)
-	
-	if not os.path.exists(config.loader_dir+"/testloader.pkl"):
 		test_loader = TestDataset(config.test_data_dir, config.wav_dir, src_spk='p262', trg_spk='p272')
 		with open(config.loader_dir+"/testloader.pkl", "wb") as f:
 			pickle.dump(test_loader, f)
-	else:
-		with open(config.loader_dir+"/testloader.pkl", "rb") as f:
-			test_loader = pickle.load(f)
-			
 	
 
 	# Solver for training and testing StarGAN.
