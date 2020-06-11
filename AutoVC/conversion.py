@@ -80,7 +80,7 @@ def Generate(m, fpath, model, modeltype = "wavernn"):
 
 
 
-def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = None, subtask = None, exp_folder = None):
+def Conversion(source, target, model, voc_model, T_emb = None, voc_type = "wavernn", task = None, subtask = None, exp_folder = None):
     if voc_type == "wavernn":
         s, t = WaveRNN_Mel(source), WaveRNN_Mel(target)
     else:
@@ -88,7 +88,7 @@ def Conversion(source, target, model, voc_model, voc_type = "wavernn", task = No
 
     S, T = torch.from_numpy(s.T).unsqueeze(0), torch.from_numpy(t.T).unsqueeze(0)
     
-    S_emb, T_emb = embed(source), embed(target)
+    S_emb, T_emb = embed(source), embed(target) if T_emb is None else T_emb
     
     conversions = {"source": (S, S_emb, S_emb), "Converted": (S, S_emb, T_emb), "target": (T, T_emb, T_emb)}
     try:
@@ -147,6 +147,7 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
                 elif dictionary[name_s][1] == dictionary[name_t][1]:
                     task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
                     subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
+                    
 
                     print(name_s, name_t)
                     Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
@@ -163,11 +164,14 @@ if __name__ == "__main__":
     # Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
 
 
-    Experiment(Model_path = "Models/AutoVC/AutoVC_seed40_200k.pt", train_length = "10min", test_data = "../data/test_data", name_list = "../data/persons2.csv", test_size = 3, experiment = "../Experiment" )
+    # # Experiment(Model_path = "Models/AutoVC/AutoVC_seed40_200k.pt", train_length = "10min", test_data = "../data/test_data", name_list = "../data/persons2.csv", test_size = 3, experiment = "../Experiment" )
 
-    # X = pickle.load(open("Models/loss10min", "rb"))
+    # X = pickle.load(open("Models/loss30min", "rb"))
     # plt.plot(X)
     # plt.show()
+    B = True
+    A = 2 if B else 3
+    print(A)
 
     
     
