@@ -239,7 +239,7 @@ class WaveRNN(nn.Module):
                 else:
                     raise RuntimeError("Unknown model mode value - ", self.mode)
 
-                if i % 100 == 0: self.gen_display(i, seq_len, b_size, start)
+                #if i % 100 == 0: self.gen_display(i, seq_len, b_size, start)
 
         output = torch.stack(output).transpose(0, 1)
         output = output.cpu().numpy()

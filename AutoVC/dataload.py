@@ -43,10 +43,11 @@ def DataLoad2(directory, mins = None, test_size = 0.01):
 
 		for i in range(len(direct[2])):
 			direct[2][i] = name + '/' + dir[0][1][j] + '/' + direct[2][i]
+			
 
 
-	dictionary = {dir[i][0].replace(directory + '\\', ""): dir[i][2] for i in range(1,len(dir))}
-
+	dictionary = {dir[i][0].replace(directory + '/', ""): dir[i][2] for i in range(1,len(dir))}
+	print(dir[0][0], dir[1][0])
 	data_train = []
 	labels_train = []
 
@@ -57,6 +58,7 @@ def DataLoad2(directory, mins = None, test_size = 0.01):
 		mins = int(mins * 12)
 
 	for key in dictionary:
+		
 		train, test = train_test_split(dictionary[key], test_size = test_size, random_state=1234)
 		try:
 			data_train.extend(train[:mins])
@@ -69,8 +71,8 @@ def DataLoad2(directory, mins = None, test_size = 0.01):
 
 		data_test.extend(test)
 		labels_test.extend([key for i in test])
+	print(labels_train)
 	
-	print(labels_test)
 
 	return (data_train, labels_train), (data_test, labels_test)
 
