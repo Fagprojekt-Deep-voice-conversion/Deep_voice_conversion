@@ -52,7 +52,7 @@ source AutoVC-env/bin/activate
 echo $PWD
 
 ### Run python script
-python3 ../ConductExperiment.py --model Models/AutoVC/AutoVC30min_step72.pt --train_size 10min --test_data ../data/test_data --name_list ../data/persons.csv --experiment_folder ../Experiment
+python3 ../ConductExperiment.py --model Models/AutoVC/AutoVC30min_step72.pt --test_data ../data/test_data --name_list ../data/persons.csv --experiment_folder ../Experiment
 
 
 
