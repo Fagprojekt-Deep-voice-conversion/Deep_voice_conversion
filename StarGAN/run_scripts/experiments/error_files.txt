@@ -1,0 +1,37 @@
+# 10 min experiment
+
+Anders 
+	Error in the following train files: 339
+	Error in the following test files: 181
+
+Helle 
+	Error in the following train files:
+	Error in the following test files:
+
+# 20 min experiment
+
+Anders 
+	Error in the following train files:
+	Error in the following test files:
+
+Helle 
+	Error in the following train files:
+	Error in the following test files:
+
+Obama 
+	Error in the following train files:
+	Error in the following test files:
+
+# 30 min experiment
+
+Anders 
+	Error in the following train files:
+	Error in the following test files:
+
+Helle 
+	Error in the following train files:
+	Error in the following test files:
+
+Obama 
+	Error in the following train files:
+	Error in the following test files:

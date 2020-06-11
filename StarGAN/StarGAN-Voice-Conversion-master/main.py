@@ -5,6 +5,7 @@ from data_loader import get_loader, TestDataset
 from torch.backends import cudnn
 from numpy.random import seed as seed_np
 from torch import manual_seed as seed_t
+import pickle
 
 
 def str2bool(v):

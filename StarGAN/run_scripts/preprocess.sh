@@ -25,13 +25,14 @@ source StarGAN-env/bin/activate
 ### Speakers must be set in the python script
 python ../StarGAN-Voice-Conversion-master/preprocess.py \
 		--sample_rate 16000 \
-		--origin_wavpath /work1/s183920/Deep_voice_conversion/data/test_data \
-		--target_wavpath /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
-		--mc_dir_train /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
-		--mc_dir_test /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
-		--speakers testspeaker \
-		--test_size 0.1 \
-		--resample 1 \
+		--origin_wavpath /work1/s183920/Deep_voice_conversion/data/test_data/testspeakers \
+		--target_wavpath /work1/s183920/Deep_voice_conversion/data/test_data/StarGAN/wav16 \
+		--mc_dir_train /work1/s183920/Deep_voice_conversion/data/test_data/StarGAN/30min/mc/train \
+		--mc_dir_test /work1/s183920/Deep_voice_conversion/data/test_data/StarGAN/30min/mc/test \
+		--speakers anders helle obama \
+		--test_size 24 \
+		--resample 0 \
 		--prep_train 1 \
 		--prep_test 1 \
 		--overwrite_old 1 \
+		--train_size 360 \

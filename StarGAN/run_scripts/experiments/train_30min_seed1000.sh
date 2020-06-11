@@ -26,13 +26,12 @@ source StarGAN-env/bin/activate
 
 ### Train model
 #python ../StarGAN-Voice-Conversion-master/main.py
-dir=/work1/s183920/Deep_voice_conversion_old/StarGAN/models/base 
 datadir=/work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc
 moddir=/work1/s183920/Deep_voice_conversion/StarGAN
-modname=base
+modname=30min_seed1000
 steps=2000
 
-if [ ! -d "$dir$" ]; then; mkdir $dir; fi
+if [ ! -d "$moddir/models/$modname" ]; then; mkdir $dir; fi
 
 if [ -z "$(ls -A $dir)" ]
 then 
@@ -50,7 +49,7 @@ then
 			--beta1 0.5 \
 			--beta2 0.999 \
 			--test_iters 100000 \
-			--seed 420 \
+			--seed 1000 \
 			--num_workers 1 \
 			--mode train \
 			--log_step 10 \
