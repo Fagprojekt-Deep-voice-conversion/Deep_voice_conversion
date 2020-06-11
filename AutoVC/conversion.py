@@ -85,26 +85,21 @@ def Conversion(source, target, model, voc_model, T_emb = None, voc_type = "waver
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
     if voc_type == "wavernn":
-        s, t = WaveRNN_Mel(source), WaveRNN_Mel(target)
+        s = WaveRNN_Mel(source)
     else:
-        s, t = AutoVC_Mel(source), AutoVC_Mel(target)
+        s = AutoVC_Mel(source)
 
-    S, T = torch.from_numpy(s.T).unsqueeze(0).to(device), torch.from_numpy(t.T).unsqueeze(0).to(device)
+    S = torch.from_numpy(s.T).unsqueeze(0).to(device)
     
-    S_emb, T_emb = embed(source), embed(target) if T_emb is None else T_emb
+    S_emb, T_emb = embed(source).to(device), embed(target).to(device) if T_emb is None else T_emb.to(device)
     
-    conversions = {"source": (S, S_emb, S_emb), "Converted": (S, S_emb, T_emb), "target": (T, T_emb, T_emb)}
-    try:
-        dir_size = len(list(os.walk(f"{exp_folder}/AutoVC/{task}/{subtask}"))[0][1]) + 1
-    except:
-        dir_size = 1
-
-    # os.mkdir(f"{exp_folder}/AutoVC/{task}/{subtask}/{dir_size}")
+    conversions = {"source": (S, S_emb, S_emb), "Converted": (S, S_emb, T_emb)}
+    
 
     for key, (X, c_org, c_trg) in conversions.items():
         if key == "Converted":
             _, Out, _ = model(X, c_org, c_trg)
-            name = source.split("/")[-1].split(".")[0] + "_to_" + target.split("/")[-1].split(".")[0]
+            name = source.split("/")[-1].split(".")[0] + "_to_" + (target.split("/")[-1].split(".")[0] if "/" in target else target)
             path = f"{exp_folder}/AutoVC/{task}/{subtask}/{name}"
         else:
             Out = X.unsqueeze(0)
@@ -131,30 +126,35 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
 
     model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn"); print(dictionary); print(labels)
 
+    persons = np.array([person for person, _ in dictionary.items()])
 
-    for key, value in dictionary.items():
+    for source in persons:
+        targets = persons[persons != source]
 
-        for source in data[labels == key]:
-            name_s = labels[labels == key][0]
+        for s in data[labels == source]:
+                  
+            for target in targets:
+                if (dictionary[source][1] == dictionary[target][1]) and train_length is None:
+                    task = dictionary[source][1] + "_" + dictionary[target][1]
+                    subtask = dictionary[source][0] + "_" + dictionary[target][0]
 
-            for i, target in enumerate(data[labels != key]):
-                name_t = labels[labels!=key][i]
+                    T_emb = torch.cat([embed(t) for t in data[labels == target]]).mean(0).unsqueeze(0)
 
-                if train_length is not None:
+                    Conversion(s, target, model, voc_model, T_emb = T_emb, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+                
+                elif train_length is not None:
                     task = train_length
-                    if (dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English") and (dictionary[name_s][0] == "Male" and dictionary[name_t][0] == "Male"):
+
+                    if (dictionary[source][1] == "English" and dictionary[target][1] == "English") and (dictionary[source][0] == "Male" and dictionary[target][0] == "Male"):
                         subtask = "Male_Male"
-                        print(name_s, name_t)
-                        Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+                        T_emb = torch.cat([embed(t) for t in data[labels == target]]).mean(0).unsqueeze(0)
+                        Conversion(s, target, model, voc_model, T_emb = T_emb, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
+                
+                
+                
 
-                elif dictionary[name_s][1] == dictionary[name_t][1]:
-                    task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
-                    subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
 
-
-                    print(name_s, name_t)
-                    Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
-
+            
 
 
 
@@ -167,14 +167,12 @@ if __name__ == "__main__":
     # Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
 
 
-    # # Experiment(Model_path = "Models/AutoVC/AutoVC_seed40_200k.pt", train_length = "10min", test_data = "../data/test_data", name_list = "../data/persons2.csv", test_size = 3, experiment = "../Experiment" )
+    Experiment(Model_path = "Models/AutoVC/AutoVC_seed40_200k.pt", train_length =  None, test_data = "../data/test_data", name_list = "../data/persons2.csv", test_size = 3, experiment = "../Experiment" )
 
     # X = pickle.load(open("Models/loss30min", "rb"))
     # plt.plot(X)
     # plt.show()
-    B = True
-    A = 2 if B else 3
-    print(A)
+    
 
     
     

@@ -47,7 +47,7 @@ def DataLoad2(directory, mins = None, test_size = 0.01):
 
 
 	dictionary = {dir[i][0].replace(directory + '/', ""): dir[i][2] for i in range(1,len(dir))}
-	print(dir[0][0], dir[1][0])
+	
 	data_train = []
 	labels_train = []
 
@@ -71,7 +71,7 @@ def DataLoad2(directory, mins = None, test_size = 0.01):
 
 		data_test.extend(test)
 		labels_test.extend([key for i in test])
-	print(labels_train)
+	
 	
 
 	return (data_train, labels_train), (data_test, labels_test)
