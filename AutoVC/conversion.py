@@ -126,7 +126,7 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
     data, labels = np.array(data), np.array(labels)
 
     X = pd.read_csv("../data/good_voices.csv", header  = None)
-    voices = {}
+    voices = {}; print(data)
     for i, x in enumerate(X.iloc[:,0]):
         voices.update({x: X.iloc[i, 1:].values})
     for key, value in voices.items():
@@ -135,8 +135,8 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
         index = index[np.invert([np.any([f"_{x}."  in wav for x in list(map(str, voices[key]))]) for wav in data[index]])]
         data = np.delete(data, index)
         labels = np.delete(labels, index)
-
-    model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn")
+	
+    model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn");print(index);print(voices); print(data)
 
     persons = np.array([person for person, _ in dictionary.items()])
 
