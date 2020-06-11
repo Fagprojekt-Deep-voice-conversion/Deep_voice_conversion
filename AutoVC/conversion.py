@@ -81,12 +81,15 @@ def Generate(m, fpath, model, modeltype = "wavernn"):
 
 
 def Conversion(source, target, model, voc_model, T_emb = None, voc_type = "wavernn", task = None, subtask = None, exp_folder = None):
+
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
     if voc_type == "wavernn":
         s, t = WaveRNN_Mel(source), WaveRNN_Mel(target)
     else:
         s, t = AutoVC_Mel(source), AutoVC_Mel(target)
 
-    S, T = torch.from_numpy(s.T).unsqueeze(0), torch.from_numpy(t.T).unsqueeze(0)
+    S, T = torch.from_numpy(s.T).unsqueeze(0).to(device), torch.from_numpy(t.T).unsqueeze(0).to(device)
     
     S_emb, T_emb = embed(source), embed(target) if T_emb is None else T_emb
     
@@ -122,11 +125,11 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
     X = pd.read_csv(name_list, header = None)
     for i, x in enumerate(X.iloc[:,0]):
         dictionary.update({x: [X.iloc[i, 1], X.iloc[i, 2]]})
-
+	
     (_, _), (data, labels) = DataLoad2(test_data, test_size= test_size)
     data, labels = np.array(data), np.array(labels)
 
-    model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn")
+    model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn"); print(dictionary); print(labels)
 
 
     for key, value in dictionary.items():
@@ -139,7 +142,7 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
 
                 if train_length is not None:
                     task = train_length
-                    if dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English":
+                    if (dictionary[name_s][1] == "English" and dictionary[name_t][1] == "English") and (dictionary[name_s][0] == "Male" and dictionary[name_t][0] == "Male"):
                         subtask = "Male_Male"
                         print(name_s, name_t)
                         Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
@@ -147,7 +150,7 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
                 elif dictionary[name_s][1] == dictionary[name_t][1]:
                     task = dictionary[name_s][1] + "_" + dictionary[name_t][1]
                     subtask = dictionary[name_s][0] + "_" + dictionary[name_t][0]
-                    
+
 
                     print(name_s, name_t)
                     Conversion(source, target, model, voc_model, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
