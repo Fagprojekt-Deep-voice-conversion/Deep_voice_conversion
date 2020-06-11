@@ -132,7 +132,7 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
     for key, value in voices.items():
         index = np.where([labels == key])[1]
 
-        index = index[[np.any([f"_{x}." in wav for x in list(map(str, voices[key]))]) for wav in data[index]]]
+        index = index[np.invert([np.any([f"_{x}."  in wav for x in list(map(str, voices[key]))]) for wav in data[index]])]
         data = np.delete(data, index)
         labels = np.delete(labels, index)
 
