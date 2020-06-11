@@ -39,8 +39,8 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--lambda_rec 10 \
 		--lambda_gp 10 \
 		--sampling_rate 16000 \
-		--batch_size 64 \
-		--num_iters 3000 \
+		--batch_size 8 \
+		--num_iters 200000 \
 		--num_iters_decay 100000 \
 		--g_lr 0.0001 \
 		--d_lr 0.0001 \
@@ -58,9 +58,9 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--train_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/train \
 		--test_data_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc/test \
 		--wav_dir /work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/wav16 \
-		--log_dir /work1/s183920/Deep_voice_conversion/StarGAN/logs/base2 \
-		--sample_dir /work1/s183920/Deep_voice_conversion/StarGAN/samples/base2 \
-		--model_save_dir /work1/s183920/Deep_voice_conversion/StarGAN/models/base2 \
-		--loss_name loss_test \
+		--log_dir /work1/s183920/Deep_voice_conversion/StarGAN/logs/base8 \
+		--sample_dir /work1/s183920/Deep_voice_conversion/StarGAN/samples/base8 \
+		--model_save_dir /work1/s183920/Deep_voice_conversion/StarGAN/models/base8 \
+		--loss_name loss_base8 \
 		#--resume_iters 4000\
 

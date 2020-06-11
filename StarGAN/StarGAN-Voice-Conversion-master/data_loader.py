@@ -57,7 +57,7 @@ class MyDataset(data.Dataset):
 			s = re.search("(.*)_.*", f).group(1)
 			if s not in self.speakers:
 				self.speakers.append(s)
-		spk2idx = dict(zip(self.speakers, range(len(self.speakers))))
+		self.spk2idx = dict(zip(self.speakers, range(len(self.speakers))))
 		mc_files = glob.glob(join(data_dir, '*.npy'))
 		mc_files = [i for i in mc_files if basename(i)[:4] in self.speakers] 
 		self.mc_files = self.rm_too_short_utt(mc_files)
@@ -88,7 +88,7 @@ class MyDataset(data.Dataset):
 	def __getitem__(self, index):
 		filename = self.mc_files[index]
 		spk = basename(filename).split('_')[0]
-		spk_idx = spk2idx[spk]
+		spk_idx = self.spk2idx[spk]
 		mc = np.load(filename)
 		mc = self.sample_seg(mc)
 		mc = np.transpose(mc, (1, 0))  # (T, D) -> (D, T), since pytorch need feature having shape
@@ -106,7 +106,7 @@ class TestDataset(object):
 			s = re.search("(.*)_.*", f).group(1)
 			if s not in self.speakers:
 				self.speakers.append(s)
-		spk2idx = dict(zip(self.speakers, range(len(self.speakers))))
+		self.spk2idx = dict(zip(self.speakers, range(len(self.speakers))))
 		self.src_spk = src_spk
 		self.trg_spk = trg_spk
 		self.mc_files = sorted(glob.glob(join(data_dir, '{}*.npy'.format(self.src_spk))))
@@ -123,7 +123,7 @@ class TestDataset(object):
 		self.mcep_mean_trg = self.trg_spk_stats['coded_sps_mean']
 		self.mcep_std_trg = self.trg_spk_stats['coded_sps_std']
 		self.src_wav_dir = f'{wav_dir}/{src_spk}'
-		self.spk_idx = spk2idx[trg_spk]
+		self.spk_idx = self.spk2idx[trg_spk]
 		spk_cat = to_categorical([self.spk_idx], num_classes=len(self.speakers))
 		self.spk_c_trg = spk_cat
 

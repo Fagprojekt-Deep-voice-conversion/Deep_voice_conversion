@@ -25,10 +25,27 @@ def main(config):
 		os.makedirs(config.model_save_dir)
 	if not os.path.exists(config.sample_dir):
 		os.makedirs(config.sample_dir)
+	if not os.path.exists(config.loader_dir):
+		os.makedirs(config.loader_dir)
 
     # Data loader.
-	train_loader = get_loader(config.train_data_dir, config.batch_size, 'train', num_workers=config.num_workers)
-	test_loader = TestDataset(config.test_data_dir, config.wav_dir, src_spk='p262', trg_spk='p272')
+    if not os.path.exists(config.loader_dir+"/trainloader.pkl"):
+		train_loader = get_loader(config.train_data_dir, config.batch_size, 'train', num_workers=config.num_workers)
+		with open(config.loader_dir+"/trainloader.pkl", "wb") as f:
+			pickle.dump(train_loader, f)
+	else:
+		with open(config.loader_dir+"/trainloader.pkl", "rb") as f:
+			train_loader = pickle.load(f)
+	
+	if not os.path.exists(config.loader_dir+"/testloader.pkl"):
+		test_loader = TestDataset(config.test_data_dir, config.wav_dir, src_spk='p262', trg_spk='p272')
+		with open(config.loader_dir+"/testloader.pkl", "wb") as f:
+			pickle.dump(test_loader, f)
+	else:
+		with open(config.loader_dir+"/testloader.pkl", "rb") as f:
+			test_loader = pickle.load(f)
+			
+	
 
 	# Solver for training and testing StarGAN.
 	solver = Solver(train_loader, test_loader, config)
@@ -81,6 +98,7 @@ if __name__ == '__main__':
 	parser.add_argument('--model_save_dir', type=str, default='./models')
 	parser.add_argument('--sample_dir', type=str, default='./samples')
 	parser.add_argument('--loss_name', type=str, default='loss', help='name to give the pickle files containing the losses')
+	parser.add_argument('--loader_dir', type=str, default='././data/VCTK-Data/StarGAN/mc/loaders', help='path to saved loaders')
 
 	# Step size.
 	parser.add_argument('--log_step', type=int, default=10)
