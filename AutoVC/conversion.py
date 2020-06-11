@@ -153,7 +153,7 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
                     task = dictionary[source][1] + "_" + dictionary[target][1]
                     subtask = dictionary[source][0] + "_" + dictionary[target][0]
 
-                    T_emb = torch.cat([embed(t) for t in data[labels == target]]).mean(0).unsqueeze(0)
+                    T_emb = torch.cat([embed(t) for t in data[labels == target]]).mean(0).unsqueeze(0);print(source, target)
 
                     Conversion(s, target, model, voc_model, T_emb = T_emb, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
                 
@@ -162,7 +162,7 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
 
                     if (dictionary[source][1] == "English" and dictionary[target][1] == "English") and (dictionary[source][0] == "Male" and dictionary[target][0] == "Male"):
                         subtask = "Male_Male"
-                        T_emb = torch.cat([embed(t) for t in data[labels == target]]).mean(0).unsqueeze(0)
+                        T_emb = torch.cat([embed(t) for t in data[labels == target]]).mean(0).unsqueeze(0);print(source, target)
                         Conversion(s, target, model, voc_model, T_emb = T_emb, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
                 
                     
