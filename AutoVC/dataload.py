@@ -46,7 +46,7 @@ def DataLoad2(directory, mins = None, test_size = 0.01):
 			
 
 
-	dictionary = {dir[i][0].replace(directory + '\\', ""): dir[i][2] for i in range(1,len(dir))}
+	dictionary = {dir[i][0].replace(directory + '/', ""): dir[i][2] for i in range(1,len(dir))}
 	
 	data_train = []
 	labels_train = []
