@@ -117,13 +117,13 @@ if __name__ == '__main__':
 	num_workers = argv.num_workers if argv.num_workers is not None else cpu_count()
 	speakers = argv.speakers
 	test_size = argv.test_size if argv.test_size <= 1 else int(argv.test_size)
-	resample = bool(argv.resample)
+	resampling = bool(argv.resample)
 	prep_train = bool(argv.prep_train)
 	prep_test = bool(argv.prep_test)
 	overwrite_old = bool(argv.overwrite_old)
 
 	# The original wav in VCTK is 48K, first we want to resample to 16K
-	if resample:
+	if resampling:
 		print("Resampling to 16000 Hz...")
 		resample_to_16k(origin_wavpath, target_wavpath, num_workers=num_workers)
 
