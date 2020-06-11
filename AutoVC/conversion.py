@@ -121,18 +121,33 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
     for i, x in enumerate(X.iloc[:,0]):
         dictionary.update({x: [X.iloc[i, 1], X.iloc[i, 2]]})
 	
+    
     (_, _), (data, labels) = DataLoad2(test_data, test_size= test_size)
     data, labels = np.array(data), np.array(labels)
 
-    model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn"); print(dictionary); print(labels)
+    X = pd.read_csv("../data/good_voices.csv", header  = None)
+    voices = {}
+    for i, x in enumerate(X.iloc[:,0]):
+        voices.update({x: X.iloc[i, 1:].values})
+    for key, value in voices.items():
+        index = np.where([labels == key])[1]
+
+        index = index[[np.any([f"_{x}." in wav for x in list(map(str, voices[key]))]) for wav in data[index]]]
+        data = np.delete(data, index)
+        labels = np.delete(labels, index)
+
+    model, voc_model = Instantiate_Models(model_path = Model_path, vocoder = "wavernn")
 
     persons = np.array([person for person, _ in dictionary.items()])
 
+
+    
     for source in persons:
         targets = persons[persons != source]
 
         for s in data[labels == source]:
-                  
+          
+
             for target in targets:
                 if (dictionary[source][1] == dictionary[target][1]) and train_length is None:
                     task = dictionary[source][1] + "_" + dictionary[target][1]
@@ -150,7 +165,7 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
                         T_emb = torch.cat([embed(t) for t in data[labels == target]]).mean(0).unsqueeze(0)
                         Conversion(s, target, model, voc_model, T_emb = T_emb, task = task, subtask = subtask, voc_type="wavernn", exp_folder = experiment)
                 
-                
+                    
                 
 
 
@@ -167,11 +182,8 @@ if __name__ == "__main__":
     # Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
 
 
-    Experiment(Model_path = "Models/AutoVC/AutoVC_seed40_200k.pt", train_length =  None, test_data = "../data/test_data", name_list = "../data/persons2.csv", test_size = 3, experiment = "../Experiment" )
-
-    # X = pickle.load(open("Models/loss30min", "rb"))
-    # plt.plot(X)
-    # plt.show()
+    Experiment(Model_path = "Models/AutoVC/AutoVC_seed40_200k.pt", train_length =  None, test_data = "../data/test_data", name_list = "../data/persons2.csv", test_size = 11, experiment = "../Experiment" )
+   
     
 
     
