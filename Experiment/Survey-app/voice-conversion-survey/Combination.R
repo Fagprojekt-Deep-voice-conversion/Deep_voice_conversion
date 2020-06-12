@@ -11,7 +11,7 @@ combination <- function(){
     
       
     }
-    for (l in c(3:5)){
+    for (l in c(3:4)){
       X <- rbind(X , c(i,l,1))
     }
     

@@ -84,15 +84,16 @@ server <- function(input, output){
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
     
     observeEvent(input$real, {insertUI(ui = tags$audio(src = sprintf("%s/%s/%s/%s.wav",
-                                                                       models[X[SamplesB,][input$Click.Counter,][1]],
-                                                                       categories[X[SamplesB,][input$Click.Counter,][2]],
-                                                                       subcategories[X[SamplesB,][input$Click.Counter,][3]],
+                                                                       models[X[SamplesA,][input$Click.Counter,][1]],
+                                                                       categories[X[SamplesA,][input$Click.Counter,][2]],
+                                                                       subcategories[X[SamplesA,][input$Click.Counter,][3]],
                                                                        samples[3]), type = " 'audio/wav", autoplay = NA,
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+    
     observeEvent(input$fake, {insertUI(ui = tags$audio(src = sprintf("%s/%s/%s/%s.wav",
-                                                                     models[X[SamplesB,][input$Click.Counter,][1]],
-                                                                     categories[X[SamplesB,][input$Click.Counter,][2]],
-                                                                     subcategories[X[SamplesB,][input$Click.Counter,][3]],
+                                                                     models[X[SamplesA,][input$Click.Counter,][1]],
+                                                                     categories[X[SamplesA,][input$Click.Counter,][2]],
+                                                                     subcategories[X[SamplesA,][input$Click.Counter,][3]],
                                                                      samples[3]), type = " 'audio/wav", autoplay = NA,
                                                        controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
     
@@ -109,18 +110,18 @@ server <- function(input, output){
     })
     
     
-    n_questions <- 42
+    n_questions <- 40
     midways <- 16
     
     models = c("AutoVC", "StarGAN", "Baseline")
-    categories = c("Danish_Danish", "English_English", "20min", "10min", "0min", "Baseline")
+    categories = c("Danish_Danish", "English_English", "20min", "10min", "Baseline")
     subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Female", "Male_English", "Male_Danish", "Female_English", "Female_Danish")
   
     voices = c("source", "target", "converted")
     
     X <- combination()
     Y <- combination2()
-
+    X
     Y
     
     SamplesA <- sample(nrow(Y), nrow(Y), replace = F)
@@ -199,7 +200,7 @@ server <- function(input, output){
           return(list(h2("Get ready for Part 2!")))
         }
         if (input$Click.Counter>midways + 2 & input$Click.Counter<=n_questions +2 ){
-            source_target = sample(c("source","target"), 2, F)
+            source_target = sample(c("source","convert1"), 2, F)
             return(
                 list(
                   h2("Part 2: Conversion Quality"),
@@ -207,21 +208,21 @@ server <- function(input, output){
                    
                     h4("Part A: Similarity"),
                     h5("Please rate the similarity of voice X with A and B"),
-                    h5("A score of -5 indicates with high confidence X is the same as A"), 
-                    h5("A score of 5 indicates with high confidence X is the same as B"),
-                    h5("A score of 0 indicates that X sounds like neither A nor B"),
+                     
+                    h5("A score of 5 indicates with high confidence that A and B are the same voice"),
+                    h5("A score of 0 indicates with high confidence that A and B are different voices"),
                     actionButton(source_target[1], "Play sound A"),
-                    actionButton("converted1", "Play sound X"),
+                    # actionButton("converted1", "Play sound X"),
                     actionButton(source_target[2], "Play sound B"),
                     
-                    sliderInput("survey", "How similar is X to A or B?", min = -5, max = 5, value = 0),
+                    sliderInput("survey", "How similar are A and B?", min = 0, max = 5, value = 3),
                   
                     h4("Part B: Quality"),
-                    h5("Please rate the quality of this voice"),
+                    h5("Please rate the naturalness of this voice"),
                     h5("A score of 0 indicates the voice to not be understandable at all"),
-                    h5("A score of 10 indicates the voice to be real i.e. not synthesized"),
+                    h5("A score of 5 indicates the voice to be real i.e. not synthesized"),
                     actionButton("converted2", "Play sound 4"),
-                    sliderInput("survey1", "How well does it sound?", 0, 10, value = 5)
+                    sliderInput("survey1", "How well does it sound?", 0, 5, value = 3)
                 )
             )}
         if (input$Click.Counter>n_questions + 2)
