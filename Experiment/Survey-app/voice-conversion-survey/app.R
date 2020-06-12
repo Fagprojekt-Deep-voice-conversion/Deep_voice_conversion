@@ -56,25 +56,25 @@ ui <- fluidPage(
 server <- function(input, output){
 
     observeEvent(input$converted1, {insertUI(ui = tags$audio(src = get_wavs_experiment(
-                                                                       models[X[SamplesB,][input$Click.Counter - midways -1,][1]],
-                                                                       categories[X[SamplesB,][input$Click.Counter - midways -1,][2]],
-                                                                       subcategories[X[SamplesB,][input$Click.Counter - midways -1,][3]],
+                                                                       models[X[SamplesB,][input$Click.Counter - midways -2,][1]],
+                                                                       categories[X[SamplesB,][input$Click.Counter - midways -2,][2]],
+                                                                       subcategories[X[SamplesB,][input$Click.Counter - midways -2,][3]],
                                                                        "similarity", input$Click.Counter)[1],
                                                          type = " 'audio/wav", autoplay = NA,
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
     
     observeEvent(input$target, {insertUI(ui = tags$audio(src = get_wavs_experiment(
-                                                                       models[X[SamplesB,][input$Click.Counter- midways -1,][1]],
-                                                                       categories[X[SamplesB,][input$Click.Counter- midways -1,][2]],
-                                                                       subcategories[X[SamplesB,][input$Click.Counter- midways -1,][3]],
+                                                                       models[X[SamplesB,][input$Click.Counter- midways -2,][1]],
+                                                                       categories[X[SamplesB,][input$Click.Counter- midways -2,][2]],
+                                                                       subcategories[X[SamplesB,][input$Click.Counter- midways -2,][3]],
                                                                        "similarity", input$Click.Counter)[2],
                                                          type = " 'audio/wav", autoplay = NA,
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
 
     observeEvent(input$converted2, {insertUI(ui = tags$audio(src = get_wavs_experiment(
-                                                                       models[X[SamplesB,][input$Click.Counter- midways -1,][1]],
-                                                                       categories[X[SamplesB,][input$Click.Counter- midways -1,][2]],
-                                                                       subcategories[X[SamplesB,][input$Click.Counter- midways -1,][3]],
+                                                                       models[X[SamplesB,][input$Click.Counter- midways -2,][1]],
+                                                                       categories[X[SamplesB,][input$Click.Counter- midways -2,][2]],
+                                                                       subcategories[X[SamplesB,][input$Click.Counter- midways -2,][3]],
                                                                        "similarity", input$Click.Counter)[3],
                                                          type = " 'audio/wav", autoplay = NA,
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
@@ -113,18 +113,17 @@ server <- function(input, output){
     
     models = c("AutoVC", "StarGAN", "Baseline")
     categories = c("Danish_Danish", "English_English", "20min", "10min", "Baseline")
-    subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Female", "Male_English", "Male_Danish", "Female_English", "Female_Danish")
+    subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Male", "Male_English", "Male_Danish", "Female_English", "Female_Danish")
   
     voices = c("source", "target", "converted")
     
     X <- combination()
     Y <- combination2()
-    X
     Y
-    
+    SamplesA
     SamplesA <- sample(nrow(Y), nrow(Y), replace = F)
     SamplesB <- sample(nrow(X), nrow(X), replace = F)
-    samples <- sample(3, 3, replace = F)
+    # samples <- sample(3, 3, replace = F)
     
     
     real_fake <- sample(c("real", "fake"), 2, replace = F)
@@ -170,7 +169,7 @@ server <- function(input, output){
         ))
       }
       if (input$Click.Counter>1 & input$Click.Counter<=midways+1 ){
-        real_fake <<- sample(c("real", "fake"), 2, replace = F)
+        # real_fake <<- sample(c("real", "fake"), 2, replace = F)
         return(
           list(
             
@@ -309,7 +308,9 @@ server <- function(input, output){
         try(fakenessresults[SamplesA[input$Click.Counter-2]]<<-score)
         # real_fake <<- sample(c("real", "fake"), 2, replace = F)
         # return(input$Click.Counter-2)
+        real_fake <<- sample(c("real", "fake"), 2, replace = F)
       }
+      
      return()
         
       
