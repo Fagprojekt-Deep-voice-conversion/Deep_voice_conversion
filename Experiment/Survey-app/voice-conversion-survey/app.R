@@ -15,7 +15,8 @@ ui <- fluidPage(
     sidebarPanel(
   
         h3("By us..."),
-        h6(textOutput("save.results")),
+        h6(textOutput("save.results1")),
+        h6(textOutput("save.results2")),
         h6(textOutput("checkcategory")),
         h6(textOutput("checkcategory1")),
         h6(textOutput("checkcategory2")),
@@ -100,8 +101,7 @@ server <- function(input, output){
     
     # observeEvent(input$item1, {output$score1 <- renderText({paste0("You gave a score of ", input$item1)})})
     
-    
-    
+
     
     
     
@@ -129,7 +129,7 @@ server <- function(input, output){
     samples <- sample(3, 3, replace = F)
     
     
-    
+    real_fake <- sample(c("real", "fake"), 2, replace = F)
     
     similarityresults = rep(NaN, nrow(X))
     qualityresults = rep(NaN, nrow(X))
@@ -172,18 +172,18 @@ server <- function(input, output){
         ))
       }
       if (input$Click.Counter>1 & input$Click.Counter<=midways+1 ){
-        real_fake = sample(c("real", "fake"), 2, replace = F)
+        real_fake <<- sample(c("real", "fake"), 2, replace = F)
         return(
           list(
             
             h2("Part 1: Which is real?"),
             
             h3("Question", input$Click.Counter-1),
-            
+            h4("A: ", real_fake[1], " B: ", real_fake[2]),
             h5("Guess which voice is real by pressing either A or B"),
             actionButton(real_fake[1], "Play sound A"),
             actionButton(real_fake[2], "Play sound B"),
-            radioButtons("fakescore", "Which is real?", c("A", "B"), selected = character(0))
+            radioButtons("fakescore", "Which is real?", c("A", "B"))
             # actionButton("play31", "Play sound B"),
             # 
             # sliderInput("survey", "How similar is X to A or B?", min = -5, max = 5, value = 0),
@@ -286,13 +286,46 @@ server <- function(input, output){
             return("Next")
         }
     })
-    output$save.results <- renderText({
-        # After each click, save the results of the radio buttons.
+    score <- NaN
+    output$save.results1 <- renderText({
       
-        if ((input$Click.Counter>0) & (input$Click.Counter <= midways)){
-          try(fakenessresults[SamplesA[input$Click.Counter]]<<-input$fakescore)
+      if ((input$Click.Counter>2) & (input$Click.Counter <= midways+2)){
+        
+        if (real_fake[1] == "fake"){
+          if (input$fakescore == "A"){
+            score <<- 0
+          }
+          else if (input$fakescore == "B"){
+            score <<- 1
+          }
+          else{score <<- NaN}
+          # try(fakenessresults[SamplesA[input$Click.Counter]]<<-score)
           
         }
+        else if (real_fake[1] == "real"){
+          if (input$fakescore == "A"){
+            score <<- 1
+          }
+          else if (input$fakescore == "B"){
+            score <<- 0
+          }
+          else{score <<- NaN}
+          
+          
+        }
+        try(fakenessresults[SamplesA[input$Click.Counter-2]]<<-score)
+        # real_fake <<- sample(c("real", "fake"), 2, replace = F)
+        # return(input$Click.Counter-2)
+      }
+     
+        
+      
+    })
+    
+    output$save.results2 <- renderText({
+        # After each click, save the results of the radio buttons.
+      
+     
         if ((input$Click.Counter>midways+2)&(input$Click.Counter<=n_questions+2)){
             try(similarityresults[SamplesB[input$Click.Counter-midways-2]] <<- input$survey)
             try(qualityresults[SamplesB[input$Click.Counter-midways-2]] <<- input$survey1)

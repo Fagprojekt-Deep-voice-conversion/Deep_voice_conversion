@@ -40,7 +40,19 @@ combination2 <- function(){
   
   
 }
+
+models = c("AutoVC", "StarGAN", "Baseline")
+categories = c("Danish_Danish", "English_English", "20min", "10min", "Baseline")
+subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Female", "Male_English", "Male_Danish", "Female_English", "Female_Danish")
+
+voices = c("source", "target", "converted")
+
 X <- combination()
-X
 Y <- combination2()
+X
 Y
+
+
+SamplesA <- sample(nrow(Y), nrow(Y), replace = F)
+SamplesB <- sample(nrow(X), nrow(X), replace = F)
+X[1,]
