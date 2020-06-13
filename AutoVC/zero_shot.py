@@ -47,4 +47,4 @@ def Zero_shot(source, target, model, voc_model, save_path, only_conversion = Tru
         
 
 model, voc_model = Instantiate_Models(model_path = 'Models/AutoVC/autoVC_seed40_200k.pt')
-Zero_shot("../Experiment/Survey-app/voice-conversion-survey/www/persons/anders/anders_50.wav", "../Experiment/Survey-app/voice-conversion-survey/www/persons/lars/lars_48.wav", model, voc_model, ".")
+Zero_shot("2.wav", "../Experiment/Survey-app/voice-conversion-survey/www/persons/lars/lars_48.wav", model, voc_model, ".")
