@@ -150,24 +150,19 @@ server <- function(input, output){
         
             return(
                 list(
-                    h2("Welcome to the Deep Voice Conversion survey!"),
-                    h4("Deep fakes are instances of fake news in which artificial intelligence is used
-                       to synthesise realistic image and/or sound media."),
-                    h4("A Deep fake could e.g. be an synthesised video with the image and sound of a famous person
-                       or a person in power."),
-                    h4("If this new technology is put to use by malicious actors it could have severe, negative consequences."),
-                    h4("Imagine a synthesised video of a politician (or any other influential person) ridiculing himself/herself or making harmfull statements."),
-                    h4("This video could shift the public opinion about this person dramatically or some people might act upon his/her fake statements."),
+                    h2("Welcome to the Voice Conversion survey!"),
+                    h4("Your contribution to the experiment is greatly appreciated. We will here sum up some of the basic aspects of what you are here to do."),
+                    h4("Before explaining the experiment, we want to make sure that you know that you are free to exit at any time. All of the information you will provide will be anonymous."),
+                    h4("The experiment will run in 2 sub experiments as follows: For each screen, two recordings of a famous speaker will be available to listen to. The objective is to choose the one you believe to be the actual recording from the famous speaker. There will be a series of these questions, and when these are over a screen will tell you so."),
+                    h4("The next series of questions, shows for each screen 3 recordings that will be available to listen to from the click of a button. There is 2 speakers and a test recording. You are then being asked to listen to the recordings, and then using a scale from -5 to 5 to describe who the test recording mostly sound like it is originating from. This will go under Question A. Question B, will have one sound where the participant is asked to specify the quality of the recording again by using a slider. These Questions will happen for a number of recordings, and there is no correct answers to the questions and your answers will be anonymous. The total time to take the test is estimated to be around ten minutes and we encourage you to take your time to answer honestly and by yourself."),
+              
                     # h3("| "),
                     # h3("| "),
-                    
-                    h4("We wish to investigate how far the deep fakes tehcnology is within voice conversion (faking peoples' voices)"),
-                    h4("To do so, we wish to test two different methods for voice conversion on a set of different subtask with both english and danish voice"),
-                    h4("This survey consists of 20 questions of 2 parts each. In the first part you are asked to rate the similarity of two voices and in the second part you are asked to rate the quality of a converted voice"),
-                    h4("Please listen carefully to each audio file before rating."),
+                  
+                    h4("We encourage you to answer the questions as truthfully as possible and by yourself."),
                     h4("Whenever you are ready click Next."),
-                
-                    checkboxInput("Check", value = FALSE, label = "Agree to terms and conditions"))
+                  
+                    checkboxInput("Check", value = FALSE, label = "I have read the experiment description above and I give my consent for the researchers to use the data collected from the experiment for research purposes."))
                 )
           
         
@@ -209,7 +204,7 @@ server <- function(input, output){
         )}
         if (input$Click.Counter==partA+2 ){
           return(list(h2("Part 2: Conversions Quality"),
-                      h4("This part of the survey consists of ", partB, " questions"),
+                      h4("This part of the survey consists of a series of questions"),
                       h4("Each questions is split into 2 subparts"),
                       h4("In the first subpart you are presented for pairs of voices and you objective is to rate the similarity of these voies"),
                       h4("In the second subpart you have to rate the quality / naturalness of a voice ")))
@@ -244,8 +239,14 @@ server <- function(input, output){
             return(
                 list(
                     h3("Thanks for taking the survey!"),
-                    
-                    h4("This has truly been a great help to our project")
+                    h4("Deep fakes are instances of fake news in which artificial intelligence is used
+                       to synthesise realistic image and/or sound media."),
+                    h4("A Deep fake could e.g. be an synthesised video with the image and sound of a famous person
+                       or a person in power."),
+                    h4("If this new technology is put to use by malicious actors it could have severe, negative consequences."),
+                    h4("Imagine a synthesised video of a politician (or any other influential person) ridiculing himself/herself or making harmfull statements."),
+                    h4("We investigate this field to get a greater understanding of the technology behind it. Both for the good uses a technology such as this can be used to, but also to be able to detect voice conversion when it is being misused."),
+                    h4("This has truly been a great help to our project and we thank you for taking the time to answer the survey.")
                     
                                     )
             ) 
