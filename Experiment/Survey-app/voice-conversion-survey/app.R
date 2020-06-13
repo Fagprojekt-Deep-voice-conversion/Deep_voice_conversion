@@ -11,10 +11,12 @@ gs4_auth(token = drive_token())
 
 ui <- fluidPage(
     useShinyjs(),
-    titlePanel("Deep Fakes inc."),
+    titlePanel("Deep Voice Conversion survey"),
     sidebarPanel(
   
-        h3("By us..."),
+        h3("By students at DTU Compute"),
+        h5("Please fill in personal information below"),
+        h5("The survey is a 100 % anonymous"),
         h6(textOutput("save.results1")),
         h6(textOutput("save.results2")),
         h6(textOutput("checkcategory")),
@@ -24,17 +26,16 @@ ui <- fluidPage(
         h6(textOutput("play")),
         h6(textOutput("check")),
         numericInput("age", "Feel free to let us know your age", value = NaN, min = 0, max = 120),
-        radioButtons("gender", "Feel free to let us know your gender", c("Male", "Female", "Other", "Prefer not to say"), selected = "Prefer not to say"),
+        radioButtons("gender", "Feel free to let us know your gender", c("Male", "Female", "Other", "Prefer not to say"), selected = "Prefer not to say")
         
         
-      
-      
-       
-       actionButton("play1", ""),
-       actionButton("play2", ""),
-       actionButton("play3", ""),
-       actionButton("play4", ""),
-       checkboxInput("interrupt", "STOP!")
+       # 
+       # 
+       # 
+       # actionButton("play1", ""),
+       # actionButton("play2", ""),
+       # actionButton("play3", ""),
+       # actionButton("play4", ""),
        
        ),
      
@@ -46,7 +47,8 @@ ui <- fluidPage(
             
             actionButton("Click.Counter", textOutput("Button")), 
             
-            textOutput("test")
+            # textOutput("test"),
+            h6(textOutput("done"))
             
         )
         
@@ -63,7 +65,7 @@ server <- function(input, output){
                                                                        subcategories[X[SamplesB,][input$Click.Counter - partA -2,][3]],
                                                                        "similarity", seeds[input$Click.Counter])[1],
                                                          type = " 'audio/wav", autoplay = NA,
-                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                         controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
     
     observeEvent(input$target, {insertUI(ui = tags$audio(src = get_wavs_experiment(
                                                                        models[X[SamplesB,][input$Click.Counter- partA -2,][1]],
@@ -71,7 +73,7 @@ server <- function(input, output){
                                                                        subcategories[X[SamplesB,][input$Click.Counter- partA -2,][3]],
                                                                        "similarity", seeds[input$Click.Counter])[2],
                                                          type = " 'audio/wav", autoplay = NA,
-                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                         controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
 
     observeEvent(input$converted2, {insertUI(ui = tags$audio(src = get_wavs_experiment(
                                                                        models[X[SamplesB,][input$Click.Counter- partA -2,][1]],
@@ -79,7 +81,7 @@ server <- function(input, output){
                                                                        subcategories[X[SamplesB,][input$Click.Counter- partA -2,][3]],
                                                                        "similarity", seeds[input$Click.Counter])[3],
                                                          type = " 'audio/wav", autoplay = NA,
-                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                         controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
     
     
     observeEvent(input$real, {insertUI(ui = tags$audio(src = get_wavs_experiment(
@@ -88,7 +90,7 @@ server <- function(input, output){
                                                                        subcategories[Y[SamplesA,][input$Click.Counter-1,][3]],
                                                                        "real_fake", seeds[input$Click.Counter])[1],
                                                          type = " 'audio/wav", autoplay = NA,
-                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                         controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
     
     observeEvent(input$fake, {insertUI(ui = tags$audio(src = get_wavs_experiment(
                                                                      models[Y[SamplesA,][input$Click.Counter-1,][1]],
@@ -96,7 +98,7 @@ server <- function(input, output){
                                                                      subcategories[Y[SamplesA,][input$Click.Counter-1,][3]],
                                                                      "real_fake", seeds[input$Click.Counter])[2],
                                                        type = " 'audio/wav", autoplay = NA,
-                                                       controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                       controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
   
     
     observe({toggleState("Click.Counter", condition = input$Check & input$Click.Counter < n_questions + 3)})
@@ -148,24 +150,27 @@ server <- function(input, output){
         
             return(
                 list(
-                    h2("Welcome to the Deep Fakes survey!"),
-                    h4("Deep fakes are instances of fake news in which artificial intelligence is used
-                       to synthesise realistic image and/or sound media."),
-                    h4("A Deep fake could e.g. be an synthesised video with the image and sound of a famous person
-                       or a person in power."),
-                    h4("If this new technology is put to use by malicious actors it could have severe, negative consequences."),
-                    h4("Imagine a synthesised video of a politician (or any other influential person) ridiculing himself/herself or making harmfull statements."),
-                    h4("This video could shift the public opinion about this person dramatically or some people might act upon his/her fake statements."),
+                    h2("Welcome to the Voice Conversion survey!"),
+                    h4("Your contribution to the experiment is greatly appreciated. We will here sum up some of the basic aspects of what you are here to do."),
+                    h4("Before explaining the experiment, we want to make sure that you know that you are free to exit at any time.
+                       All of the information you will provide will be anonymous."),
+                    h4("The experiment will run in 2 sub experiments as follows:"),
+                    h4("For each screen, two recordings will be available to listen to.
+                       The objective is to choose the one you believe to be the actual recording. 
+                       There will be a series of these questions, and when these are over a screen will tell you so."),
+                    h4("The next series of questions, shows for each screen 2 recordings that will be available to listen to from the click of a button.
+                       You are then being asked to listen to the recordings, and then using a scale from 0 to 5 to describe how similar the two audiofiles sound.
+                       This will go under Question A. Question B, will have one sound where the participant is asked to specify the quality of the recording again by using a slider.
+                       These Questions will happen for a number of recordings, and there is no correct answers to the questions and your answers will be anonymous.
+                       The total time to take the test is estimated to be around ten minutes and we encourage you to take your time to answer honestly and by yourself."),
+              
                     # h3("| "),
                     # h3("| "),
-                    
-                    h4("We wish to investigate how far the deep fakes tehcnology is within voice conversion (faking peoples' voices)"),
-                    h4("To do so, we wish to test two different methods for voice conversion on a set of different subtask with both english and danish voice"),
-                    h4("This survey consists of 20 questions of 2 parts each. In the first part you are asked to rate the similarity of two voices and in the second part you are asked to rate the quality of a converted voice"),
-                    h4("Please listen carefully to each audio file before rating."),
+                  
+                    h4("We encourage you to answer the questions as truthfully as possible and by yourself."),
                     h4("Whenever you are ready click Next."),
-                
-                    checkboxInput("Check", value = FALSE, label = "Agree to terms and conditions"))
+                  
+                    checkboxInput("Check", value = FALSE, label = "I have read the experiment description above and I give my consent for the researchers to use the data collected from the experiment for research purposes."))
                 )
           
         
@@ -173,7 +178,11 @@ server <- function(input, output){
         
       if (input$Click.Counter == 1){
         return(list(
-          h3("This is part 1")
+          h2("Part 1: Which is real"),
+          h4("You will be presented for pairs of voices"),
+          h4("One voice is real the other is a synthesized voice"),
+          h4("Your objective is to tell which is real")
+          
         ))
       }
       if (input$Click.Counter>1 & input$Click.Counter<=partA+1 ){
@@ -184,7 +193,7 @@ server <- function(input, output){
             h2("Part 1: Which is real?"),
             
             h3("Question", input$Click.Counter-1),
-            h4("A: ", real_fake[1], " B: ", real_fake[2]),
+            # h4("A: ", real_fake[1], " B: ", real_fake[2]),
             h5("Guess which voice is real by pressing either A or B"),
             actionButton(real_fake[1], "Play sound A"),
             actionButton(real_fake[2], "Play sound B"),
@@ -202,7 +211,11 @@ server <- function(input, output){
           )
         )}
         if (input$Click.Counter==partA+2 ){
-          return(list(h2("Get ready for Part 2!")))
+          return(list(h2("Part 2: Conversions Quality"),
+                      h4("This part of the survey consists of a series of questions"),
+                      h4("Each questions is split into 2 subparts"),
+                      h4("In subpart A you are presented for pairs of voices and you objective is to rate the similarity of these voies"),
+                      h4("In subpart B you have to rate the quality / naturalness of a voice ")))
         }
         if (input$Click.Counter>partA + 2 & input$Click.Counter<=n_questions +2 ){
             source_target = sample(c("target","converted1"), 2, F)
@@ -214,8 +227,9 @@ server <- function(input, output){
                     h4("Part A: Similarity"),
                     h5("Please rate the similarity of voice X with A and B"),
                      
-                    h5("A score of 5 indicates with high confidence that A and B are the same voice"),
+                   
                     h5("A score of 0 indicates with high confidence that A and B are different voices"),
+                    h5("A score of 5 indicates with high confidence that A and B are the same voice"),
                     actionButton(source_target[1], "Play sound A"),
                     # actionButton("converted1", "Play sound X"),
                     actionButton(source_target[2], "Play sound B"),
@@ -234,8 +248,19 @@ server <- function(input, output){
             return(
                 list(
                     h3("Thanks for taking the survey!"),
-                    
-                    h4("This has truly been a great help to our project")
+                    h4("Voice conversion is the act of imitating peoples voices.
+                       Deep Voice Conversion uses artificial intelligence to convert the speech of one speaker to the voice of a different speaker,
+                       e.g. make a speech of Barack Obama sound like it was Donald Trump talking."),
+                    h4("Unfortunately, this technology can be misused with what is known as 'Deep Fakes'."),
+                    h4("Deep fakes are instances of fake news in which artificial intelligence is used
+                       to synthesise realistic image and/or sound media."),
+                    h4("A Deep fake could e.g. be an synthesised video with the image and sound of a famous person
+                       or a person in power."),
+                    h4("If this new technology is put to use by malicious actors it could have severe, negative consequences."),
+                    h4("Imagine a synthesised video of a politician (or any other influential person) ridiculing himself/herself or making harmfull statements."),
+                    h4("We investigate this field to get a greater understanding of the technology behind it. Both for the good uses of a technology such as this,
+                       but also to be able to detect voice conversion when it is being misused."),
+                    h4("Your time has truly been a great help to our project and we thank you for taking the time to answer the survey.")
                     
                                     )
             ) 
@@ -249,7 +274,12 @@ server <- function(input, output){
             return(models[X[SamplesB,][input$Click.Counter -partA-2,][1]])}
         
         
-        
+    
+    })
+    
+    output$done <- renderText({
+      if (input$Click.Counter > n_questions+2){
+        return("Your results have been submitted")}
     })
     output$checkcategory1 <- renderText({
         if (input$Click.Counter > 1 & input$Click.Counter <= partA + 1){
@@ -345,7 +375,7 @@ server <- function(input, output){
               try(person_score_baseline[persons[name][[1]]] <<- input$survey1)
               try(person_score_conversion[input$Click.Counter - partA - 2, persons[name][[1]]] <<- input$survey1)
             }
-            else{ print("NOO")
+            else{ 
               
               try(person_score_conversion[input$Click.Counter - partA - 2,persons[name][[1]]] <<- input$survey1)
             }
