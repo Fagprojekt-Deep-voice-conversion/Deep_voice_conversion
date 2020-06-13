@@ -21,6 +21,7 @@ ui <- fluidPage(
         h6(textOutput("checkcategory1")),
         h6(textOutput("checkcategory2")),
         h6(textOutput("checkcategory3")),
+        h6(textOutput("play")),
         h6(textOutput("check")),
         numericInput("age", "Feel free to let us know your age", value = NaN, min = 0, max = 120),
         radioButtons("gender", "Feel free to let us know your gender", c("Male", "Female", "Other", "Prefer not to say"), selected = "Prefer not to say"),
@@ -32,7 +33,8 @@ ui <- fluidPage(
        actionButton("play1", ""),
        actionButton("play2", ""),
        actionButton("play3", ""),
-       actionButton("play4", "")
+       actionButton("play4", ""),
+       checkboxInput("interrupt", "STOP!")
        
        ),
      
@@ -56,26 +58,26 @@ ui <- fluidPage(
 server <- function(input, output){
 
     observeEvent(input$converted1, {insertUI(ui = tags$audio(src = get_wavs_experiment(
-                                                                       models[X[SamplesB,][input$Click.Counter - midways -2,][1]],
-                                                                       categories[X[SamplesB,][input$Click.Counter - midways -2,][2]],
-                                                                       subcategories[X[SamplesB,][input$Click.Counter - midways -2,][3]],
-                                                                       "similarity", input$Click.Counter)[1],
+                                                                       models[X[SamplesB,][input$Click.Counter - partA -2,][1]],
+                                                                       categories[X[SamplesB,][input$Click.Counter - partA -2,][2]],
+                                                                       subcategories[X[SamplesB,][input$Click.Counter - partA -2,][3]],
+                                                                       "similarity", seeds[input$Click.Counter])[1],
                                                          type = " 'audio/wav", autoplay = NA,
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
     
     observeEvent(input$target, {insertUI(ui = tags$audio(src = get_wavs_experiment(
-                                                                       models[X[SamplesB,][input$Click.Counter- midways -2,][1]],
-                                                                       categories[X[SamplesB,][input$Click.Counter- midways -2,][2]],
-                                                                       subcategories[X[SamplesB,][input$Click.Counter- midways -2,][3]],
-                                                                       "similarity", input$Click.Counter)[2],
+                                                                       models[X[SamplesB,][input$Click.Counter- partA -2,][1]],
+                                                                       categories[X[SamplesB,][input$Click.Counter- partA -2,][2]],
+                                                                       subcategories[X[SamplesB,][input$Click.Counter- partA -2,][3]],
+                                                                       "similarity", seeds[input$Click.Counter])[2],
                                                          type = " 'audio/wav", autoplay = NA,
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
 
     observeEvent(input$converted2, {insertUI(ui = tags$audio(src = get_wavs_experiment(
-                                                                       models[X[SamplesB,][input$Click.Counter- midways -2,][1]],
-                                                                       categories[X[SamplesB,][input$Click.Counter- midways -2,][2]],
-                                                                       subcategories[X[SamplesB,][input$Click.Counter- midways -2,][3]],
-                                                                       "similarity", input$Click.Counter)[3],
+                                                                       models[X[SamplesB,][input$Click.Counter- partA -2,][1]],
+                                                                       categories[X[SamplesB,][input$Click.Counter- partA -2,][2]],
+                                                                       subcategories[X[SamplesB,][input$Click.Counter- partA -2,][3]],
+                                                                       "similarity", seeds[input$Click.Counter])[3],
                                                          type = " 'audio/wav", autoplay = NA,
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
     
@@ -84,7 +86,7 @@ server <- function(input, output){
                                                                        models[Y[SamplesA,][input$Click.Counter -1,][1]],
                                                                        categories[Y[SamplesA,][input$Click.Counter -1,][2]],
                                                                        subcategories[Y[SamplesA,][input$Click.Counter-1,][3]],
-                                                                       "real_fake", input$Click.Counter)[1],
+                                                                       "real_fake", seeds[input$Click.Counter])[1],
                                                          type = " 'audio/wav", autoplay = NA,
                                                          controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
     
@@ -92,48 +94,54 @@ server <- function(input, output){
                                                                      models[Y[SamplesA,][input$Click.Counter-1,][1]],
                                                                      categories[Y[SamplesA,][input$Click.Counter-1,][2]],
                                                                      subcategories[Y[SamplesA,][input$Click.Counter-1,][3]],
-                                                                     "real_fake", input$Click.Counter)[2],
+                                                                     "real_fake", seeds[input$Click.Counter])[2],
                                                        type = " 'audio/wav", autoplay = NA,
                                                        controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+  
     
-    
-    # observeEvent(input$item1, {output$score1 <- renderText({paste0("You gave a score of ", input$item1)})})
-    
-
+    observe({toggleState("Click.Counter", condition = input$Check & input$Click.Counter < n_questions + 3)})
     
     
     
-    output$MainAction <- renderUI( {
-        dynamicUi()
-    })
-    
-    
-    n_questions <- 40
-    midways <- 16
+    partA <- 16
+    partB <- 24
+  
+    n_questions <- partA + partB
     
     models = c("AutoVC", "StarGAN", "Baseline")
-    categories = c("Danish_Danish", "English_English", "20min", "10min", "Baseline")
+    categories = c("Danish", "English", "20min", "10min", "Baseline")
     subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Male", "Male_English", "Male_Danish", "Female_English", "Female_Danish")
   
     voices = c("source", "target", "converted")
-    
+    persons = list("obama" = 1, "trump"= 2, "hillary"= 3, "michelle"= 4, "mette"= 5, "helle"= 6, "lars"= 7, "anders" = 8)
     X <- combination()
     Y <- combination2()
-    Y
-    SamplesA
+  
+  
     SamplesA <- sample(nrow(Y), nrow(Y), replace = F)
     SamplesB <- sample(nrow(X), nrow(X), replace = F)
-    # samples <- sample(3, 3, replace = F)
     
+    seeds = sample(1:1000, 100, replace = F)
     
     real_fake <- sample(c("real", "fake"), 2, replace = F)
     
     similarityresults = rep(NaN, nrow(X))
     qualityresults = rep(NaN, nrow(X))
     fakenessresults = rep(NaN, nrow(Y))
-    observe({toggleState("Click.Counter", condition = input$Check)})
+    
+    person_score_conversion = matrix(, nrow = nrow(X), ncol = length(persons))
+    person_score_baseline = rep(NA , length(persons))
+    colMeans(avg_score_persons, na.rm = T)
     
     ss = "https://docs.google.com/spreadsheets/d/1Y2Hu04dY-chxSPdVgcUefXSTs6zvG6lkzAFlWhICPJA/edit#gid=0"
+    
+    
+    
+    output$MainAction <- renderUI( {
+      dynamicUi()
+    })
+    
+    
     
     dynamicUi <- reactive({
         if (input$Click.Counter==0){
@@ -168,8 +176,8 @@ server <- function(input, output){
           h3("This is part 1")
         ))
       }
-      if (input$Click.Counter>1 & input$Click.Counter<=midways+1 ){
-        # real_fake <<- sample(c("real", "fake"), 2, replace = F)
+      if (input$Click.Counter>1 & input$Click.Counter<=partA+1 ){
+        real_fake <<- sample(c("real", "fake"), 2, replace = F)
         return(
           list(
             
@@ -193,10 +201,10 @@ server <- function(input, output){
             # sliderInput("survey1", "How well does it sound?", 0, 10, value = 5)
           )
         )}
-        if (input$Click.Counter==midways+2 ){
+        if (input$Click.Counter==partA+2 ){
           return(list(h2("Get ready for Part 2!")))
         }
-        if (input$Click.Counter>midways + 2 & input$Click.Counter<=n_questions +2 ){
+        if (input$Click.Counter>partA + 2 & input$Click.Counter<=n_questions +2 ){
             source_target = sample(c("target","converted1"), 2, F)
             return(
                 list(
@@ -234,32 +242,32 @@ server <- function(input, output){
             
     })
     output$checkcategory <- renderText({
-        if (input$Click.Counter > 1 & input$Click.Counter <= midways + 1){
+        if (input$Click.Counter > 1 & input$Click.Counter <= partA + 1){
             return(
                 models[Y[SamplesA,][input$Click.Counter-1,][1]])}
         else if (input$Click.Counter > 2 & input$Click.Counter <= n_questions +2){
-            return(models[X[SamplesB,][input$Click.Counter -midways-2,][1]])}
+            return(models[X[SamplesB,][input$Click.Counter -partA-2,][1]])}
         
         
         
     })
     output$checkcategory1 <- renderText({
-        if (input$Click.Counter > 1 & input$Click.Counter <= midways + 1){
+        if (input$Click.Counter > 1 & input$Click.Counter <= partA + 1){
             return(
                 categories[Y[SamplesA,][input$Click.Counter -1,][2]])}
         else if (input$Click.Counter > 2 & input$Click.Counter <= n_questions +2){
-            return(categories[X[SamplesB,][input$Click.Counter - midways-2 ,][2]])}
+            return(categories[X[SamplesB,][input$Click.Counter - partA-2 ,][2]])}
         
         
         
     })
     output$checkcategory2 <- renderText({
       
-        if (input$Click.Counter > 1 & input$Click.Counter <= midways + 1){
+        if (input$Click.Counter > 1 & input$Click.Counter <= partA + 1){
             return(
                 subcategories[Y[SamplesA,][input$Click.Counter -1,][3]])}
         else if (input$Click.Counter > 2 & input$Click.Counter <= n_questions +2){
-            return(subcategories[X[SamplesB,][input$Click.Counter - midways-2,][3]])}
+            return(subcategories[X[SamplesB,][input$Click.Counter - partA-2,][3]])}
         
         
         
@@ -280,8 +288,8 @@ server <- function(input, output){
     })
     score <- NaN
     output$save.results1 <- renderText({
-      
-      if ((input$Click.Counter>2) & (input$Click.Counter <= midways+2)){
+      try(
+      if ((input$Click.Counter>1) & (input$Click.Counter <= partA+1)){
         
         if (real_fake[1] == "fake"){
           if (input$fakescore == "A"){
@@ -305,11 +313,11 @@ server <- function(input, output){
           
           
         }
-        try(fakenessresults[SamplesA[input$Click.Counter-2]]<<-score)
-        # real_fake <<- sample(c("real", "fake"), 2, replace = F)
-        # return(input$Click.Counter-2)
-        real_fake <<- sample(c("real", "fake"), 2, replace = F)
-      }
+        try(fakenessresults[SamplesA[input$Click.Counter-1]]<<-score)
+        #try(sheet_append(ss, data.frame(t(c(input$age, input$gender, fakenessresults))), sheet = "Fakeness"))
+        # print(fakenessresults)
+        # print(input$Click.Counter)
+      })
       
      return()
         
@@ -320,9 +328,30 @@ server <- function(input, output){
         # After each click, save the results of the radio buttons.
       
      
-        if ((input$Click.Counter>midways+2)&(input$Click.Counter<=n_questions+2)){
-            try(similarityresults[SamplesB[input$Click.Counter-midways-2]] <<- input$survey)
-            try(qualityresults[SamplesB[input$Click.Counter-midways-2]] <<- input$survey1)
+        if ((input$Click.Counter>partA+2)&(input$Click.Counter<=n_questions+2)){
+            try(similarityresults[SamplesB[input$Click.Counter-partA-2]] <<- input$survey)
+            try(qualityresults[SamplesB[input$Click.Counter-partA-2]] <<- input$survey1)
+            
+            # try(print(similarityresults))
+            name <- get_wavs_experiment(
+            models[X[SamplesB,][input$Click.Counter- partA -2,][1]],
+            categories[X[SamplesB,][input$Click.Counter- partA -2,][2]],
+            subcategories[X[SamplesB,][input$Click.Counter- partA -2,][3]],
+            "similarity", seeds[input$Click.Counter])[4]
+            
+            C = categories[X[SamplesB,][input$Click.Counter- partA -2,][2]]
+            if(C == "Baseline"){
+              
+              try(person_score_baseline[persons[name][[1]]] <<- input$survey1)
+              try(person_score_conversion[input$Click.Counter - partA - 2, persons[name][[1]]] <<- input$survey1)
+            }
+            else{ print("NOO")
+              
+              try(person_score_conversion[input$Click.Counter - partA - 2,persons[name][[1]]] <<- input$survey1)
+            }
+            
+            #  
+            
             return()}
       
         if (input$Click.Counter == n_questions + 3){
@@ -330,6 +359,8 @@ server <- function(input, output){
           try(sheet_append(ss, data.frame(t(c(input$age, input$gender, similarityresults))), sheet = "Similarity"))
           try(sheet_append(ss, data.frame(t(c(input$age, input$gender, similarityresults))), sheet = "Quality"))
           try(sheet_append(ss, data.frame(t(c(input$age, input$gender, fakenessresults))), sheet = "Fakeness"))
+          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, person_score_baseline, colMeans(person_score_conversion, na.rm = TRUE)))), sheet = "Persons"))
+          
             return("Shiiit son you did it!")
         }
       
@@ -343,6 +374,4 @@ server <- function(input, output){
    
     }
 shinyApp(ui = ui, server = server)
-
-
 

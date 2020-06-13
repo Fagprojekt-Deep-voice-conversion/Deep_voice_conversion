@@ -175,14 +175,15 @@ def Experiment(Model_path, train_length = None, test_data = None, name_list = No
 
 
 
+
 if __name__ == "__main__":
     # (data, labels), (_, _) = DataLoad2("../data/Test_Data")
-    # model, voc_model = Instantiate_Models(model_path = 'autoVC_seed40_200k.pt', vocoder = "wavernn")
+    model, voc_model = Instantiate_Models(model_path = 'autoVC_seed40_200k.pt', vocoder = "wavernn")
     # source, target = data[0], data[39]
     # Conversion(source, target, model, voc_model, voc_type = "wavernn", task = "English_English", subtask = "Male_Male")
 
 
-    Experiment(Model_path = "Models/AutoVC/AutoVC_seed40_200k.pt", train_length =  None, test_data = "../data/test_data", name_list = "../data/persons2.csv", test_size = 11, experiment = "../Experiment" )
+    #Experiment(Model_path = "Models/AutoVC/AutoVC_seed40_200k.pt", train_length =  None, test_data = "../data/test_data", name_list = "../data/persons2.csv", test_size = 11, experiment = "../Experiment" )
    
     
 

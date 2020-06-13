@@ -63,15 +63,15 @@ get_wavs_experiment <- function(model, task, subtask, q, seed){
     if (q == "real_fake"){
       list_of_fakes <- list.files(sprintf("www/%s/%s/%s", model, task, subtask))
       fake <- sample(list_of_fakes, 1, F)
-      t <- strsplit(task[1], "_")[[1]]
+      t <- task
       s <- strsplit(subtask[1], "_")[[1]]
       
-      baseline_category <- paste(s[2],t[2], sep = "_")
-
+      baseline_category <- paste(s[2],t, sep = "_")
+      print(baseline_category)
       list_of_reals <- list.files(sprintf('www/Baseline/Baseline/%s', baseline_category))
       
       name <- sample(list_of_reals, 1)
-      print(name)
+      
       real<-sample(list.files(paste("www", "Baseline", "Baseline", baseline_category, name, sep = "/")),1)
       
       path_to_fake <- paste(model, task, subtask, fake, sep= "/")
@@ -91,8 +91,8 @@ get_wavs_experiment <- function(model, task, subtask, q, seed){
       path_to_fake1 <- paste(model, task, subtask, fakes[1], sep= "/")
       path_to_fake2 <- paste(model, task, subtask, fakes[2], sep= "/")
       path_to_real <- paste("persons", name, real, sep = "/" )
-      print(c(path_to_fake1, path_to_real, path_to_fake2))
-      return(c(path_to_fake1, path_to_real, path_to_fake2))
+      
+      return(c(path_to_fake1, path_to_real, path_to_fake2, name))
     }
   else if  (q == "similarity" & model == "Baseline"){
     names <- sample(list.files(paste("www", model, task, subtask, sep = "/")),2, replace = F)
@@ -105,15 +105,10 @@ get_wavs_experiment <- function(model, task, subtask, q, seed){
     path_to_fake1 <- paste(model, task, subtask, names[1], person1[1], sep= "/")
     path_to_fake2 <- paste(model, task, subtask, names[2], person2, sep= "/")
     path_to_real <- paste(model, task, subtask, names[1], person1[2], sep = "/" )
-    print(c(path_to_fake1, path_to_real, path_to_fake2))
-    return(c(path_to_fake1, path_to_real, path_to_fake2))
+    # print(c(path_to_fake1, path_to_real, path_to_fake2, names[2]))
+    return(c(path_to_fake1, path_to_real, path_to_fake2, names[2]))
 
   }
     
 }
 
-get_wavs_experiment("AutoVC", "English_English", "Male_Male", "real_fake", 2)
-
-
-get_wavs_experiment("Baseline", "Baseline", "Male_English", "similarity", 23)     
-      
