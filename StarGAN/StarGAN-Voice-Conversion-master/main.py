@@ -5,6 +5,7 @@ from data_loader import get_loader, TestDataset
 from torch.backends import cudnn
 from numpy.random import seed as seed_np
 from torch import manual_seed as seed_t
+import torch
 import pickle
 
 
@@ -30,21 +31,35 @@ def main(config):
 		os.makedirs(config.loader_dir)
 	
 	# Data loader.
+	# Train
+	train_loader = get_loader(config.train_data_dir, config.batch_size, 'train', num_workers=config.num_workers)
+	
+	"""
 	if os.path.exists(config.loader_dir+"/trainloader.pkl"):
 		with open(config.loader_dir+"/trainloader.pkl", "rb") as f:
 			train_loader = pickle.load(f)
+		train_loader = pickle.loads(f)
 	else:
 		train_loader = get_loader(config.train_data_dir, config.batch_size, 'train', num_workers=config.num_workers)
+		t = pickle.dumps(train_loader)
 		with open(config.loader_dir+"/trainloader.pkl", "wb") as f:
-			pickle.dump(train_loader, f)
-			
+			pickle.dump(t, f)
+	"""
+		
+	# Test
+	test_loader = TestDataset(config.test_data_dir, config.wav_dir, src_spk='p262', trg_spk='p272')
+	"""
 	if os.path.exists(config.loader_dir+"/testloader.pkl"):
 		with open(config.loader_dir+"/testloader.pkl", "rb") as f:
 			test_loader = pickle.load(f)
+		test_loader = pickle.loads(test_loader)
 	else:
 		test_loader = TestDataset(config.test_data_dir, config.wav_dir, src_spk='p262', trg_spk='p272')
+		t = pickle.dumps(test_loader)
 		with open(config.loader_dir+"/testloader.pkl", "wb") as f:
-			pickle.dump(test_loader, f)
+			pickle.dump(t, f)
+	"""
+			
 	
 
 	# Solver for training and testing StarGAN.
@@ -77,6 +92,7 @@ if __name__ == '__main__':
 	parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for Adam optimizer')
 	parser.add_argument('--beta2', type=float, default=0.999, help='beta2 for Adam optimizer')
 	parser.add_argument('--resume_iters', type=int, default=None, help='resume training from this step')
+	parser.add_argument('--resume_from_max', type=int, default=1, help='whether to resume the training from the latest model, as int')
 
 	# Test configuration.
 	parser.add_argument('--test_iters', type=int, default=100000, help='test model from this step')

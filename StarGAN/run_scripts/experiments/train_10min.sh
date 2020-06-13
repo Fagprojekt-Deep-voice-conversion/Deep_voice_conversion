@@ -3,19 +3,17 @@
 ### ?- specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J StarGAN_30min_seed1000
+#BSUB -J StarGAN_10min
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 1
 ### -- set span if number of cores is more than 1
 ###BSUB -R "span[hosts=1]"
 ### -- Select the resources: 1 gpu in exclusive process mode --
 #BSUB -gpu "num=1:mode=exclusive_process"
-### request gpu with 32 gb
-#BSUB -R "select[gpu32gb]"
 ### -- set walltime limit: hh:mm --  maximum 24 hours for GPU-queues right now
 #BSUB -W 24:00
-### request xGB of system-memory
-#BSUB -R "rusage[mem=15GB]"
+# request xGB of system-memory
+#BSUB -R "rusage[mem=60GB]"
 ### -- set the email address --
 # please uncomment the following line and put in your e-mail address,
 # if you want to receive e-mail notifications on a non-default address
@@ -24,12 +22,10 @@
 #BSUB -B
 ### -- send notification at completion--
 #BSUB -N
-### Make job dependent on previous
-#BSUB -w "ended(7118524)"
 ### -- Specify the output and error file. %J is the job-id --
 ### -- -o and -e mean append, -oo and -eo mean overwrite --
-#BSUB -o StarGAN_30min_seed1000_%J.out
-#BSUB -e StarGAN_30min_seed1000_%J.err
+#BSUB -o StarGAN_10min_%J.out
+#BSUB -e StarGAN_10min_%J.err
 # -- end of LSF options --
 
 ### Set directory
@@ -61,9 +57,9 @@ source StarGAN-env/bin/activate
 
 ### Train model
 #python ../StarGAN-Voice-Conversion-master/main.py
-datadir=/work1/s183920/Deep_voice_conversion/data/train_data/StarGAN/30min
+datadir=/work1/s183920/Deep_voice_conversion/data/train_data/StarGAN/10min
 moddir=/work1/s183920/Deep_voice_conversion/StarGAN
-modname=30min_seed1000
+modname=10min
 steps=200000
 
 if [ ! -d "$moddir/models/$modname" ]
@@ -102,3 +98,4 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--model_save_dir $moddir/models/$modname \
 		--loss_name loss_$modname \
 		--resume_from_max 1 \
+

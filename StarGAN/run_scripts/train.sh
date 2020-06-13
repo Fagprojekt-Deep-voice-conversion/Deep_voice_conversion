@@ -26,76 +26,39 @@ source StarGAN-env/bin/activate
 
 ### Train model
 #python ../StarGAN-Voice-Conversion-master/main.py
-dir=/work1/s183920/Deep_voice_conversion_old/StarGAN/models/base 
-datadir=/work1/s183920/Deep_voice_conversion/data/VCTK-Data/StarGAN/mc
-moddir=/work1/s183920/Deep_voice_conversion/StarGAN
-modname=base
+datadir=/work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/mc
+moddir=/work1/s183920/Deep_voice_conversion_old/StarGAN
+modname=base_test_old
 steps=2000
 
-if [ ! -d "$dir$" ]; then; mkdir $dir; fi
 
-if [ -z "$(ls -A $dir)" ]
-then 
-	python ../StarGAN-Voice-Conversion-master/main.py \
-			--lambda_cls 10 \
-			--lambda_rec 10 \
-			--lambda_gp 10 \
-			--sampling_rate 16000 \
-			--batch_size 32 \
-			--num_iters $steps \
-			--num_iters_decay 100000 \
-			--g_lr 0.0001 \
-			--d_lr 0.0001 \
-			--n_critic 5 \
-			--beta1 0.5 \
-			--beta2 0.999 \
-			--test_iters 100000 \
-			--seed 420 \
-			--num_workers 1 \
-			--mode train \
-			--log_step 10 \
-			--sample_step 1000 \
-			--model_save_step 1000 \
-			--lr_update_step 1000 \
-			--train_data_dir $datadir/train \
-			--test_data_dir $datadir/test \
-			--loader_dir $datadir/loader \
-			--wav_dir $datadir/wav16 \
-			--log_dir $moddir/logs/$modname \
-			--sample_dir $moddir/samples/$modname \
-			--model_save_dir $moddir/models/$modname \
-			--loss_name loss_$modname \
-else
-	m=$(ls $dir | sed -e s/[^0-9]//g | tail -1)
-	let "m = m - 1000"
-	python ../StarGAN-Voice-Conversion-master/main.py \
-			--lambda_cls 10 \
-			--lambda_rec 10 \
-			--lambda_gp 10 \
-			--sampling_rate 16000 \
-			--batch_size 32 \
-			--num_iters $steps \
-			--num_iters_decay 100000 \
-			--g_lr 0.0001 \
-			--d_lr 0.0001 \
-			--n_critic 5 \
-			--beta1 0.5 \
-			--beta2 0.999 \
-			--test_iters 100000 \
-			--seed 420 \
-			--num_workers 1 \
-			--mode train \
-			--log_step 10 \
-			--sample_step 1000 \
-			--model_save_step 1000 \
-			--lr_update_step 1000 \
-			--train_data_dir $datadir/train \
-			--test_data_dir $datadir/test \
-			--loader_dir $datadir/loader \
-			--wav_dir $datadir/wav16 \
-			--log_dir $moddir/logs/$modname \
-			--sample_dir $moddir/samples/$modname \
-			--model_save_dir $moddir/models/$modname \
-			--loss_name loss_$modname \
-			--resume_iters $m \
-fi
+python ../StarGAN-Voice-Conversion-master/main.py \
+		--lambda_cls 10 \
+		--lambda_rec 10 \
+		--lambda_gp 10 \
+		--sampling_rate 16000 \
+		--batch_size 32 \
+		--num_iters $steps \
+		--num_iters_decay 100000 \
+		--g_lr 0.0001 \
+		--d_lr 0.0001 \
+		--n_critic 5 \
+		--beta1 0.5 \
+		--beta2 0.999 \
+		--test_iters 100000 \
+		--seed 420 \
+		--num_workers 1 \
+		--mode train \
+		--log_step 10 \
+		--sample_step 1000 \
+		--model_save_step 1000 \
+		--lr_update_step 1000 \
+		--train_data_dir $datadir/train \
+		--test_data_dir $datadir/test \
+		--loader_dir $datadir/loader \
+		--wav_dir $datadir/wav16 \
+		--log_dir $moddir/logs/$modname \
+		--sample_dir $moddir/samples/$modname \
+		--model_save_dir $moddir/models/$modname \
+		--loss_name loss_$modname \
+

@@ -54,7 +54,17 @@ class Solver(object):
 		self.n_critic = config.n_critic
 		self.beta1 = config.beta1
 		self.beta2 = config.beta2
-		self.resume_iters = config.resume_iters
+		
+		if bool(config.resume_from_max):
+			dir = config.model_save_dir
+			if len(os.listdir(dir)) == 0:
+				self.resume_iters = None
+			else:
+				self.resume_iters = int(max([int(re.search("(\d*)-.\.ckpt", file).group(1)) for file in os.listdir(dir)])-1000)
+				self.resume_iters = self.resume_iters if self.resume_iters >= 1000 else None
+				print(f"Resuming from iteration {self.resume_iters}...")
+		else:
+			self.resume_iters = config.resume_iters
 
 		# Test configurations.
 		self.test_iters = config.test_iters
@@ -196,7 +206,11 @@ class Solver(object):
 		print('Start training...')
 		start_time = time.time()
 		loss_log = {"d_loss_real":[], "d_loss_cls_spks":[], "d_loss_fake":[], "d_loss":[], "g_loss_fake":[], "g_loss_cls_spks":[], "g_loss_rec":[], "g_loss":[]}
-		losses = {"d_loss":[], "g_loss":[], "step":[]}
+		if os.path.exists(self.log_dir+f"/{self.loss_name}.pkl"):
+			with open(self.log_dir+f"/{self.loss_name}.pkl", "rb") as f:
+				losses = pickle.load(f)
+		else:
+			losses = {"d_loss":[], "g_loss":[], "step":[]}
 		for i in range(start_iters, self.num_iters):
 
             # =================================================================================== #

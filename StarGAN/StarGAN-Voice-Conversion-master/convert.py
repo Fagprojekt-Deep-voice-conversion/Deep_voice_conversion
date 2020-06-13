@@ -32,7 +32,7 @@ spk2acc = {'262': 'Edinburgh', #F
 class TestDataset(object):
 	"""Dataset for testing."""
 	def __init__(self, config):
-		speakers = ['p262', 'p272', 'p229', 'p232', 'p292', 'p293', 'p360', 'p361', 'p248', 'p251']
+		#speakers = ['p262', 'p272', 'p229', 'p232', 'p292', 'p293', 'p360', 'p361', 'p248', 'p251']
 		speakers = []
 		for f in os.listdir(config.test_data_dir):
 			s = re.search("(.*)_.*", f).group(1)
@@ -97,8 +97,15 @@ def test(config):
 	os.makedirs(join(config.convert_dir, str(config.resume_iters)), exist_ok=True)
 	sampling_rate, num_mcep, frame_period=16000, 36, 5
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-	G = Generator().to(device)
+	
+	speakers = []
+	for f in os.listdir(config.test_data_dir):
+		s = re.search("(.*)_.*", f).group(1)
+		if s not in speakers:
+			speakers.append(s)
+	num_speakers = len(speakers)
+	
+	G = Generator(num_speakers = num_speakers).to(device)
 	test_loader = TestDataset(config)
 	# Restore model
 	print(f'Loading the trained models from step {config.resume_iters}...')

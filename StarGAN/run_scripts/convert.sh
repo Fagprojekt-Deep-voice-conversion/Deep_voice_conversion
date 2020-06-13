@@ -18,6 +18,12 @@ then
 
 fi
 
+datadir=/work1/s183920/Deep_voice_conversion/data/train_data/StarGAN/30min
+moddir=/work1/s183920/Deep_voice_conversion/StarGAN
+modname=30min_seed3000
+conv_dir=/work1/s183920/Deep_voice_conversion/data/results/StarGAN/$modname/converted 
+steps=200000
+
 
 ### Load modules
 module load python3
@@ -29,13 +35,13 @@ source StarGAN-env/bin/activate
 python ../StarGAN-Voice-Conversion-master/convert.py \
 		--seed 420 \
 		--num_converted_wavs 1 \
-		--resume_iters 4000 \
-		--src_spk p262 \
-		--trg_spk p272 \
-		--train_data_dir /work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/mc/train \
-		--test_data_dir /work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/mc/test \
-		--wav_dir /work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/wav16 \
-		--log_dir /work1/s183920/Deep_voice_conversion/data/results/StarGAN/logs \
-		--model_save_dir /work1/s183920/Deep_voice_conversion_old/data/results/StarGAN/models \
-		--convert_dir /work1/s183920/Deep_voice_conversion_old/data/results/StarGAN/converted \
-		--files_to_convert random
+		--resume_iters $steps \
+		--src_spk lars \
+		--trg_spk anders \
+		--train_data_dir $datadir/mc/train \
+		--test_data_dir $datadir/mc/test \
+		--wav_dir $datadir/wav16 \
+		--log_dir $moddir/logs/$modname \
+		--model_save_dir $moddir/models/$modname \
+		--convert_dir $conv_dir \
+		--files_to_convert random \
