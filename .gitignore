@@ -47,7 +47,7 @@ Model/run_scripts/AutoVC-env/
 # Own additions
 
 Model/WaveNetVC_pretrained.pth
-
+vocoder/WaveRNN_model.py
 ### json settings ###
 settings.json
 .idea/workspace.xml

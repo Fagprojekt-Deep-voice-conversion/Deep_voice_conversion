@@ -3,7 +3,7 @@
 ### ?- specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J AutoVCexperiment10min
+#BSUB -J AutoVCexperiment20min
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 1
 ### -- set span if number of cores is more than 1
@@ -50,7 +50,7 @@ source AutoVC-env/bin/activate
 echo $PWD
 
 ### Run python script
-python3 ../ConductExperiment.py --model Models/AutoVC/AutoVC30min_step72.pt --test_data ../data/test_data --name_list ../data/persons.csv --experiment_folder ../Experiment
+python3 ../ConductExperiment.py --model Models/AutoVC/AutoVC20min_step48k.pt --test_data ../data/test_data --name_list ../data/persons.csv --experiment_folder ../Experiment --train_size 20min
 
 
 
