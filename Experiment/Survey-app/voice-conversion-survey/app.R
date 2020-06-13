@@ -204,7 +204,7 @@ server <- function(input, output){
         )}
         if (input$Click.Counter==partA+2 ){
           return(list(h2("Part 2: Conversions Quality"),
-                      h4("This part of the survey consists of ", partB, " questions"),
+                      h4("This part of the survey consists of a series of questions"),
                       h4("Each questions is split into 2 subparts"),
                       h4("In the first subpart you are presented for pairs of voices and you objective is to rate the similarity of these voies"),
                       h4("In the second subpart you have to rate the quality / naturalness of a voice ")))
