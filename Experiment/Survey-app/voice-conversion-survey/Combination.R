@@ -67,7 +67,7 @@ get_wavs_experiment <- function(model, task, subtask, q, seed){
       s <- strsplit(subtask[1], "_")[[1]]
       
       baseline_category <- paste(s[2],t, sep = "_")
-      print(baseline_category)
+      # print(baseline_category)
       list_of_reals <- list.files(sprintf('www/Baseline/Baseline/%s', baseline_category))
       
       name <- sample(list_of_reals, 1)

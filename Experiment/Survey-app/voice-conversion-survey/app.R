@@ -14,27 +14,28 @@ ui <- fluidPage(
     titlePanel("Deep Fakes inc."),
     sidebarPanel(
   
-        h3("By us..."),
+        h3("By students at DTU Compute"),
+        h5("Please fill in personal information below"),
+        h5("The survey is a 100 % anonymous"),
         h6(textOutput("save.results1")),
         h6(textOutput("save.results2")),
-        h6(textOutput("checkcategory")),
-        h6(textOutput("checkcategory1")),
-        h6(textOutput("checkcategory2")),
-        h6(textOutput("checkcategory3")),
+        # h6(textOutput("checkcategory")),
+        # h6(textOutput("checkcategory1")),
+        # h6(textOutput("checkcategory2")),
+        # h6(textOutput("checkcategory3")),
         h6(textOutput("play")),
         h6(textOutput("check")),
         numericInput("age", "Feel free to let us know your age", value = NaN, min = 0, max = 120),
-        radioButtons("gender", "Feel free to let us know your gender", c("Male", "Female", "Other", "Prefer not to say"), selected = "Prefer not to say"),
+        radioButtons("gender", "Feel free to let us know your gender", c("Male", "Female", "Other", "Prefer not to say"), selected = "Prefer not to say")
         
         
-      
-      
-       
-       actionButton("play1", ""),
-       actionButton("play2", ""),
-       actionButton("play3", ""),
-       actionButton("play4", ""),
-       checkboxInput("interrupt", "STOP!")
+       # 
+       # 
+       # 
+       # actionButton("play1", ""),
+       # actionButton("play2", ""),
+       # actionButton("play3", ""),
+       # actionButton("play4", ""),
        
        ),
      
@@ -46,7 +47,8 @@ ui <- fluidPage(
             
             actionButton("Click.Counter", textOutput("Button")), 
             
-            textOutput("test")
+            # textOutput("test"),
+            h6(textOutput("done"))
             
         )
         
@@ -63,7 +65,7 @@ server <- function(input, output){
                                                                        subcategories[X[SamplesB,][input$Click.Counter - partA -2,][3]],
                                                                        "similarity", seeds[input$Click.Counter])[1],
                                                          type = " 'audio/wav", autoplay = NA,
-                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                         controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
     
     observeEvent(input$target, {insertUI(ui = tags$audio(src = get_wavs_experiment(
                                                                        models[X[SamplesB,][input$Click.Counter- partA -2,][1]],
@@ -71,7 +73,7 @@ server <- function(input, output){
                                                                        subcategories[X[SamplesB,][input$Click.Counter- partA -2,][3]],
                                                                        "similarity", seeds[input$Click.Counter])[2],
                                                          type = " 'audio/wav", autoplay = NA,
-                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                         controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
 
     observeEvent(input$converted2, {insertUI(ui = tags$audio(src = get_wavs_experiment(
                                                                        models[X[SamplesB,][input$Click.Counter- partA -2,][1]],
@@ -79,7 +81,7 @@ server <- function(input, output){
                                                                        subcategories[X[SamplesB,][input$Click.Counter- partA -2,][3]],
                                                                        "similarity", seeds[input$Click.Counter])[3],
                                                          type = " 'audio/wav", autoplay = NA,
-                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                         controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
     
     
     observeEvent(input$real, {insertUI(ui = tags$audio(src = get_wavs_experiment(
@@ -88,7 +90,7 @@ server <- function(input, output){
                                                                        subcategories[Y[SamplesA,][input$Click.Counter-1,][3]],
                                                                        "real_fake", seeds[input$Click.Counter])[1],
                                                          type = " 'audio/wav", autoplay = NA,
-                                                         controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                         controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
     
     observeEvent(input$fake, {insertUI(ui = tags$audio(src = get_wavs_experiment(
                                                                      models[Y[SamplesA,][input$Click.Counter-1,][1]],
@@ -96,7 +98,7 @@ server <- function(input, output){
                                                                      subcategories[Y[SamplesA,][input$Click.Counter-1,][3]],
                                                                      "real_fake", seeds[input$Click.Counter])[2],
                                                        type = " 'audio/wav", autoplay = NA,
-                                                       controls = NA, style="display:none;"), selector = "#play1", where = "afterEnd")})
+                                                       controls = NA, style="display:none;"), selector = "#age", where = "afterEnd")})
   
     
     observe({toggleState("Click.Counter", condition = input$Check & input$Click.Counter < n_questions + 3)})
@@ -168,7 +170,11 @@ server <- function(input, output){
         
       if (input$Click.Counter == 1){
         return(list(
-          h3("This is part 1")
+          h2("Part 1: Which is real"),
+          h4("You will be presented for pairs of voices"),
+          h4("One voice is real the other is a converted voice"),
+          h4("Your objective is to tell which is real")
+          
         ))
       }
       if (input$Click.Counter>1 & input$Click.Counter<=partA+1 ){
@@ -179,7 +185,7 @@ server <- function(input, output){
             h2("Part 1: Which is real?"),
             
             h3("Question", input$Click.Counter-1),
-            h4("A: ", real_fake[1], " B: ", real_fake[2]),
+            # h4("A: ", real_fake[1], " B: ", real_fake[2]),
             h5("Guess which voice is real by pressing either A or B"),
             actionButton(real_fake[1], "Play sound A"),
             actionButton(real_fake[2], "Play sound B"),
@@ -197,7 +203,11 @@ server <- function(input, output){
           )
         )}
         if (input$Click.Counter==partA+2 ){
-          return(list(h2("Get ready for Part 2!")))
+          return(list(h2("Part 2: Conversions Quality"),
+                      h4("This part of the survey consists of ", partB, " questions"),
+                      h4("Each questions is split into 2 subparts"),
+                      h4("In the first subpart you are presented for pairs of voices and you objective is to rate the similarity of these voies"),
+                      h4("In the second subpart you have to rate the quality / naturalness of a voice ")))
         }
         if (input$Click.Counter>partA + 2 & input$Click.Counter<=n_questions +2 ){
             source_target = sample(c("target","converted1"), 2, F)
@@ -250,7 +260,12 @@ server <- function(input, output){
             return(models[X[SamplesB,][input$Click.Counter -partA-2,][1]])}
         
         
-        
+    
+    })
+    
+    output$done <- renderText({
+      if (input$Click.Counter > n_questions+2){
+        return("Your results have been submitted")}
     })
     output$checkcategory1 <- renderText({
         if (input$Click.Counter > 1 & input$Click.Counter <= partA + 1){
@@ -346,7 +361,7 @@ server <- function(input, output){
               try(person_score_baseline[persons[name][[1]]] <<- input$survey1)
               try(person_score_conversion[input$Click.Counter - partA - 2, persons[name][[1]]] <<- input$survey1)
             }
-            else{ print("NOO")
+            else{ 
               
               try(person_score_conversion[input$Click.Counter - partA - 2,persons[name][[1]]] <<- input$survey1)
             }
