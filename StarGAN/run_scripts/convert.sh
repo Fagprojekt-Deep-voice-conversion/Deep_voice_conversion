@@ -20,9 +20,9 @@ fi
 
 datadir=/work1/s183920/Deep_voice_conversion/data/train_data/StarGAN/30min
 moddir=/work1/s183920/Deep_voice_conversion/StarGAN
-modname=30min_seed3000
+modname=30min_seed2000
 conv_dir=/work1/s183920/Deep_voice_conversion/data/results/StarGAN/$modname/converted 
-steps=200000
+steps=190000
 
 
 ### Load modules
@@ -36,8 +36,8 @@ python ../StarGAN-Voice-Conversion-master/convert.py \
 		--seed 420 \
 		--num_converted_wavs 1 \
 		--resume_iters $steps \
-		--src_spk lars \
-		--trg_spk anders \
+		--src_spk trump \
+		--trg_spk michelle \
 		--train_data_dir $datadir/mc/train \
 		--test_data_dir $datadir/mc/test \
 		--wav_dir $datadir/wav16 \
