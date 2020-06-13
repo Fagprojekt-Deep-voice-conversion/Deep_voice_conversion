@@ -162,7 +162,7 @@ server <- function(input, output){
                     h4("We encourage you to answer the questions as truthfully as possible and by yourself."),
                     h4("Whenever you are ready click Next."),
                   
-                    checkboxInput("Check", value = FALSE, label = "I have read the experiment description above and I give my consent for the researchers to use the data collected from the experiment."))
+                    checkboxInput("Check", value = FALSE, label = "I have read the experiment description above and I give my consent for the researchers to use the data collected from the experiment for research purposes."))
                 )
           
         
