@@ -27,7 +27,7 @@ ui <- fluidPage(
         h6(textOutput("check")),
         numericInput("age", "Feel free to let us know your age", value = NaN, min = 0, max = 120),
         radioButtons("gender", "Feel free to let us know your gender", c("Male", "Female", "Other", "Prefer not to say"), selected = "Prefer not to say"),
-        actionButton("submit_data", "Submit age and gender"),
+        actionButton("submit_data", "Submit age and gender")
         
         
        # 
@@ -138,8 +138,8 @@ server <- function(input, output){
     qualityresults = rep(NaN, nrow(X))
     fakenessresults = rep(NaN, nrow(Y))
     
-    person_score_conversion_A = matrix(, nrow = nrow(X), ncol = length(persons))
-    person_score_conversion_S = matrix(, nrow = nrow(X), ncol = length(persons))
+    person_score_conversion_A = matrix(NA, nrow = nrow(X), ncol = length(persons))
+    person_score_conversion_S = matrix(NA, nrow = nrow(X), ncol = length(persons))
     person_score_wavernn = rep(NA , length(persons2))
     person_score_world = rep(NA , length(persons))
     colMeans(avg_score_persons, na.rm = T)
@@ -160,24 +160,23 @@ server <- function(input, output){
             return(
                 list(
                     h2("Welcome to the Voice Conversion survey!"),
-                    h4("Your contribution to the experiment is greatly appreciated. We will here sum up some of the basic aspects of what you are here to do."),
-                    h4("Before explaining the experiment, we want to make sure that you know that you are free to exit at any time.
-                       All of the information you will provide will be anonymous."),
-                    h4("The experiment will run in 2 sub experiments as follows:"),
-                    h4("For each screen, two recordings will be available to listen to.
+                    tags$div("Your contribution to the experiment is greatly appreciated. We will here sum up some of the basic aspects of what you are here to do.", tags$br(), tags$br(),
+                    "Before explaining the experiment, we want to make sure that you know that you are free to exit at any time. All of the information you will provide will be anonymous.", tags$br(), tags$br(),
+                    "The experiment will run in 2 sub experiments as follows:", tags$br(), tags$br(),
+                    "For each screen, two recordings will be available to listen to.
                        The objective is to choose the one you believe to be the actual recording. 
-                       There will be a series of these questions, and when these are over a screen will tell you so."),
-                    h4("The next series of questions, shows for each screen 2 recordings that will be available to listen to from the click of a button.
+                       There will be a series of these questions, and when these are over a screen will tell you so.", tags$br(), tags$br(),
+                    "The next series of questions, shows for each screen 2 recordings that will be available to listen to from the click of a button.
                        You are then being asked to listen to the recordings, and then using a scale from 0 to 5 to describe how similar the two audiofiles sound.
                        This will go under Question A. Question B, will have one sound where the participant is asked to specify the quality of the recording again by using a slider.
                        These Questions will happen for a number of recordings, and there is no correct answers to the questions and your answers will be anonymous.
-                       The total time to take the test is estimated to be around ten minutes and we encourage you to take your time to answer honestly and by yourself."),
-                    h4("Unfortunatly, the survey does <u>NOT</u> work with iOS and Safari webrowser, mening you can <u>NOT answer using an Iphone.</u>"),
+                       The total time to take the test is estimated to be around fifteen minutes and we encourage you to take your time to answer honestly and by yourself.",tags$br(), tags$br(),
+                    "Unfortunatly, the survey does", tags$u("NOT"), "work with iOS and Safari webrowser, mening you can", tags$u("NOT"), "answer using an Iphone.",tags$br(), tags$br(),
                     # h3("| "),
                     # h3("| "),
                   
-                    h4("We encourage you to answer the questions as truthfully as possible and by yourself."),
-                    h4("Whenever you are ready click Next."),
+                    "We encourage you to answer the questions as truthfully as possible and by yourself.",tags$br(), tags$br(),
+                    "Whenever you are ready click Next."),
                   
                     checkboxInput("Check", value = FALSE, label = "I have read the experiment description above and I give my consent for the researchers to use the data collected from the experiment for research purposes."))
                 )
@@ -237,8 +236,8 @@ server <- function(input, output){
                     h5("Please rate the similarity of voice A and B"),
                      
                    
-                    h5("A score of 0 indicates with high confidence that A and B are different voices"),
-                    h5("A score of 5 indicates with high confidence that A and B are the same voice"),
+                    h5("A score of 0 indicates with high confidence that A and B originates from different speakers"),
+                    h5("A score of 5 indicates with high confidence that A and B originates from the same speaker"),
                     actionButton(source_target[1], "Play sound A"),
                     # actionButton("converted1", "Play sound X"),
                     actionButton(source_target[2], "Play sound B"),
@@ -247,8 +246,8 @@ server <- function(input, output){
                   
                     h4("Part B: Quality"),
                     h5("Please rate the naturalness of this voice"),
-                    h5("A score of 0 indicates the voice to not be understandable at all"),
-                    h5("A score of 5 indicates the voice to be real i.e. not synthesized"),
+                    h5("A score of 0 indicates the voice does not sound natural at all"),
+                    h5("A score of 5 indicates the voice to be natural i.e. not synthesized"),
                     actionButton("converted2", "Play sound 4"),
                     sliderInput("survey1", "How well does it sound?", 0, 5, value = 3)
                 )
@@ -402,15 +401,16 @@ server <- function(input, output){
             return()}
       
         if (input$Click.Counter == n_questions + 3){
+          time <- as.character(Sys.time())
+          zone <- as.character(Sys.timezone())
+          try(sheet_append( ss, data.frame(t(c(time,zone, input$age, input$gender, similarityresults))), sheet = "Similarity"))
+          try(sheet_append( ss, data.frame(t(c(time,zone,input$age, input$gender, qualityresults))), sheet = "Quality"))
+          try(sheet_append( ss, data.frame(t(c(time,zone,input$age, input$gender, fakenessresults))), sheet = "Fakeness"))
+          try(sheet_append( ss, data.frame(t(c(time,zone,input$age, input$gender, person_score_wavernn, person_score_world))), sheet = "Persons"))
+          try(sheet_append( ss, data.frame(t(c(time,zone,input$age, input$gender, colMeans(person_score_conversion_S, na.rm = T)))), sheet = "ConversionsSG"))
+          try(sheet_append( ss, data.frame(t(c(time,zone,input$age, input$gender, colMeans(person_score_conversion_A, na.rm = T)))), sheet = "ConversionsAV"))
           
-          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, similarityresults))), sheet = "Similarity"))
-          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, qualityresults))), sheet = "Quality"))
-          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, fakenessresults))), sheet = "Fakeness"))
-          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, person_score_wavernn, person_score_world))), sheet = "Persons"))
-          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, colMeans(person_score_conversion_S, na.rm = T)))), sheet = "ConversionsSG"))
-          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, colMeans(person_score_conversion_A, na.rm = T)))), sheet = "ConversionsAV"))
-          
-            return("Shiiit son you did it!")
+            # return("Shiiit son you did it!")
         }
       
         
@@ -424,3 +424,5 @@ server <- function(input, output){
     }
 shinyApp(ui = ui, server = server)
 
+Sys.time()
+  
