@@ -38,7 +38,7 @@ class TestDataset(object):
 			s = re.search("(.*)_.*", f).group(1)
 			if s not in speakers:
 				speakers.append(s)
-		print("\n --------------------------\n", speakers, "\n---------------------------\n") 
+		#print("\n --------------------------\n", speakers, "\n---------------------------\n") 
 		#del speakers[-1]
 		spk2idx = dict(zip(speakers, range(len(speakers))))
 		assert config.trg_spk in speakers, f'The trg_spk should be chosen from {speakers}, but you choose {trg_spk}.'
@@ -51,9 +51,9 @@ class TestDataset(object):
 		if self.files_to_convert == ["random"]:
 			self.mc_files = sorted(glob.glob(join(config.test_data_dir, f'{config.src_spk}*.npy'))) # look here 
 		else:
-			self.mc_files = sorted(glob.glob(join(config.test_data_dir, f'{config.src_spk}*{f}.npy'))[0] for f in self.files_to_convert)
-			
-		print("\n -------------------- \n", self.mc_files, "\n ------------------------")
+			self.mc_files = sorted(glob.glob(join(config.test_data_dir, f'{config.src_spk}_{f}.npy'))[0] for f in self.files_to_convert)
+		print(f"Files to be converted: {self.mc_files}")
+		#print("\n -------------------- \n", self.mc_files, "\n ------------------------")
 		self.src_spk_stats = np.load(join(config.train_data_dir, f'{config.src_spk}_stats.npz'))
 		self.src_wav_dir = f'{config.wav_dir}/{config.src_spk}'
 
@@ -93,8 +93,12 @@ def test(config):
 	# Set seed
 	torch.manual_seed(config.seed)
 	np.random.seed(config.seed)
-
-	os.makedirs(join(config.convert_dir, str(config.resume_iters)), exist_ok=True)
+	
+	model_step = config.resume_iters if bool(config.modelstep_dir) else ""
+	if bool(config.modelstep_dir):
+		os.makedirs(join(config.convert_dir, str(config.resume_iters)), exist_ok=True)
+	else:
+		os.makedirs(config.convert_dir, exist_ok=True)
 	sampling_rate, num_mcep, frame_period=16000, 36, 5
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	
@@ -139,12 +143,14 @@ def test(config):
 			wav_transformed = world_speech_synthesis(f0=f0_converted, coded_sp=coded_sp_converted, 
 													ap=ap, fs=sampling_rate, frame_period=frame_period)
 			wav_id = wav_name.split('.')[0]
-			librosa.output.write_wav(join(config.convert_dir, str(config.resume_iters),
+			
+			
+			librosa.output.write_wav(join(config.convert_dir, str(model_step ),
 				f'{wav_id}-vcto-{test_loader.trg_spk}.wav'), wav_transformed, sampling_rate)
 			if [True, False][0]:
 				wav_cpsyn = world_speech_synthesis(f0=f0, coded_sp=coded_sp, 
 												ap=ap, fs=sampling_rate, frame_period=frame_period)
-				librosa.output.write_wav(join(config.convert_dir, str(config.resume_iters), f'cpsyn-{wav_name}'), wav_cpsyn, sampling_rate)
+				librosa.output.write_wav(join(config.convert_dir, str(model_step), f'cpsyn-{wav_name}'), wav_cpsyn, sampling_rate)
 
 
 if __name__ == '__main__':
@@ -168,6 +174,7 @@ if __name__ == '__main__':
 	parser.add_argument('--log_dir', type=str, default='./logs')
 	parser.add_argument('--model_save_dir', type=str, default='./models')
 	parser.add_argument('--convert_dir', type=str, default='./converted')
+	parser.add_argument('--modelstep_dir', type=int, default=1, help='whether to save converted files in folder names after the resume_iters or not, as integer')
 
 
 	config = parser.parse_args()
