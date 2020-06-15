@@ -21,6 +21,9 @@ Model/Models/trainedModel30k.pt
 *.wav
 data/VCTK-Data/*
 data/results/StarGAN/experiments.zip
+data/experiment_data/*
+data/train_data/*
+data/results/StarGAN/experiment/*
 
 ### Pre trained model ###
 resemblyzer/pretrained.pt
