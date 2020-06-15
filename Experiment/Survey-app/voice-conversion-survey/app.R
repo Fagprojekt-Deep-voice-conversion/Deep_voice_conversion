@@ -106,12 +106,12 @@ server <- function(input, output){
     
     
     partA <- 16
-    partB <- 24
+    partB <- 28
   
     n_questions <- partA + partB
     
     models = c("AutoVC", "StarGAN", "Baseline")
-    categories = c("Danish", "English", "20min", "10min", "Baseline")
+    categories = c("Danish", "English", "20min", "10min", "WaveRNN", "WORLD")
     subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Male", "Male_English", "Male_Danish", "Female_English", "Female_Danish")
   
     voices = c("source", "target", "converted")
@@ -131,8 +131,10 @@ server <- function(input, output){
     qualityresults = rep(NaN, nrow(X))
     fakenessresults = rep(NaN, nrow(Y))
     
-    person_score_conversion = matrix(, nrow = nrow(X), ncol = length(persons))
-    person_score_baseline = rep(NA , length(persons))
+    person_score_conversion_A = matrix(, nrow = nrow(X), ncol = length(persons))
+    person_score_conversion_S = matrix(, nrow = nrow(X), ncol = length(persons))
+    person_score_wavernn = rep(NA , length(persons))
+    person_score_world = rep(NA , length(persons))
     colMeans(avg_score_persons, na.rm = T)
     
     ss = "https://docs.google.com/spreadsheets/d/1Y2Hu04dY-chxSPdVgcUefXSTs6zvG6lkzAFlWhICPJA/edit#gid=0"
@@ -193,7 +195,7 @@ server <- function(input, output){
             h2("Part 1: Which is real?"),
             
             h3("Question", input$Click.Counter-1),
-            # h4("A: ", real_fake[1], " B: ", real_fake[2]),
+            h4("A: ", real_fake[1], " B: ", real_fake[2]),
             h5("Guess which voice is real by pressing either A or B"),
             actionButton(real_fake[1], "Play sound A"),
             actionButton(real_fake[2], "Play sound B"),
@@ -370,18 +372,26 @@ server <- function(input, output){
             "similarity", seeds[input$Click.Counter])[4]
             
             C = categories[X[SamplesB,][input$Click.Counter- partA -2,][2]]
-            if(C == "Baseline"){
+            M = models[X[SamplesB,][input$Click.Counter- partA -2,][1]]
+            if(C == "WaveRNN"){
               
-              try(person_score_baseline[persons[name][[1]]] <<- input$survey1)
-              try(person_score_conversion[input$Click.Counter - partA - 2, persons[name][[1]]] <<- input$survey1)
+              try(person_score_wavernn[persons[name][[1]]] <<- input$survey1)
+              # try(person_score_conversion_A[input$Click.Counter - partA - 2, persons[name][[1]]] <<- input$survey1)
             }
-            else{ 
-              
-              try(person_score_conversion[input$Click.Counter - partA - 2,persons[name][[1]]] <<- input$survey1)
+            else if (C == "WORLD"){ 
+              try(person_score_world[persons[name][[1]]] <<- input$survey1)
+              # try(person_score_conversion_S[input$Click.Counter - partA - 2, persons[name][[1]]] <<- input$survey1)
+            }
+            else if (M == "AutoVC"){
+              try(person_score_conversion_A[input$Click.Counter - partA - 2,persons[name][[1]]] <<- input$survey1)
+            }
+            else if (M == "StarGAN"){
+              try(person_score_conversion_S[input$Click.Counter - partA - 2,persons[name][[1]]] <<- input$survey1)
             }
             
             #  
-            
+            print(person_score_world)
+            print(person_score_wavernn)
             return()}
       
         if (input$Click.Counter == n_questions + 3){
@@ -389,7 +399,7 @@ server <- function(input, output){
           try(sheet_append(ss, data.frame(t(c(input$age, input$gender, similarityresults))), sheet = "Similarity"))
           try(sheet_append(ss, data.frame(t(c(input$age, input$gender, similarityresults))), sheet = "Quality"))
           try(sheet_append(ss, data.frame(t(c(input$age, input$gender, fakenessresults))), sheet = "Fakeness"))
-          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, person_score_baseline, colMeans(person_score_conversion, na.rm = TRUE)))), sheet = "Persons"))
+          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, person_score_wavernn, colMeans(person_score_conversion_A, na.rm = TRUE), person_score_world, colMeans(person_score_conversion_S, na.rm = TRUE)))), sheet = "Persons"))
           
             return("Shiiit son you did it!")
         }
