@@ -165,7 +165,7 @@ server <- function(input, output){
                        This will go under Question A. Question B, will have one sound where the participant is asked to specify the quality of the recording again by using a slider.
                        These Questions will happen for a number of recordings, and there is no correct answers to the questions and your answers will be anonymous.
                        The total time to take the test is estimated to be around ten minutes and we encourage you to take your time to answer honestly and by yourself."),
-              
+                    h4("Unfortunatly, the survey does <u>NOT</u> work with iOS and Safari webrowser, mening you can <u>NOT answer using an Iphone.</u>"),
                     # h3("| "),
                     # h3("| "),
                   
@@ -195,7 +195,7 @@ server <- function(input, output){
             h2("Part 1: Which is real?"),
             
             h3("Question", input$Click.Counter-1),
-            h4("A: ", real_fake[1], " B: ", real_fake[2]),
+            #h4("A: ", real_fake[1], " B: ", real_fake[2]),
             h5("Guess which voice is real by pressing either A or B"),
             actionButton(real_fake[1], "Play sound A"),
             actionButton(real_fake[2], "Play sound B"),
@@ -227,7 +227,7 @@ server <- function(input, output){
                     h3("Question: ", input$Click.Counter -2),
                    
                     h4("Part A: Similarity"),
-                    h5("Please rate the similarity of voice X with A and B"),
+                    h5("Please rate the similarity of A and B"),
                      
                    
                     h5("A score of 0 indicates with high confidence that A and B are different voices"),
