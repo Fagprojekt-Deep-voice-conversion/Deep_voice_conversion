@@ -38,7 +38,7 @@ class TestDataset(object):
 			s = re.search("(.*)_.*", f).group(1)
 			if s not in speakers:
 				speakers.append(s)
-		print("\n --------------------------\n", speakers, "\n---------------------------\n") 
+		#print("\n --------------------------\n", speakers, "\n---------------------------\n") 
 		#del speakers[-1]
 		spk2idx = dict(zip(speakers, range(len(speakers))))
 		assert config.trg_spk in speakers, f'The trg_spk should be chosen from {speakers}, but you choose {trg_spk}.'
@@ -51,8 +51,8 @@ class TestDataset(object):
 		if self.files_to_convert == ["random"]:
 			self.mc_files = sorted(glob.glob(join(config.test_data_dir, f'{config.src_spk}*.npy'))) # look here 
 		else:
-			self.mc_files = sorted(glob.glob(join(config.test_data_dir, f'{config.src_spk}*{f}.npy'))[0] for f in self.files_to_convert)
-			
+			self.mc_files = sorted(glob.glob(join(config.test_data_dir, f'{config.src_spk}_{f}.npy'))[0] for f in self.files_to_convert)
+		print(f"Files to be converted: {self.mc_files}")
 		#print("\n -------------------- \n", self.mc_files, "\n ------------------------")
 		self.src_spk_stats = np.load(join(config.train_data_dir, f'{config.src_spk}_stats.npz'))
 		self.src_wav_dir = f'{config.wav_dir}/{config.src_spk}'

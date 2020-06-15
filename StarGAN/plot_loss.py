@@ -19,8 +19,8 @@ def plot_loss(loss_files, outfile_name):
         plt.ylabel("Generator loss")
         plt.title("Loss of the generator")
         plt.legend(["Seed 1000", "Seed 2000", "Seed 3000"])
-        plt.savefig(f"{plot_folder}/{outfile_name}-G.png")
-        print(f"Saving as {plot_folder}/{outfile_name}-G.png...")
+        plt.savefig(f"{plot_folder}/{outfile_name}-G_loss.png")
+        print(f"Saving as {plot_folder}/{outfile_name}-G_loss.png...")
     else:
         with open(f"/work1/s183920/Deep_voice_conversion/StarGAN/logs/{loss_files}.pkl", "rb") as f:
                 loss_log = pickle.load(f)
@@ -30,7 +30,7 @@ def plot_loss(loss_files, outfile_name):
         plt.ylabel("Generator loss")
         plt.title("Loss of the generator")
         plt.savefig(f"{plot_folder}/{outfile_name}-G_loss.png")
-        print(f"Saving as {plot_folder}/{outfile_name}-G.png...")
+        print(f"Saving as {plot_folder}/{outfile_name}-G_loss.png...")
 
 
     # plt.plot(loss_log["step"], loss_log["g_loss"])
@@ -49,4 +49,8 @@ def plot_loss(loss_files, outfile_name):
     # plt.savefig(f"{plot_folder}/{outfile_name}-D.png")
 
 #if __name__ == "__main__":
-plot_loss(["30min_seed1000/loss_30min_seed1000", "30min_seed2000/loss_30min_seed2000", "30min_seed3000/loss_30min_seed3000"], "30min")
+plot_loss("30min_seed1000/loss_30min_seed1000", "30min_seed1000")
+plt.show()
+plot_loss("20min/loss_20min", "20min")
+plt.show()
+plot_loss("10min/loss_10min", "10min")
