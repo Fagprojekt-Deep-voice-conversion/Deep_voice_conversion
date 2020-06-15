@@ -85,9 +85,13 @@ get_wavs_experiment <- function(model, task, subtask, q, seed){
       
       path_to_fake <- paste(model, task, subtask, fake, sep= "/")
       path_to_real <- paste("Baseline", baseline, baseline_category, name, real, sep = "/")
-      print(c(path_to_real, path_to_fake))
+      # print(c(path_to_real, path_to_fake))
       return(c(path_to_real, path_to_fake))
     }
+  
+  
+  
+  
     
     else if (q == "similarity" & model != "Baseline"){
       
@@ -96,13 +100,22 @@ get_wavs_experiment <- function(model, task, subtask, q, seed){
       fakes <- sample(list_of_fakes, 2, F)
       if (model == "AutoVC"){
         split <- strsplit(str_remove(fakes[1], ".wav"), "_")[[1]]
+        # print(split)
+        from_and_to <- paste(split[1], split[length(split)], sep = "_")
       }
       else if (model == "StarGAN"){
         split <- strsplit(str_remove(fakes[1], ".wav"), "-")[[1]]
+        a <- strsplit(split[1], "_")[[1]]
+        b <- split[length(split)]
+        from_and_to <- paste(a[1], b, sep = "_")
+        # print(a)
+        # print(b)
       }
-      
-     
+    
       name <- split[length(split)]
+      
+      
+      print(from_and_to)
       
       
       if (model == "AutoVC"){
@@ -111,18 +124,23 @@ get_wavs_experiment <- function(model, task, subtask, q, seed){
       else if (model == "StarGAN"){
         baseline = "WORLD"
       }
-      print(name)
+      # print(name)
       list_of_reals <- list.files(paste("www", "Baseline", baseline, "persons", name, sep = "/"))
-      print(list_of_reals)
+      # print(list_of_reals)
       real <- sample(list_of_reals, 1)
       
       
       path_to_fake1 <- paste(model, task, subtask, fakes[1], sep= "/")
       path_to_fake2 <- paste(model, task, subtask, fakes[2], sep= "/")
       path_to_real <- paste("Baseline", baseline, "persons", name, real, sep = "/" )
-      print(c(path_to_fake1, path_to_real, path_to_fake2, name))
-      return(c(path_to_fake1, path_to_real, path_to_fake2, name))
+      # print(c(path_to_fake1, path_to_real, path_to_fake2, name))
+      return(c(path_to_fake1, path_to_real, path_to_fake2, from_and_to))
     }
+  
+  
+  
+  
+  
   else if  (q == "similarity" & model == "Baseline"){
     names <- sample(list.files(paste("www", model, task, subtask, sep = "/")),2, replace = F)
     list_of_reals1 <- list.files(paste("www", model, task, subtask, names[1], sep = "/"))
@@ -134,7 +152,7 @@ get_wavs_experiment <- function(model, task, subtask, q, seed){
     path_to_fake1 <- paste(model, task, subtask, names[1], person1[1], sep= "/")
     path_to_fake2 <- paste(model, task, subtask, names[2], person2, sep= "/")
     path_to_real <- paste(model, task, subtask, names[1], person1[2], sep = "/" )
-    print(c(path_to_fake1, path_to_real, path_to_fake2, names[2]))
+    # print(c(path_to_fake1, path_to_real, path_to_fake2, names[2]))
     return(c(path_to_fake1, path_to_real, path_to_fake2, names[2]))
 
   }
@@ -142,4 +160,4 @@ get_wavs_experiment <- function(model, task, subtask, q, seed){
 }
 
 
-get_wavs_experiment("StarGAN", "10min", "Male_Male", "similarity", 2)
+# get_wavs_experiment("StarGAN", "English", "Male_Female", "similarity", 1)

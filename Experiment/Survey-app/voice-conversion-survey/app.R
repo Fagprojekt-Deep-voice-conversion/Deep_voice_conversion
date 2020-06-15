@@ -19,14 +19,15 @@ ui <- fluidPage(
         h5("The survey is a 100 % anonymous"),
         h6(textOutput("save.results1")),
         h6(textOutput("save.results2")),
-        h6(textOutput("checkcategory")),
-        h6(textOutput("checkcategory1")),
-        h6(textOutput("checkcategory2")),
-        h6(textOutput("checkcategory3")),
+        # h6(textOutput("checkcategory")),
+        # h6(textOutput("checkcategory1")),
+        # h6(textOutput("checkcategory2")),
+        # h6(textOutput("checkcategory3")),
         h6(textOutput("play")),
         h6(textOutput("check")),
         numericInput("age", "Feel free to let us know your age", value = NaN, min = 0, max = 120),
-        radioButtons("gender", "Feel free to let us know your gender", c("Male", "Female", "Other", "Prefer not to say"), selected = "Prefer not to say")
+        radioButtons("gender", "Feel free to let us know your gender", c("Male", "Female", "Other", "Prefer not to say"), selected = "Prefer not to say"),
+        actionButton("submit_data", "Submit age and gender"),
         
         
        # 
@@ -102,7 +103,9 @@ server <- function(input, output){
   
     
     observe({toggleState("Click.Counter", condition = input$Check & input$Click.Counter < n_questions + 3)})
-    
+    observe({toggleElement("age", condition = input$submit_data < 1)})
+    observe({toggleElement("gender", condition = input$submit_data < 1)})
+    observe({toggleState("submit_data", condition = input$submit_data < 1)})
     
     
     partA <- 16
@@ -115,7 +118,11 @@ server <- function(input, output){
     subcategories = c("Male_Male", "Female_Female", "Male_Female", "Female_Male", "Male_English", "Male_Danish", "Female_English", "Female_Danish")
   
     voices = c("source", "target", "converted")
-    persons = list("obama" = 1, "trump"= 2, "hillary"= 3, "michelle"= 4, "mette"= 5, "helle"= 6, "lars"= 7, "anders" = 8)
+    persons = list("hillary_obama" = 1, "michelle_obama"= 2, "trump_obama"= 3,  "obama_michelle"= 4, "trump_michelle"= 5, "hillary_michelle"= 6,
+                   "obama_trump"= 7, "michelle_trump" = 8, "hillary_trump" = 9, "trump_hillary" = 10, "michelle_hillary" = 11, "obama_hillary" = 12,
+                   "mette_lars"  = 13, "helle_lars" = 14, "anders_lars" = 15, "mette_anders" = 16, "helle_anders" = 17, "lars_anders" = 18,
+                   "lars_mette" = 19, "anders_mette" = 20, "helle_mette" = 21, "lars_helle" = 22, "anders_helle" = 23, "mette_helle" = 24)
+    persons2 = list("obama" = 1, "trump" = 2, "hillary" = 3, "michelle" = 4, "mette" = 5, "helle" = 6, "lars" = 7, "anders" = 8)
     X <- combination()
     Y <- combination2()
   
@@ -133,7 +140,7 @@ server <- function(input, output){
     
     person_score_conversion_A = matrix(, nrow = nrow(X), ncol = length(persons))
     person_score_conversion_S = matrix(, nrow = nrow(X), ncol = length(persons))
-    person_score_wavernn = rep(NA , length(persons))
+    person_score_wavernn = rep(NA , length(persons2))
     person_score_world = rep(NA , length(persons))
     colMeans(avg_score_persons, na.rm = T)
     
@@ -195,7 +202,7 @@ server <- function(input, output){
             h2("Part 1: Which is real?"),
             
             h3("Question", input$Click.Counter-1),
-            h4("A: ", real_fake[1], " B: ", real_fake[2]),
+            # h4("A: ", real_fake[1], " B: ", real_fake[2]),
             h5("Guess which voice is real by pressing either A or B"),
             actionButton(real_fake[1], "Play sound A"),
             actionButton(real_fake[2], "Play sound B"),
@@ -227,7 +234,7 @@ server <- function(input, output){
                     h3("Question: ", input$Click.Counter -2),
                    
                     h4("Part A: Similarity"),
-                    h5("Please rate the similarity of voice X with A and B"),
+                    h5("Please rate the similarity of voice A and B"),
                      
                    
                     h5("A score of 0 indicates with high confidence that A and B are different voices"),
@@ -375,11 +382,11 @@ server <- function(input, output){
             M = models[X[SamplesB,][input$Click.Counter- partA -2,][1]]
             if(C == "WaveRNN"){
               
-              try(person_score_wavernn[persons[name][[1]]] <<- input$survey1)
+              try(person_score_wavernn[persons2[name][[1]]] <<- input$survey1)
               # try(person_score_conversion_A[input$Click.Counter - partA - 2, persons[name][[1]]] <<- input$survey1)
             }
             else if (C == "WORLD"){ 
-              try(person_score_world[persons[name][[1]]] <<- input$survey1)
+              try(person_score_world[persons2[name][[1]]] <<- input$survey1)
               # try(person_score_conversion_S[input$Click.Counter - partA - 2, persons[name][[1]]] <<- input$survey1)
             }
             else if (M == "AutoVC"){
@@ -390,16 +397,18 @@ server <- function(input, output){
             }
             
             #  
-            print(person_score_world)
-            print(person_score_wavernn)
+            # print(person_score_world)
+            # print(person_score_wavernn)
             return()}
       
         if (input$Click.Counter == n_questions + 3){
           
           try(sheet_append(ss, data.frame(t(c(input$age, input$gender, similarityresults))), sheet = "Similarity"))
-          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, similarityresults))), sheet = "Quality"))
+          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, qualityresults))), sheet = "Quality"))
           try(sheet_append(ss, data.frame(t(c(input$age, input$gender, fakenessresults))), sheet = "Fakeness"))
-          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, person_score_wavernn, colMeans(person_score_conversion_A, na.rm = TRUE), person_score_world, colMeans(person_score_conversion_S, na.rm = TRUE)))), sheet = "Persons"))
+          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, person_score_wavernn, person_score_world))), sheet = "Persons"))
+          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, colMeans(person_score_conversion_S, na.rm = T)))), sheet = "ConversionsSG"))
+          try(sheet_append(ss, data.frame(t(c(input$age, input$gender, colMeans(person_score_conversion_A, na.rm = T)))), sheet = "ConversionsAV"))
           
             return("Shiiit son you did it!")
         }
