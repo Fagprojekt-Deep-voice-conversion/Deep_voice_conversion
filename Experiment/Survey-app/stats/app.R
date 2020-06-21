@@ -1,51 +1,10 @@
 library(shiny)
 library(shinydashboard)
 library(ggplot2)
-library(googlesheets4)
-library(googledrive)
-options(gargle_oauth_cache = ".secrets")
-library(lubridate)
 library(magrittr)
 library(dplyr)
-library(tidyr)
+source("data.R")
 
-# Get data
-drive_auth(cache = ".secrets", email = "luke.leindance@gmail.com")
-gs4_auth(token = drive_token())
-ss = "https://docs.google.com/spreadsheets/d/1Y2Hu04dY-chxSPdVgcUefXSTs6zvG6lkzAFlWhICPJA/edit#gid=0"
-
-S <- read_sheet(ss, sheet = "Similarity")
-Q <- read_sheet(ss, sheet = "Quality")
-Fool <- read_sheet(ss, sheet = "Fakeness")
-P <- read_sheet(ss, sheet = "Persons")
-PAV <- read_sheet(ss, sheet = "ConversionsAV")
-PSG <- read_sheet(ss, sheet = "ConversionsSG")
-
-n_participants <- nrow(S)
-
-S <- S %>% gather(key = "conv_type", value = "score", -c(Time, Zone, Age, Gender)) %>%
-    mutate(model = stringr::str_extract(conv_type, "^.{1}")) %>%
-    mutate(model = ifelse(model == "A", "AutoVC", "StarGAN")) %>%
-    mutate(conv_type = gsub("^.{1}", "", conv_type)) %>%
-    mutate(score = as.integer(score)) %>%
-    mutate(Age = as.integer(Age)) %>%
-    mutate(Time = ymd_hms(Time, tz = "UTC") %>% with_tz(tzone = "Europe/Copenhagen"))
-
-Q <- Q %>% gather(key = "conv_type", value = "score", -c(Time, Zone, Age, Gender)) %>%
-    mutate(model = stringr::str_extract(conv_type, "^.{1}")) %>%
-    mutate(model = ifelse(model == "A", "AutoVC", "StarGAN")) %>%
-    mutate(conv_type = gsub("^.{1}", "", conv_type)) %>%
-    mutate(score = as.integer(score)) %>%
-    mutate(Age = as.integer(Age)) %>%
-    mutate(Time = ymd_hms(Time, tz = "UTC") %>% with_tz(tzone = "Europe/Copenhagen"))
-
-Fool <- Fool %>% gather(key = "conv_type", value = "score", -c(Time, Zone, Age, Gender)) %>%
-    mutate(model = stringr::str_extract(conv_type, "^.{1}")) %>%
-    mutate(model = ifelse(model == "A", "AutoVC", "StarGAN")) %>%
-    mutate(conv_type = gsub("^.{1}", "", conv_type)) %>%
-    mutate(score = as.integer(score)) %>%
-    mutate(Age = as.integer(Age)) %>%
-    mutate(Time = ymd_hms(Time, tz = "UTC") %>% with_tz(tzone = "Europe/Copenhagen"))
 
 # UI
 select_def <- c("DMM", "DFF", "DMF", "DFM", "EMM", "EFF", "EMF", "EFM")
@@ -54,7 +13,7 @@ header <- dashboardHeader(title = "VC results")
 
 sidebar <- dashboardSidebar(
     sidebarMenu(
-        menuItem("Similarity", tabName = "similarity"),
+        menuItem("Similarity", tabName = "similarity", icon = icon("line-chart")),
         menuItem("Quality", tabName = "quality"),
         menuItem("Fool test", tabName = "fool"),
         menuItem("Overall", tabName = "overall")
@@ -68,13 +27,14 @@ body <- dashboardBody(
             tabName = "similarity",
             h2("The similarity results"),
             fluidRow(
-                box(plotOutput("plot_S", height = 250), downloadButton('dl_S_plot')),
+                box(plotOutput("plot_S", height = 250), downloadButton('dl_S_plot'), collapsible = T, collapsed = F),
                 box(
                     box(checkboxGroupInput("conv_types_S", "", unique(S$conv_type), selected = select_def), collapsible = T, title = "Conversion types", collapsed = T),
                     box(checkboxGroupInput("gender_S", "", unique(S$Gender), selected = unique(S$Gender)), collapsible = T, title = "Gender", collapsed = T),
                     box(sliderInput("time_S", "", min = 0, max = 24, value = c(0, 24)), collapsible = T, title = "Time intervals", collapsed = T),
                     box(sliderInput("age_S", "", min = min(S$Age), max = max(S$Age), value = c(min(S$Age), max(S$Age))), collapsible = T, title = "Age interval", collapsed = T),
-                    collapsible = T, collapsed = T, title = "Plot specifications"
+                    box(checkboxGroupInput("divide_S", "Should the data be divided in different groups?", c("True", "False"), selected = "True"), collapsible = T, title = "Divide data", collapsed = T),
+                    collapsible = T, collapsed = T, title = "Specifications"
                 )
                
             )
@@ -83,13 +43,12 @@ body <- dashboardBody(
             tabName = "quality",
             h2("The quality results"),
             fluidPage(
-                box(plotOutput("plot_Q", height = 250), downloadButton('dl_Q_plot')),
+                box(plotOutput("plot_Q", height = 250), downloadButton('dl_Q_plot'), collapsible = T, collapsed = F),
                 box(
                     box(checkboxGroupInput("conv_types_Q", "Conversion types", unique(Q$conv_type), selected = select_def), collapsible = T, title = "Conversion types", collapsed = T),
                     box(checkboxGroupInput("gender_Q", "", unique(Q$Gender), selected = unique(Q$Gender)), collapsible = T, title = "Gender", collapsed = T),
                     box(sliderInput("time_Q", "", min = 0, max = 24, value = c(0, 24)), collapsible = T, title = "Time intervals", collapsed = T),
-                    box(sliderInput("age_Q", "", min = min(Q$Age), max = max(Q$Age), value = c(min(Q$Age), max(Q$Age))), collapsible = T, title = "Age interval", collapsed = T),
-                    collapsible = T, collapsed = T, title = "Plot specifications"
+                    collapsible = T, collapsed = T, title = "Specifications"
                 )
                 
             )
@@ -98,13 +57,13 @@ body <- dashboardBody(
             tabName = "fool",
             h2("The fool test results"),
             fluidPage(
-                box(plotOutput("plot_F", height = 250), downloadButton('dl_F_plot')),
+                box(plotOutput("plot_F", height = 250), downloadButton('dl_F_plot'), collapsible = T, collapsed = F),
                 box(
                     box(checkboxGroupInput("conv_types_F", "Conversion types", unique(Fool$conv_type), selected = select_def), collapsible = T, title = "Conversion types", collapsed = T),
                     box(checkboxGroupInput("gender_F", "", unique(Fool$Gender), selected = unique(Fool$Gender)), collapsible = T, title = "Gender", collapsed = T),
                     box(sliderInput("time_F", "", min = 0, max = 24, value = c(0, 24)), collapsible = T, title = "Time intervals", collapsed = T),
                     box(sliderInput("age_F", "", min = min(Fool$Age), max = max(Fool$Age), value = c(min(Fool$Age), max(Fool$Age))), collapsible = T, title = "Age interval", collapsed = T),
-                    collapsible = T, collapsed = T, title = "Plot specifications"
+                    collapsible = T, collapsed = T, title = "Specifications"
                 )
                 
             )
@@ -129,7 +88,7 @@ server <- function(input, output) {
             filter(as.integer(hour(Time)) > input$time_S[1], as.integer(hour(Time)) < input$time_S[2]) %>% 
             filter(Gender %in% input$gender_S) %>% 
             filter(Age >= input$age_S[1], Age <= input$age_S[2]) %>% 
-            group_by(model, conv_type) %>% 
+            group_by(model, conv_type, experiment) %>% 
             summarise(score = mean(score)) %>% 
             filter(conv_type %in% input$conv_types_S)
                 
@@ -141,7 +100,7 @@ server <- function(input, output) {
             filter(as.integer(hour(Time)) > input$time_Q[1], as.integer(hour(Time)) < input$time_Q[2]) %>% 
             filter(Gender %in% input$gender_Q) %>% 
             filter(Age >= input$age_Q[1], Age <= input$age_Q[2]) %>%
-            group_by(model, conv_type) %>% 
+            group_by(model, conv_type, experiment) %>% 
             summarise(score = mean(score)) %>% 
             filter(conv_type %in% input$conv_types_Q)
         t
@@ -152,7 +111,7 @@ server <- function(input, output) {
             filter(as.integer(hour(Time)) > input$time_F[1], as.integer(hour(Time)) < input$time_F[2]) %>% 
             filter(Gender %in% input$gender_F) %>% 
             filter(Age >= input$age_F[1], Age <= input$age_F[2]) %>%
-            group_by(model, conv_type) %>% 
+            group_by(model, conv_type, experiment) %>% 
             summarise(score = 1-mean(score)) %>% 
             filter(conv_type %in% input$conv_types_F)
         t
@@ -165,7 +124,8 @@ server <- function(input, output) {
             theme(plot.title = element_text(size=20, face="bold", 
                                             margin = margin(10, 0, 10, 0))) +
             xlab("Conversion type") +
-            ylab("Mean opinion score")
+            ylab("Mean opinion score") +
+            facet_grid(~experiment, scales = "free_x")
     }
     
     plot_Q <- function(){
@@ -175,7 +135,8 @@ server <- function(input, output) {
             theme(plot.title = element_text(size=20, face="bold", 
                                             margin = margin(10, 0, 10, 0))) +
             xlab("Conversion type") +
-            ylab("Mean opinion score")
+            ylab("Mean opinion score")+
+            facet_grid(~experiment, scales = "free_x")
     }
     
     plot_F <- function(){
@@ -185,7 +146,8 @@ server <- function(input, output) {
             theme(plot.title = element_text(size=20, face="bold", 
                                             margin = margin(10, 0, 10, 0))) +
             xlab("Conversion type") +
-            ylab("Percentage fooled")
+            ylab("Percentage fooled")+
+            facet_grid(~experiment, scales = "free_x")
     }
     
     
