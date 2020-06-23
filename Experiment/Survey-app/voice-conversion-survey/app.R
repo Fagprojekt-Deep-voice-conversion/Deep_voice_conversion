@@ -6,7 +6,7 @@ library(googledrive)
 source("Combination.R")
 options(gargle_oauth_cache = ".secrets")
 
-drive_auth(cache = ".secrets", email = "peter@groenning.net")
+drive_auth(cache = ".secrets", email = "luke.leindance@gmail.com")
 gs4_auth(token = drive_token())
 
 ui <- fluidPage(
@@ -423,6 +423,5 @@ server <- function(input, output){
    
     }
 shinyApp(ui = ui, server = server)
-
 
   

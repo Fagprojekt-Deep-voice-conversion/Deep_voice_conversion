@@ -1,0 +1,13 @@
+name: stats
+title: stats
+username:
+account: s183920
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2464174
+bundleId: 3279417
+url: https://s183920.shinyapps.io/stats/
+when: 1592343125.50237
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: data.R
