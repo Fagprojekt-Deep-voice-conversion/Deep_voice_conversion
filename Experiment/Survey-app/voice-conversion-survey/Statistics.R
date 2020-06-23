@@ -23,7 +23,14 @@ MOS <- colMeans(data)
 X <- t(cbind(MOS[c(1:8)], MOS[c(11:18)]))
 colnames(X) <- c("DMM", "DFF", "DMF", "DFM", "EMM", "EFF", "EMF", "EFM")
 barplot(X, beside = T, legend.text = c("AutoVC", "StarGAN"), col = c("skyblue", "orange"), main = "Similarity")
-
+# X <- X/5 * (5-1) +1
+barplot(X, beside = T, legend.text = c("AutoVC", "StarGAN"), col = c("skyblue", "orange"), main = "Similarity")
+boxplot(data)
+sem <- apply(data, 2, sd, na.rm = T) / length(data$ADMM)
+sem
+a = 0.05
+MOS + pt(a/2, length(data$A10M) - 1) * sem
+MOS - pt(a/2, length(data$A10M) - 1) * sem
 
 #### QUALITY ####
 data <- Q[,-c(1,2,3,4)]
@@ -34,7 +41,8 @@ MOS <- colMeans(data)
 X <- t(cbind(MOS[c(1:8)], MOS[c(11:18)]))
 colnames(X) <- c("DMM", "DFF", "DMF", "DFM", "EMM", "EFF", "EMF", "EFM")
 barplot(X, beside = T, legend.text = c("AutoVC", "StarGAN"), col = c("skyblue", "orange"), main = "Quality")
-
+X <- X/5 * (5-1) +1
+barplot(X, beside = T, legend.text = c("AutoVC", "StarGAN"), col = c("skyblue", "orange"), main = "Quality")
 ### Fool Score ### 
 data <- Fool[,-c(1,2,3,4)]
 data
@@ -105,4 +113,8 @@ barplot(colMeans(X), beside = T, col = c("skyblue", "orange"), main = "Conversio
 
 
 barplot(rbind(colMeans(Y), colMeans(X)), beside = T, legend.text = c("AutoVC", "StarGAN"), col = c("skyblue", "orange"), main = "Mean Conversion Sound Quality / Naturalness")
+
+
+x = 0.25 * (5-1)
+0.25 *(5-1) +1
 
