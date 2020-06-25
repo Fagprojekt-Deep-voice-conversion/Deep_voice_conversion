@@ -468,9 +468,6 @@ ggsave(filename = "train_amount_exp.png", plot = p_train)
 ```
 
 
-### Similarity
-
-### Quality
 
 
 # T-test
