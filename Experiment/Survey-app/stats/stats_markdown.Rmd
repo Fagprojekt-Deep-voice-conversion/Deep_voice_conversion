@@ -468,6 +468,30 @@ ggsave(filename = "train_amount_exp.png", plot = p_train)
 ```
 
 
+## For presentation
+
+```{r}
+p_pres <- S_ci %>% mutate(name = "Similarity") %>% 
+  bind_rows(Q_ci %>% mutate(name = "Quality")) %>% 
+  bind_rows(fool_ci %>% mutate(name = "Fool test") %>% rename(Mean = est, Lower = ci_lwr, Upper = ci_upr)) %>% 
+  filter(conv_type == "All") %>% 
+  ggplot(aes(x = model, y = Mean, fill = model)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    ggtitle("Main results") +
+    theme(plot.title = element_text(size=20, face="bold", 
+                                    margin = margin(10, 0, 10, 0)),
+          axis.text.x = element_blank()) +
+          # axis.text.x = element_text(angle = 45, vjust = 0.25, hjust=0.5, color = "#000000")) +
+    xlab("Models") +
+    ylab("Pct. fooled/MOS") +
+    facet_wrap(~name, scales = "free") +
+    geom_errorbar(aes(ymin = Lower, ymax = Upper), width = .2, position = position_dodge(.9))+
+    scale_fill_manual(values=col_vals)
+
+ggsave(filename = "presentation_results.png", p_pres, width = 10, height = 7)
+```
+
+
 
 
 # T-test
