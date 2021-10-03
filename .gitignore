@@ -67,6 +67,7 @@ Model/Reconstruction_Test.wav
 *.wav
 data/VCTK-Data/*
 
+
 ### Pre trained model ###
 resemblyzer/pretrained.pt
 
