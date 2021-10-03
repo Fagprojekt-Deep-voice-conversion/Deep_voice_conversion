@@ -1,7 +1,8 @@
 from conversion import *
 import torch
-from Preprocessing_WAV import WaveRNN_Mel
-
+from Preprocessing_WAV import WaveRNN_Mel, AutoVC_Mel
+import matplotlib.pyplot as plt
+import numpy as np
 
 def Zero_shot(source, target, model, voc_model, save_path, only_conversion = True):
     """
@@ -49,4 +50,51 @@ def Zero_shot(source, target, model, voc_model, save_path, only_conversion = Tru
 # model, voc_model = Instantiate_Models(model_path = 'Models/AutoVC/autoVC30min_step72.pt')
 if __name__ == "__main__":
     model, voc_model = Instantiate_Models(model_path = 'Models/AutoVC/autoVC_seed40_200k.pt')
-    Zero_shot("2.wav", "../Experiment/Survey-app/voice-conversion-survey/www/persons/mette/mette_183.wav", model, voc_model, ".")
+    Zero_shot("2.wav", "2.wav", model, voc_model, ".")
+    # s = "p225_001.wav"
+    
+    # import librosa
+    # import seaborn as sns
+    # from hparams import hparams_autoVC as hp
+    # from Preprocessing_WAV import *
+    # y = load_wav(s)
+
+    # plt.plot(y)
+    # plt.ylim(-0.8, 0.8)
+    # plt.grid()
+    # plt.show()
+
+
+    # y = y / np.abs(y).max() * hp.rescaling_max
+    # y = trim(y)
+    # X = abs(librosa.stft(y,
+    #                                    n_fft=hp.fft_size,
+    #                                    hop_length=hp.hop_size,
+    #                                 #    n_mels=hp.num_mels,
+    #                                 #    fmin=hp.fmin,
+    #                                 #    fmax=hp.fmax,
+    #                                    ))**2
+
+    X = spectrogram(y)
+    # X = librosa.feature.melspectrogram(y, sr=hp.sample_rate,
+    #                                    n_fft=hp.fft_size,
+    #                                    hop_length=hp.hop_size,
+    #                                    n_mels=hp.num_mels,
+    #                                    fmin=hp.fmin,
+    #                                    fmax=hp.fmax,
+    #                                    power=2,
+    #                                    )
+    # X = librosa.power_to_db(X, ref=hp.ref_level_db)
+    # X = np.clip((X - hp.min_level_db) / (- hp.min_level_db), 0, 1)
+    
+    plt.matshow(X)
+    plt.show()
+
+    plt.plot(X[:,40])
+    plt.show()
+
+    # y, sr = librosa.load(s, 16000)
+    # Y = librosa.feature.mfcc(y = y, sr = sr, n_fft = 1024, hop_length = None, n_mels = 128, n_mfcc=24)
+    # plt.matshow(Y)
+    # # plt.plot(y)
+    # plt.show()

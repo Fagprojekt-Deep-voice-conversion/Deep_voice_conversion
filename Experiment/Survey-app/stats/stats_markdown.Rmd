@@ -1,0 +1,512 @@
+---
+title: "Stats markdown"
+author: "Lukas Leindals"
+date: "21/6/2020"
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Packages
+```{r warning=FALSE, include=FALSE}
+library(googlesheets4)
+library(googledrive)
+options(gargle_oauth_cache = ".secrets")
+library(lubridate)
+library(magrittr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gridExtra)
+```
+
+
+# Get data 
+```{r include=FALSE}
+drive_auth(cache = ".secrets", email = "luke.leindance@gmail.com")
+gs4_auth(token = drive_token())
+ss = "https://docs.google.com/spreadsheets/d/1Y2Hu04dY-chxSPdVgcUefXSTs6zvG6lkzAFlWhICPJA/edit#gid=0"
+
+S <- read_sheet(ss, sheet = "Similarity")
+Q <- read_sheet(ss, sheet = "Quality")
+Fool <- read_sheet(ss, sheet = "Fakeness")
+P <- read_sheet(ss, sheet = "Persons")
+PAV <- read_sheet(ss, sheet = "ConversionsAV")
+PSG <- read_sheet(ss, sheet = "ConversionsSG")
+```
+
+# Data prep
+
+```{r}
+n_participants <- nrow(S)
+cat(paste0("There has been ", n_participants, " participants"))
+```
+
+## transform function
+
+```{r}
+transform_data <- function(data){
+  data %>% 
+    mutate(S30M = SDMM) %>% 
+    mutate(A30M = ADMM) %>% 
+    gather(key = "conv_type", value = "score", -c(Time, Zone, Age, Gender)) %>%
+    mutate(model = stringr::str_extract(conv_type, "^.{1}")) %>%
+    mutate(model = ifelse(model == "A", "AutoVC", ifelse(model == "S", "StarGAN", "Baseline"))) %>%
+    mutate(conv_type = gsub("^.{1}", "", conv_type)) %>%
+    mutate(score = as.integer(score)) %>%
+    mutate(Age = as.integer(Age)) %>%
+    mutate(Time = ymd_hms(Time, tz = "UTC") %>% with_tz(tzone = "Europe/Copenhagen")) %>% 
+    mutate(vocoder = ifelse(model == "AutoVC", "WaveRNN", "World")) %>% 
+    mutate(vocoder = ifelse((model == "Baseline"), ifelse(stringr::str_extract(conv_type, "^.{4}") == "Wave", "WaveRNN", "World"), vocoder)) %>% 
+    mutate(model = ifelse(model == "Baseline", ifelse(vocoder == "WaveRNN", "WaveRNN Baseline", "World Baseline"), model)) %>% 
+    mutate(conv_type =  gsub("Wave", "", conv_type)) %>% 
+    mutate(conv_type = gsub("World", "", conv_type)) %>% 
+    mutate(experiment = ifelse(conv_type %in% c("10M", "20M", "30M"), "Amount", "Type")) %>% 
+    mutate(conv_type = ifelse(conv_type == "10M", "10 min", ifelse(conv_type == "20M", "20 min", ifelse(conv_type == "30M", "30 min", conv_type)))) %>% 
+    mutate(conv_type = ifelse(conv_type == "MD", "DM", conv_type)) %>% 
+    mutate(conv_type = ifelse(conv_type == "ME", "EM", conv_type)) %>% 
+    mutate(conv_type = ifelse(conv_type == "FD", "DF", conv_type)) %>% 
+    mutate(conv_type = ifelse(conv_type == "FE", "EF", conv_type))
+}
+
+S_transformed <- transform_data(S)
+Q_transformed <- transform_data(Q)
+Fool_transformed <- transform_data(Fool) %>% filter(conv_type != "30 min")
+
+```
+
+# Normal distributed - shapiros test
+
+```{r}
+shapiro_S <- S %>% 
+  transform_data() %>% 
+  group_by(conv_type, model) %>% 
+  summarise(p_value = shapiro.test(score)$p.value) %>% 
+  # arrange(desc(p_value)) %>% 
+   mutate(p_value = format(p_value, scientific = T, digits = 3)) %>% 
+  rename(Experiment = conv_type, Model = model, 'P-value' = p_value) %>% 
+  xtable::xtable(caption = "The p-values for the similarity experiment when performing a shapiros test", label = "tab:shapiro_S", auto = T, print.results = F)
+
+print(shapiro_S, include.rownames=FALSE, math.style.exponents = TRUE)
+
+shapiro_Q <-Q %>% 
+  transform_data() %>% 
+  group_by(conv_type, model) %>% 
+  summarise(p_value = shapiro.test(score)$p.value) %>% 
+  # arrange(desc(p_value))
+   mutate(p_value = format(p_value, scientific = T, digits = 3)) %>% 
+  rename(Experiment = conv_type, Model = model, 'P-value' = p_value) %>% 
+  xtable::xtable(caption = "The p-values for the quality experiment when performing a shapiros test", label = "tab:shapiro_Q", auto = T, print.results = F)
+
+print(shapiro_Q, include.rownames=FALSE, math.style.exponents = TRUE)
+
+shapiro_Fool <-Fool %>% 
+  transform_data() %>% 
+  mutate(score = 1-score) %>% 
+  group_by(conv_type, model) %>% 
+  summarise(p_value = shapiro.test(score)$p.value) %>% 
+  # arrange(desc(p_value)) %>% 
+  filter(conv_type != "30 min") %>% 
+  mutate(p_value = format(p_value, scientific = T, digits = 3)) %>% 
+  rename(Experiment = conv_type, Model = model, 'P-value' = p_value) %>% 
+  xtable::xtable(caption = "The p-values for the fool test experiment when performing a shapiros test", label = "tab:shapiro_fool")
+
+print(shapiro_Fool, include.rownames=FALSE)
+
+```
+
+
+
+## CI similaity
+
+```{r}
+n <- 65
+k <- 6
+
+scores <- S %>% pull(ADMM) %>% as.integer() 
+c <- scores %>% sum()-n
+
+d <- n*(k-1)-c+1
+
+qbeta(p = 0.05/2, shape1 = c+.5, shape2 = d-.5)*(k-1)+1
+mean(scores)
+qbeta(p = 1-0.05/2, shape1 = c+.5, shape2 = d-.5)*(k-1)+1
+
+# with boot strap
+S_ci <- S %>% 
+  transform_data() %>% 
+  group_by(conv_type, model) %>% 
+  do(data.frame(rbind(Hmisc::smean.cl.boot(.$score, B = 1e3)))) %>% 
+  rbind(S %>%
+    transform_data() %>% 
+    filter(experiment == "Type") %>% 
+    group_by(model) %>% 
+    do(data.frame(rbind(Hmisc::smean.cl.boot(.$score, B = 1e3)))) %>% mutate(conv_type = "All"))
+
+S_ci_table <- S_ci %>% 
+  rename(Model = model, 'Conversion type' = conv_type, 'Upper CI' = Upper, 'Lower CI' = Lower) %>% 
+  ungroup() %>% 
+  xtable::xtable(caption = "The data used for the similarity plot", label = "tab:similarity_test")
+
+print(S_ci_table, include.rownames=FALSE)
+
+
+```
+## CI quality
+
+```{r}
+# Q_ci <- Q %>% 
+#   transform_data() %>% 
+#   group_by(conv_type, model) %>% 
+#   do(data.frame(rbind(Hmisc::smean.cl.boot(.$score, B = 1e5))))
+
+Q_ci <- Q %>% 
+  transform_data() %>% 
+  group_by(conv_type, model) %>% 
+  do(data.frame(rbind(Hmisc::smean.cl.boot(.$score, B = 1e3)))) %>% 
+  rbind(Q %>%
+    transform_data() %>% 
+    filter(experiment == "Type") %>% 
+    group_by(model) %>% 
+    do(data.frame(rbind(Hmisc::smean.cl.boot(.$score, B = 1e3)))) %>% mutate(conv_type = "All"))
+Q_ci
+
+Q_ci_table <- Q_ci %>% 
+  rename(Model = model, 'Conversion type' = conv_type, 'Upper CI' = Upper, 'Lower CI' = Lower) %>% 
+  ungroup() %>% 
+  xtable::xtable(caption = "The data used for the quality plot", label = "tab:quality_test")
+
+print(Q_ci_table, include.rownames=FALSE)
+```
+
+
+
+## CI fool test
+
+```{r}
+all_fool <- Fool %>% transform_data() %>% mutate(score = 1-score) %>% 
+  group_by(model) %>% summarise(trials = n()) %>% 
+  left_join(Fool %>% 
+              transform_data() %>% 
+              mutate(score = 1 - score) %>% 
+              filter(score == 1) %>%
+              group_by(model) %>% 
+              summarize(succes = n())) %>% 
+  mutate(conv_type = "All")
+
+fool_ci <- Fool %>% 
+  transform_data() %>% 
+  mutate(score = 1-score) %>% 
+  group_by(conv_type, model) %>% 
+  summarize(trials = n()) %>% 
+  left_join(Fool %>% 
+              transform_data() %>% 
+              mutate(score = 1 - score) %>% 
+              filter(score == 1) %>%
+              group_by(conv_type, model) %>% 
+              summarize(succes = n())) %>% 
+  bind_rows(all_fool) %>% 
+  mutate(est = DescTools::BinomCI(succes, trials, method = "jeffreys")[,1]) %>% 
+  mutate(ci_lwr = DescTools::BinomCI(succes, trials, method = "jeffreys")[,2]) %>% 
+  mutate(ci_upr = DescTools::BinomCI(succes, trials, method = "jeffreys")[,3]) %>% 
+  filter(conv_type != "30 min")
+
+fool_ci
+
+fool_ci_table <- fool_ci %>% 
+  rename(Model = model, 'Conversion type' = conv_type, Participants = trials, 'People fooled' = succes, 'Percentage fooled' = est, 'Upper CI' = ci_upr, 'Lower CI' = ci_lwr) %>% 
+  ungroup() %>% 
+  xtable::xtable(caption = "The data used for the fool test plot", label = "tab:fool_test")
+
+print(fool_ci_table, include.rownames=FALSE)
+
+
+# with bootstrap
+Fool %>% 
+  transform_data() %>% 
+  mutate(score = 1-score) %>%
+  filter(conv_type != "30 min") %>% 
+  group_by(conv_type, model) %>% 
+  do(data.frame(rbind(Hmisc::smean.cl.boot(.$score, B = 1e5))))
+```
+
+
+
+# Plots
+
+```{r}
+col_vals <- c("#3af714", "#ff0d00", "#05c5f5", "#1900ff")
+order <-  c("All", "DFF", "DFM", "DMF", "DMM", "EFF", "EFM", "EMF", "EMM", "DF", "DM", "EF", "EM")
+```
+
+
+## Plot all data 
+
+```{r}
+p1 <- S_transformed %>% 
+  group_by(model) %>% 
+  summarise(score = mean(score)) %>%
+  ggplot(aes(y = score, x = model, fill= model)) +
+              geom_bar(stat = "identity", position = "dodge") +
+              ggtitle("Similarity") +
+              theme(plot.title = element_text(size=20, face="bold", 
+                                              margin = margin(10, 0, 10, 0))) +
+              xlab("Conversion type") +
+              ylab("Mean opinion score")
+
+p2 <- Q_transformed %>% 
+  group_by(model) %>% 
+  summarise(score = mean(score)) %>%
+  ggplot(aes(y = score, x = model, fill= model)) +
+              geom_bar(stat = "identity", position = "dodge") +
+              ggtitle("Quality") +
+              theme(plot.title = element_text(size=20, face="bold", 
+                                              margin = margin(10, 0, 10, 0))) +
+              xlab("Conversion type") +
+              ylab("Mean opinion score")
+
+p3 <- Fool_transformed %>% 
+  group_by(model) %>% 
+  summarise(score = 1-mean(score)) %>%
+  ggplot(aes(y = score, x = model, fill = model)) +
+            geom_bar(stat = "identity", position = "dodge") +
+            ggtitle("Fool test") +
+            theme(plot.title = element_text(size=20, face="bold", 
+                                            margin = margin(10, 0, 10, 0))) +
+            xlab("Conversion type") +
+            ylab("Percentage fooled")
+
+cowplot::plot_grid(p1, p2, p3)
+
+p1
+```
+
+
+
+
+
+## conversion type experiments
+
+### Simililarity
+
+```{r}
+
+pS <- S_ci %>%
+  ungroup() %>% 
+  filter(!(conv_type %in% c("10 min", "20 min", "30 min"))) %>% 
+  mutate(conv_type = factor(conv_type, levels = order)) %>%
+  rename(Model = model) %>% 
+  ggplot(aes(x = conv_type, y = Mean, fill =  Model)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    ggtitle("Similarity") +
+    theme(plot.title = element_text(size=20, face="bold", 
+                                    margin = margin(10, 0, 10, 0))) +
+    xlab("Conversion type") +
+    ylab("Mean opinion score") +
+    geom_errorbar(aes(ymin = Lower, ymax = Upper), width = .2, position = position_dodge(.9))+
+    scale_fill_manual(values=col_vals)
+
+pS
+
+ggsave(filename = "similarity_test.png", pS)
+
+```
+
+#### Box- and violin plots
+
+```{r}
+
+S %>%
+  transform_data() %>%
+  filter(experiment == "Type", vocoder == "WaveRNN") %>%
+  ggplot(aes(x = conv_type, y = score)) +
+    geom_violin() +
+    ggtitle("AutoVC")
+
+S %>%
+  transform_data() %>%
+  filter(experiment == "Type", vocoder == "World") %>%
+  ggplot(aes(x = conv_type, y = score)) +
+    geom_violin() +
+    ggtitle("StarGAN")
+
+
+S %>%
+  transform_data() %>%
+  filter(experiment == "Type", vocoder == "WaveRNN") %>%
+  ggplot(aes(x = conv_type, y = score)) +
+    geom_boxplot() +
+    ggtitle("AutoVC")
+
+S %>%
+  transform_data() %>%
+  filter(experiment == "Type", vocoder == "World") %>%
+  ggplot(aes(x = conv_type, y = score)) +
+    geom_boxplot() +
+    ggtitle("StarGAN")
+
+```
+
+
+
+### Quality
+
+```{r}
+pQ <- Q_ci %>% 
+  ungroup() %>% 
+  filter(!(conv_type %in% c("10 min", "20 min", "30 min"))) %>% 
+  mutate(conv_type = factor(conv_type, levels = order)) %>%
+  rename(Model = model) %>% 
+  ggplot(aes(x = conv_type, y = Mean, fill = Model)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    ggtitle("Quality") +
+    theme(plot.title = element_text(size=20, face="bold", 
+                                    margin = margin(10, 0, 10, 0))) +
+    xlab("Conversion type") +
+    ylab("Mean opinion score") +
+    geom_errorbar(aes(ymin = Lower, ymax = Upper), width = .2, position = position_dodge(.9))+
+    scale_fill_manual(values=col_vals)
+
+pQ
+
+ggsave(filename = "quality_test.png", pQ)
+
+
+
+
+```
+
+
+
+### Fool test
+
+```{r}
+
+
+p_fool <- fool_ci %>% 
+  ggplot(aes(x = conv_type, y = est, fill = model)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    ggtitle("Fool test") +
+    theme(plot.title = element_text(size=20, face="bold", 
+                                    margin = margin(10, 0, 10, 0))) +
+    xlab("Conversion type") +
+    ylab("Percentage fooled") +
+    geom_errorbar(aes(ymin = ci_lwr, ymax = ci_upr), width = .2, position = position_dodge(.9))+
+    scale_fill_manual(values=col_vals)
+
+
+p_fool
+
+ggsave(filename = "fool_test.png", plot = p_fool)
+
+```
+
+
+
+## Simiarity vs quality
+
+```{r}
+p_SVQ <- S_transformed %>% 
+  rename(score_S = score) %>% 
+  left_join(Q_transformed %>% rename(score_Q = score)) %>% 
+  group_by(score_Q, model) %>% 
+  summarise(score_S = mean(score_S)) %>% 
+  rename(Model = model) %>% 
+  ggplot(aes(x=score_Q, y = score_S, color = Model)) +
+    geom_point(size =3) +
+    geom_line() +
+    xlab("Quality MOS")+
+    ylab("Similarity MOS") +
+    ggtitle("Similarity vs quality") +
+    theme(plot.title = element_text(size=20, face="bold", 
+                                    margin = margin(10, 0, 10, 0)))+
+    scale_color_manual(values=col_vals)
+
+p_SVQ
+  
+
+ggsave(filename = "similarity_vs_quality.png", plot = p_SVQ, width = 5, height = 3)
+```
+
+
+
+## Train amount experiments 
+
+```{r}
+p_train <- S_ci %>% 
+  ungroup() %>% 
+  filter((conv_type %in% c("10 min", "20 min", "30 min"))) %>% 
+  rename(Model = model) %>% 
+  mutate(experiment = "Similarity") %>% bind_rows(Q_ci %>% 
+  ungroup() %>% 
+  filter((conv_type %in% c("10 min", "20 min", "30 min"))) %>% 
+  rename(Model = model) %>% 
+  mutate(experiment = "Quality")) %>% 
+  ggplot(aes(x = conv_type, y = Mean, fill = Model)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    ggtitle("Effect of training data amount") +
+    theme(plot.title = element_text(size=20, face="bold", 
+                                    margin = margin(10, 0, 10, 0))) +
+    xlab("Conversion type") +
+    ylab("Mean opinion score") +
+    facet_wrap(~experiment) +
+    geom_errorbar(aes(ymin = Lower, ymax = Upper), width = .2, position = position_dodge(.9))+
+    scale_fill_manual(values=col_vals)
+
+p_train
+
+ggsave(filename = "train_amount_exp.png", plot = p_train)
+
+
+```
+
+
+## For presentation
+
+```{r}
+p_pres <- S_ci %>% mutate(name = "Similarity") %>% 
+  bind_rows(Q_ci %>% mutate(name = "Quality")) %>% 
+  bind_rows(fool_ci %>% mutate(name = "Fool test") %>% rename(Mean = est, Lower = ci_lwr, Upper = ci_upr)) %>% 
+  filter(conv_type == "All") %>% 
+  ggplot(aes(x = model, y = Mean, fill = model)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    ggtitle("Main results") +
+    theme(plot.title = element_text(size=20, face="bold", 
+                                    margin = margin(10, 0, 10, 0)),
+          axis.text.x = element_blank()) +
+          # axis.text.x = element_text(angle = 45, vjust = 0.25, hjust=0.5, color = "#000000")) +
+    xlab("Models") +
+    ylab("Pct. fooled/MOS") +
+    facet_wrap(~name, scales = "free") +
+    geom_errorbar(aes(ymin = Lower, ymax = Upper), width = .2, position = position_dodge(.9))+
+    scale_fill_manual(values=col_vals)
+
+ggsave(filename = "presentation_results.png", p_pres, width = 10, height = 7)
+```
+
+
+
+
+# T-test
+## all data StarGAN vs AutoVC
+
+```{r}
+cat("Similarity results")
+t.test(x = S_transformed %>% filter(model == "StarGAN") %>% pull(score), S_transformed %>% filter(model == "AutoVC") %>% pull(score))
+
+cat("Quality results")
+t.test(x = Q_transformed %>% filter(model == "StarGAN") %>% pull(score), Q_transformed %>% filter(model == "AutoVC") %>% pull(score))
+
+cat("Fool test results")
+t.test(x = Fool_transformed %>% filter(model == "StarGAN") %>% mutate(score = 1-score) %>% pull(score), Fool_transformed %>% filter(model == "AutoVC") %>% mutate(score = 1-score) %>% pull(score))
+```
+
+
+
