@@ -47,8 +47,11 @@ def split_data(paths, test_size = 0.1):
 def get_spk_world_feats(spk_fold_path, mc_dir_train, mc_dir_test, sample_rate=16000, test_size = 0.1, prep_train = True, prep_test = True, train_size = 360):
 	paths = glob.glob(join(spk_fold_path, '*.wav'))
 	spk_name = basename(spk_fold_path)
-	train_paths, test_paths = split_data(paths, test_size)
-	train_paths = train_paths[:train_size]
+
+	# train_paths, test_paths = split_data(paths, test_size)
+	# train_paths = train_paths[:train_size]
+	train_paths = paths
+	test_paths = paths if "louise" in spk_fold_path else []
 
            
 	if prep_train:
@@ -104,10 +107,12 @@ if __name__ == '__main__':
 
 
 	sample_rate_default = 16000
-	origin_wavpath_default = "./data/VCTK-Corpus/wav48"
-	target_wavpath_default = "./data/VCTK-Corpus/wav16"
-	mc_dir_train_default = './data/mc/train'
-	mc_dir_test_default = './data/mc/test'
+	origin_wavpath_default = '/work1/s183920/Deep_voice_conversion/data/SMK/wavs'# "../data/VCTK-Corpus/wav48"
+	target_wavpath_default = '/work1/s183920/Deep_voice_conversion/data/SMK/wav16'#"../data/VCTK-Corpus/wav16"
+	mc_dir_train_default = '/work1/s183920/Deep_voice_conversion/data/SMK/mc/train'#'../data/mc/train'
+	mc_dir_test_default = '/work1/s183920/Deep_voice_conversion/data/SMK/mc/test'#'../data/mc/test'
+
+	 
 
 	parser.add_argument("--sample_rate", type = int, default = 16000, help = "Sample rate.")
 	parser.add_argument("--origin_wavpath", type = str, default = origin_wavpath_default, help = "The original wav path to resample.")
@@ -121,9 +126,12 @@ if __name__ == '__main__':
 	parser.add_argument("--prep_train", type=int, default=1, help="Whether or not to preprocess the training data as integer")
 	parser.add_argument("--prep_test", type=int, default=1, help="Whether or not to preprocess the test data as integer")
 	parser.add_argument("--overwrite_old", type=int, default=1, help="Whether to overwrite existing speakers, as integer")
-	parser.add_argument("--train_size", type=int, default=360, help="number of files to use for training")
+	# parser.add_argument("--train_size", type=int, default=360, help="number of files to use for training")
+	parser.add_argument("--train_size", type=int, default=0, help="number of files to use for training")
 
 	argv = parser.parse_args()
+
+	print(argv)
 
 	sample_rate = argv.sample_rate
 	origin_wavpath = argv.origin_wavpath
@@ -137,7 +145,14 @@ if __name__ == '__main__':
 	prep_train = bool(argv.prep_train)
 	prep_test = bool(argv.prep_test)
 	overwrite_old = bool(argv.overwrite_old)
-	train_size = argv.train_size
+	if argv.train_size == 0:
+		train_size = 0
+		for roots,dirs, files in os.walk(origin_wavpath):
+			for file in files:
+				if os.path.splitext(file)[1] == '.wav':
+					train_size += 1  
+	else:
+		train_size = argv.train_size
 
 	# The original wav in VCTK is 48K, first we want to resample to 16K
 	if resampling:

@@ -18,11 +18,20 @@ then
 
 fi
 
-datadir=/work1/s183920/Deep_voice_conversion/data/train_data/StarGAN/30min
+# datadir=/work1/s183920/Deep_voice_conversion/data/train_data/StarGAN/30min
+# moddir=/work1/s183920/Deep_voice_conversion/StarGAN
+# modname=30min_seed1000
+# conv_dir=/work1/s183920/Deep_voice_conversion/data/results/StarGAN/$modname/experiment/Danish/Male_Female
+# steps=175000
+
+datadir=/work1/s183920/Deep_voice_conversion/data/SMK
 moddir=/work1/s183920/Deep_voice_conversion/StarGAN
-modname=30min_seed1000
-conv_dir=/work1/s183920/Deep_voice_conversion/data/results/StarGAN/$modname/experiment/Danish/Male_Female
-steps=175000
+# modname=30min_seed1000
+modname=SMK_2
+# conv_dir=/work1/s183920/Deep_voice_conversion/data/results/StarGAN/$modname/experiment/Danish/Male_Female
+# steps=175000
+conv_dir=/work1/s183920/Deep_voice_conversion/data/results/StarGAN/$modname/
+steps=90000
 
 
 ### Load modules
@@ -34,15 +43,14 @@ source StarGAN-env/bin/activate
 ### Must set the speakers that was used for preprocessing in script
 python ../StarGAN-Voice-Conversion-master/convert.py \
 		--seed 1000 \
-		--num_converted_wavs 1 \
+		--num_converted_wavs 12 \
 		--resume_iters $steps \
-		--src_spk anders \
-		--trg_spk mette \
+		--src_spk HY \
+		--trg_spk HaegueYang \
 		--train_data_dir $datadir/mc/train \
 		--test_data_dir $datadir/mc/test \
 		--wav_dir $datadir/wav16 \
 		--log_dir $moddir/logs/$modname \
 		--model_save_dir $moddir/models/$modname \
 		--convert_dir $conv_dir \
-		--files_to_convert 3 \
 		--modelstep_dir 0 \

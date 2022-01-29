@@ -1,6 +1,6 @@
 #!/bin/sh
 ### General options
-### ?- specify queue --
+### -- specify queue --
 #BSUB -q hpc
 ### -- set the job Name --
 #BSUB -J StarGAN

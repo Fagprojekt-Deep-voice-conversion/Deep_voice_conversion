@@ -20,13 +20,15 @@ fi
 
 
 ### Make python environment
-module load python3
+# module load python3
+module load python3/3.8.9 # only use if on HPC
 python3 -m venv StarGAN-env
 
 source StarGAN-env/bin/activate
 
+python -m pip install --upgrade pip
 python -m pip install --upgrade cython
-python -m pip install torch==1.4.0 pyworld tqdm librosa tensorboardX tensorboard torchvision==0.5.0 matplotlib
+python -m pip install wandb torch==1.4.0 pyworld tqdm librosa tensorboardX tensorboard torchvision==0.5.0 matplotlib
 
 #sudo apt-get install sox
 

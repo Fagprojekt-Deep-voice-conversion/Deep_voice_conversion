@@ -24,6 +24,10 @@ data/results/StarGAN/experiments.zip
 data/experiment_data/*
 data/train_data/*
 data/results/StarGAN/experiment/*
+*.npy
+*.npz
+StarGAN/logs
+StarGAN/run_scripts/wandb/*
 
 ### Pre trained model ###
 resemblyzer/pretrained.pt

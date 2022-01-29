@@ -47,5 +47,6 @@ module load cuda
 source StarGAN-env/bin/activate
 
 # Train
-sh train.sh
+# sh train.sh
+sh SMK_trains/train2.sh
 

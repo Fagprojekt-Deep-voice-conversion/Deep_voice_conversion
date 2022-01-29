@@ -35,7 +35,11 @@ class TestDataset(object):
 		#speakers = ['p262', 'p272', 'p229', 'p232', 'p292', 'p293', 'p360', 'p361', 'p248', 'p251']
 		speakers = []
 		for f in os.listdir(config.test_data_dir):
-			s = re.search("(.*)_.*", f).group(1)
+			s = re.search("(.*)_.*", f)
+			if s is not None:
+				s = s.group(1)
+			else:
+				s = re.search("(.*)\d.*", f).group(1)
 			if s not in speakers:
 				speakers.append(s)
 		#print("\n --------------------------\n", speakers, "\n---------------------------\n") 
@@ -104,7 +108,11 @@ def test(config):
 	
 	speakers = []
 	for f in os.listdir(config.test_data_dir):
-		s = re.search("(.*)_.*", f).group(1)
+		s = re.search("(.*)_.*", f)
+		if s is not None:
+			s = s.group(1)
+		else:
+			s = re.search("(.*)\d.*", f).group(1)
 		if s not in speakers:
 			speakers.append(s)
 	num_speakers = len(speakers)
@@ -117,7 +125,7 @@ def test(config):
 	G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
 
 	# Read a batch of testdata
-	n_wavs = config.num_converted_wavs if config.files_to_convert == "random" else len(config.files_to_convert)
+	n_wavs = config.num_converted_wavs if config.files_to_convert == ["random"] else len(config.files_to_convert)
 	test_wavfiles = test_loader.get_batch_test_data(batch_size=n_wavs)
 	test_wavs = [load_wav(wavfile, sampling_rate) for wavfile in test_wavfiles]
 

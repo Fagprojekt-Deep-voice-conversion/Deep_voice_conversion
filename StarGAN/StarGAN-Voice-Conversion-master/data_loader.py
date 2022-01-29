@@ -54,12 +54,16 @@ class MyDataset(data.Dataset):
 	def __init__(self, data_dir):
 		self.speakers = []
 		for f in os.listdir(data_dir):
-			s = re.search("(.*)_.*", f).group(1)
+			s = re.search("(.*)_.*", f)
+			if s is not None:
+				s = s.group(1)
+			else:
+				s = re.search("(.*)\d.*", f).group(1)
 			if s not in self.speakers:
 				self.speakers.append(s)
 		self.spk2idx = dict(zip(self.speakers, range(len(self.speakers))))
 		mc_files = glob.glob(join(data_dir, '*.npy'))
-		mc_files = [i for i in mc_files if basename(i)[:4] in self.speakers] 
+		# mc_files = [i for i in mc_files if basename(i)[:4] in self.speakers] 
 		self.mc_files = self.rm_too_short_utt(mc_files)
 		self.num_files = len(self.mc_files)
 		print("\t Number of training samples: ", self.num_files)
@@ -87,7 +91,7 @@ class MyDataset(data.Dataset):
 
 	def __getitem__(self, index):
 		filename = self.mc_files[index]
-		spk = basename(filename).split('_')[0]
+		spk = basename(filename).split('_')[0] if "_" in basename(filename) else re.search("(.*)\d.*", basename(filename)).group(1)
 		spk_idx = self.spk2idx[spk]
 		mc = np.load(filename)
 		mc = self.sample_seg(mc)
@@ -101,11 +105,17 @@ class MyDataset(data.Dataset):
 class TestDataset(object):
 	"""Dataset for testing."""
 	def __init__(self, data_dir, wav_dir, src_spk='p262', trg_spk='p272'):
+		# data dir not necesary, only needs to known the speakers
 		self.speakers = []
 		for f in os.listdir(data_dir):
-			s = re.search("(.*)_.*", f).group(1)
+			s = re.search("(.*)_.*", f)
+			if s is not None:
+				s = s.group(1)
+			else:
+				s = re.search("(.*)\d.*", f).group(1)
 			if s not in self.speakers:
 				self.speakers.append(s)
+		print(self.speakers)
 		self.spk2idx = dict(zip(self.speakers, range(len(self.speakers))))
 		self.src_spk = src_spk
 		self.trg_spk = trg_spk
@@ -139,6 +149,7 @@ class TestDataset(object):
 
 def get_loader(data_dir, batch_size=32, mode='train', num_workers=1):
 	dataset = MyDataset(data_dir)
+	# print(dataset, len(dataset))
 	data_loader = data.DataLoader(dataset=dataset,
                                   batch_size=batch_size,
                                   shuffle=(mode=='train'),

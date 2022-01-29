@@ -19,7 +19,7 @@ then
 fi
 
 ### Load modules
-module load python3
+# module load python3
 module load cuda
 
 source StarGAN-env/bin/activate
@@ -29,7 +29,7 @@ source StarGAN-env/bin/activate
 # datadir=/work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/mc
 # moddir=/work1/s183920/Deep_voice_conversion_old/StarGAN
 # modname=base_test_old
-datadir=/work1/s183920/Deep_voice_conversion/data/SMK/mc
+datadir=/work1/s183920/Deep_voice_conversion/data/SMK2/mc
 moddir=/work1/s183920/Deep_voice_conversion/StarGAN
 modname=SMK2
 steps=200000
@@ -53,8 +53,8 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--num_workers 1 \
 		--mode train \
 		--log_step 10 \
-		--sample_step 1000 \
-		--model_save_step 1000 \
+		--sample_step 5000 \
+		--model_save_step 5000 \
 		--lr_update_step 1000 \
 		--train_data_dir $datadir/train \
 		--test_data_dir $datadir/test \
@@ -64,5 +64,8 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--sample_dir $moddir/samples/$modname \
 		--model_save_dir $moddir/models/$modname \
 		--loss_name loss_$modname \
-		--model_name $modname
+		--model_name $modname \
+		--test_target yangSMK \
+		--resume_from_max 0\
+		--resume_iters 45000 \
 

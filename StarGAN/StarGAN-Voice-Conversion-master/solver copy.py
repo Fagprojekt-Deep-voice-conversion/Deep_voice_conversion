@@ -15,7 +15,6 @@ from utils import *
 from tqdm import tqdm
 import pickle
 import re
-import wandb
 
 
 class Solver(object):
@@ -92,12 +91,8 @@ class Solver(object):
 
 		# Build the model and tensorboard.
 		self.build_model()
-		# if self.use_tensorboard:
-		# 	self.build_tensorboard()
-		self.model_name = config.model_name
-		# self.log_freq = config.log_freq
-		self.wandb_run = wandb.init(entity="deep_voice_inc", project="StarGAN", name = self.model_name, config = config)
-		self.wandb_run.config.update({"speakers" : speakers})
+		if self.use_tensorboard:
+			self.build_tensorboard()
 
 	def build_model(self):
 		"""Create a generator and a discriminator."""
@@ -214,12 +209,12 @@ class Solver(object):
 		# Start training.
 		print('Start training...')
 		start_time = time.time()
-		# loss_log = {"d_loss_real":[], "d_loss_cls_spks":[], "d_loss_fake":[], "d_loss":[], "g_loss_fake":[], "g_loss_cls_spks":[], "g_loss_rec":[], "g_loss":[]}
-		# if os.path.exists(self.log_dir+f"/{self.loss_name}.pkl"):
-		# 	with open(self.log_dir+f"/{self.loss_name}.pkl", "rb") as f:
-		# 		losses = pickle.load(f)
-		# else:
-		# 	losses = {"d_loss":[], "g_loss":[], "step":[]}
+		loss_log = {"d_loss_real":[], "d_loss_cls_spks":[], "d_loss_fake":[], "d_loss":[], "g_loss_fake":[], "g_loss_cls_spks":[], "g_loss_rec":[], "g_loss":[]}
+		if os.path.exists(self.log_dir+f"/{self.loss_name}.pkl"):
+			with open(self.log_dir+f"/{self.loss_name}.pkl", "rb") as f:
+				losses = pickle.load(f)
+		else:
+			losses = {"d_loss":[], "g_loss":[], "step":[]}
 		for i in range(start_iters, self.num_iters):
 
             # =================================================================================== #
@@ -253,14 +248,14 @@ class Solver(object):
 			out_src, out_cls_spks = self.D(mc_real)
 			d_loss_real = - torch.mean(out_src)
 			d_loss_cls_spks = self.classification_loss(out_cls_spks, spk_label_org)
-			# loss_log["d_loss_real"].append(d_loss_real)
-			# loss_log["d_loss_cls_spks"].append(d_loss_cls_spks)
+			loss_log["d_loss_real"].append(d_loss_real)
+			loss_log["d_loss_cls_spks"].append(d_loss_cls_spks)
 
 			# Compute loss with fake mc feats.
 			mc_fake = self.G(mc_real, spk_c_trg)
 			out_src, out_cls_spks = self.D(mc_fake.detach())
 			d_loss_fake = torch.mean(out_src)
-			# loss_log["d_loss_fake"].append(d_loss_fake)
+			loss_log["d_loss_fake"].append(d_loss_fake)
 
 			# Compute loss for gradient penalty.
 			alpha = torch.rand(mc_real.size(0), 1, 1, 1).to(self.device)
@@ -270,18 +265,17 @@ class Solver(object):
 
 			# Backward and optimize.
 			d_loss = d_loss_real + d_loss_fake + self.lambda_cls * d_loss_cls_spks + self.lambda_gp * d_loss_gp
-			# loss_log["d_loss"].append(d_loss)
+			loss_log["d_loss"].append(d_loss)
 			self.reset_grad()
 			d_loss.backward()
 			self.d_optimizer.step()
 
 			# Logging.
 			loss = {}
-			loss['Discriminator/loss_real'] = d_loss_real.item()
-			loss['Discriminator/loss_fake'] = d_loss_fake.item()
-			loss['Discriminator/loss_cls_spks'] = d_loss_cls_spks.item()
-			loss['Discriminator/loss_gp'] = d_loss_gp.item()
-			loss['Discriminator/total'] = d_loss.item()
+			loss['D/loss_real'] = d_loss_real.item()
+			loss['D/loss_fake'] = d_loss_fake.item()
+			loss['D/loss_cls_spks'] = d_loss_cls_spks.item()
+			loss['D/loss_gp'] = d_loss_gp.item()
 
 			# =================================================================================== #
 			#                               3. Train the generator                                #
@@ -293,26 +287,25 @@ class Solver(object):
 				out_src, out_cls_spks = self.D(mc_fake)
 				g_loss_fake = - torch.mean(out_src)
 				g_loss_cls_spks = self.classification_loss(out_cls_spks, spk_label_trg)
-				# loss_log["g_loss_fake"].append(g_loss_fake)
-				# loss_log["g_loss_cls_spks"].append(g_loss_cls_spks)
+				loss_log["g_loss_fake"].append(g_loss_fake)
+				loss_log["g_loss_cls_spks"].append(g_loss_cls_spks)
 
 				# Target-to-original domain.
 				mc_reconst = self.G(mc_fake, spk_c_org)
 				g_loss_rec = torch.mean(torch.abs(mc_real - mc_reconst))
-				# loss_log["g_loss_rec"].append(g_loss_rec)
+				loss_log["g_loss_rec"].append(g_loss_rec)
 
 				# Backward and optimize.
 				g_loss = g_loss_fake + self.lambda_rec * g_loss_rec + self.lambda_cls * g_loss_cls_spks
-				# loss_log["g_loss"].append(g_loss)
+				loss_log["g_loss"].append(g_loss)
 				self.reset_grad()
 				g_loss.backward()
 				self.g_optimizer.step()
 
 				# Logging.
-				loss['Generator/loss_fake'] = g_loss_fake.item()
-				loss['Generator/loss_rec'] = g_loss_rec.item()
-				loss['Generator/loss_cls_spks'] = g_loss_cls_spks.item()
-				loss["Generator/total"] = g_loss.item()
+				loss['G/loss_fake'] = g_loss_fake.item()
+				loss['G/loss_rec'] = g_loss_rec.item()
+				loss['G/loss_cls_spks'] = g_loss_cls_spks.item()
 
             # =================================================================================== #
             #                                 4. Miscellaneous                                    #
@@ -327,11 +320,9 @@ class Solver(object):
 					log += ", {}: {:.4f}".format(tag, value)
 				print(log)
 
-				self.wandb_run.log(loss, step = i+1, commit = (i+1) % self.sample_step != 0)
-
-				# if self.use_tensorboard:
-				# 	for tag, value in loss.items():
-				# 		self.logger.scalar_summary(tag, value, i+1)
+				if self.use_tensorboard:
+					for tag, value in loss.items():
+						self.logger.scalar_summary(tag, value, i+1)
 
 			if (i+1) % self.sample_step == 0:
 				sampling_rate=16000
@@ -358,21 +349,14 @@ class Solver(object):
 						wav_transformed = world_speech_synthesis(f0=f0_converted, coded_sp=coded_sp_converted, 
 																ap=ap, fs=sampling_rate, frame_period=frame_period)
 
-						save_name = join(self.sample_dir, str(i+1)+'-'+wav_name.split('.')[0]+'-vcto-{}'.format(self.test_loader.trg_spk)+'.wav')
-						librosa.output.write_wav(save_name, wav_transformed, sampling_rate)
-						# self.wandb_run.log({save_name.replace(".wav", "") : wandb.Audio(save_name, caption = save_name, sample_rate = sampling_rate)}, commit = not cpsyn_flag)
-						self.wandb_run.log({"converted" : {wav_name.replace(".wav", "") : wandb.Audio(wav_transformed, caption = save_name, sample_rate = sampling_rate)}}, commit = not cpsyn_flag)
-						
+						librosa.output.write_wav(
+							join(self.sample_dir, str(i+1)+'-'+wav_name.split('.')[0]+'-vcto-{}'.format(self.test_loader.trg_spk)+'.wav'), wav_transformed, sampling_rate)
 						if cpsyn_flag:
 							wav_cpsyn = world_speech_synthesis(f0=f0, coded_sp=coded_sp, 
 														ap=ap, fs=sampling_rate, frame_period=frame_period)
-							save_name = join(self.sample_dir, 'cpsyn-'+wav_name)
-							librosa.output.write_wav(save_name, wav_cpsyn, sampling_rate)
-							# self.wandb_run.log({"cpsyn" : {wav_name.replace(".wav", "") : wandb.Audio(wav_cpsyn, caption = save_name, sample_rate = sampling_rate)}}) # no need for synthesized
-
+							librosa.output.write_wav(join(self.sample_dir, 'cpsyn-'+wav_name), wav_cpsyn, sampling_rate)
 					cpsyn_flag = False
 
-	
             # Save model checkpoints.
 			if (i+1) % self.model_save_step == 0:
 				G_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(i+1))
@@ -380,22 +364,15 @@ class Solver(object):
 				torch.save(self.G.state_dict(), G_path)
 				torch.save(self.D.state_dict(), D_path)
 				print('Saved model checkpoints into {}...'.format(self.model_save_dir))
-				# with open(self.log_dir+f"/{self.loss_name}_log_ext.pkl", "wb") as f:
-				# 	pickle.dump(loss_log, f)
-				# losses["d_loss"].append(d_loss.cpu().detach().numpy())
-				# losses["g_loss"].append(g_loss.cpu().detach().numpy())
-				# losses["step"].append(i+1)
-				# with open(self.log_dir+f"/{self.loss_name}.pkl", "wb") as f:
-				# 	pickle.dump(losses, f)
-				# print(f"Saved loss_log as {self.log_dir}/{self.loss_name}_log_ext.pkl")
-				# print(f"Saved losses as {self.log_dir}/{self.loss_name}.pkl")
-
-				artifact = wandb.Artifact(self.model_name, "StarGAN")
-				artifact.add_file(G_path)
-				artifact.add_file(D_path)
-				self.wandb_run.log_artifact(artifact)
-
-	
+				with open(self.log_dir+f"/{self.loss_name}_log_ext.pkl", "wb") as f:
+					pickle.dump(loss_log, f)
+				losses["d_loss"].append(d_loss.cpu().detach().numpy())
+				losses["g_loss"].append(g_loss.cpu().detach().numpy())
+				losses["step"].append(i+1)
+				with open(self.log_dir+f"/{self.loss_name}.pkl", "wb") as f:
+					pickle.dump(losses, f)
+				print(f"Saved loss_log as {self.log_dir}/{self.loss_name}_log_ext.pkl")
+				print(f"Saved losses as {self.log_dir}/{self.loss_name}.pkl")
 				
 
             # Decay learning rates.
