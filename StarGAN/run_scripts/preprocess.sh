@@ -13,7 +13,7 @@ fi
 
 
 ### Load modules
-module load python3
+# module load python3
 module load cuda
 
 ### Run setup
@@ -23,7 +23,7 @@ source StarGAN-env/bin/activate
 ### Preprocess
 ### Submit must be set to CPU and mulitple cores can be requested
 ### Speakers must be set in the python script
-data_subfolder=SMK1
+data_subfolder=SMK4
 python ../StarGAN-Voice-Conversion-master/preprocess.py \
 		--sample_rate 16000 \
 		--origin_wavpath /work1/s183920/Deep_voice_conversion/data/$data_subfolder/wavs \

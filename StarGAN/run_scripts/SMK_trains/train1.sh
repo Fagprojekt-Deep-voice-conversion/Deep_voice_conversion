@@ -29,9 +29,9 @@ source StarGAN-env/bin/activate
 # datadir=/work1/s183920/Deep_voice_conversion_old/data/VCTK-Data/StarGAN/mc
 # moddir=/work1/s183920/Deep_voice_conversion_old/StarGAN
 # modname=base_test_old
-datadir=/work1/s183920/Deep_voice_conversion/data/SMK2/mc
+datadir=/work1/s183920/Deep_voice_conversion/data/SMK1/mc
 moddir=/work1/s183920/Deep_voice_conversion/StarGAN
-modname=SMK2
+modname=SMK1
 steps=500000
 
 
@@ -66,7 +66,7 @@ python ../StarGAN-Voice-Conversion-master/main.py \
 		--loss_name loss_$modname \
 		--model_name $modname \
 		--test_target yangSMK \
-		--test_source louise\
+		--test_source hilde\
 		--resume_from_max 1\
-		# --resume_iters 280000 \
+		# --resume_iters 310000 \
 

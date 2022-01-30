@@ -45,7 +45,7 @@ class TestDataset(object):
 		#print("\n --------------------------\n", speakers, "\n---------------------------\n") 
 		#del speakers[-1]
 		spk2idx = dict(zip(speakers, range(len(speakers))))
-		assert config.trg_spk in speakers, f'The trg_spk should be chosen from {speakers}, but you choose {trg_spk}.'
+		assert config.trg_spk in speakers, f'The trg_spk should be chosen from {speakers}, but you choose {config.trg_spk}.'
 		# Source speaker
 		self.src_spk = config.src_spk
 		self.trg_spk = config.trg_spk

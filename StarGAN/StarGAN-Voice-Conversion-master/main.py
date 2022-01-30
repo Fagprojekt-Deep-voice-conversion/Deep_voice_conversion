@@ -48,7 +48,7 @@ def main(config):
 		
 	# Test
 	# test_loader = TestDataset(config.test_data_dir, config.wav_dir, src_spk='p262', trg_spk='p272')
-	test_loader = TestDataset(config.test_data_dir, config.wav_dir, src_spk='louise', trg_spk=config.test_target)
+	test_loader = TestDataset(config.test_data_dir, config.wav_dir, src_spk=config.test_source, trg_spk=config.test_target)
 	"""
 	if os.path.exists(config.loader_dir+"/testloader.pkl"):
 		with open(config.loader_dir+"/testloader.pkl", "rb") as f:
@@ -85,6 +85,7 @@ if __name__ == '__main__':
 
 	parser.add_argument("--model_name", type = str, default = "StarGAN_model")
 	parser.add_argument('--test_target', type = str, default = "yangSMK")
+	parser.add_argument("--test_source", type = str, default = "louise")
 	# parser.add_argument("--log_freq", type = int, default = 8)
 
 	# Training configuration.

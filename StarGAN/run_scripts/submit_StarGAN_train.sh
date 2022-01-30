@@ -48,5 +48,5 @@ source StarGAN-env/bin/activate
 
 # Train
 # sh train.sh
-sh SMK_trains/train2.sh
+sh SMK_trains/train4.sh
 

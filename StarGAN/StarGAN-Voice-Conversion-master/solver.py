@@ -23,6 +23,10 @@ class Solver(object):
 	def __init__(self, train_loader, test_loader, config):
 		"""Initialize configurations."""
 
+		self.config = config
+		self.model_name = config.model_name
+		self.wandb_run = wandb.init(entity="deep_voice_inc", project="StarGAN", name = self.model_name, config = config)
+
 		# Data loader.
 		self.train_loader = train_loader
 		self.test_loader = test_loader
@@ -61,12 +65,20 @@ class Solver(object):
 		self.beta2 = config.beta2
 		
 		if bool(config.resume_from_max):
+
+			# if self.config.resume_from_max:
+			artifact = self.wandb_run.use_artifact(f'deep_voice_inc/StarGAN/{self.model_name}:latest', type='StarGAN')
+			# else:
+			# 	artifact = self.wandb_run.use_artifact(f'deep_voice_inc/StarGAN/{self.model_name}:v{resume_iters//self.log_step}', type='StarGAN')
+			artifact.download(self.config.model_save_dir)
+
 			dir = config.model_save_dir
 			if len(os.listdir(dir)) == 0:
 				self.resume_iters = None
 			else:
-				self.resume_iters = int(max([int(re.search("(\d*)-.\.ckpt", file).group(1)) for file in os.listdir(dir)])-1000)
-				self.resume_iters = self.resume_iters if self.resume_iters >= 1000 else None
+				# self.resume_iters = int(max([int(re.search("(\d*)-.\.ckpt", file).group(1)) for file in os.listdir(dir)])-config.log_step)
+				self.resume_iters = int(max([int(re.search("(\d*)-.\.ckpt", file).group(1)) for file in os.listdir(dir)]))
+				self.resume_iters = self.resume_iters if self.resume_iters >= config.log_step else None
 				print(f"Resuming from iteration {self.resume_iters}...")
 		else:
 			self.resume_iters = config.resume_iters
@@ -94,9 +106,7 @@ class Solver(object):
 		self.build_model()
 		# if self.use_tensorboard:
 		# 	self.build_tensorboard()
-		self.model_name = config.model_name
-		# self.log_freq = config.log_freq
-		self.wandb_run = wandb.init(entity="deep_voice_inc", project="StarGAN", name = self.model_name, config = config)
+		
 		self.wandb_run.config.update({"speakers" : speakers})
 
 	def build_model(self):
@@ -126,8 +136,18 @@ class Solver(object):
 		print('Loading the trained models from step {}...'.format(resume_iters))
 		G_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(resume_iters))
 		D_path = os.path.join(self.model_save_dir, '{}-D.ckpt'.format(resume_iters))
+		# try:
 		self.G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
 		self.D.load_state_dict(torch.load(D_path, map_location=lambda storage, loc: storage))
+		# except:
+		# 	if self.config.resume_from_max:
+		# 		artifact = self.wandb_run.use_artifact(f'deep_voice_inc/StarGAN/{self.model_name}:latest', type='StarGAN')
+		# 	else:
+		# 		artifact = self.wandb_run.use_artifact(f'deep_voice_inc/StarGAN/{self.model_name}:v{resume_iters//self.log_step}', type='StarGAN')
+		# 	artifact.download(self.model_save_dir)
+
+		# 	self.G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
+		# 	self.D.load_state_dict(torch.load(D_path, map_location=lambda storage, loc: storage))
 
 	def build_tensorboard(self):
 		"""Build a tensorboard logger."""
@@ -358,10 +378,11 @@ class Solver(object):
 						wav_transformed = world_speech_synthesis(f0=f0_converted, coded_sp=coded_sp_converted, 
 																ap=ap, fs=sampling_rate, frame_period=frame_period)
 
-						save_name = join(self.sample_dir, str(i+1)+'-'+wav_name.split('.')[0]+'-vcto-{}'.format(self.test_loader.trg_spk)+'.wav')
+						display_name = wav_name.split('.')[0]+'-vcto-{}'.format(self.test_loader.trg_spk)
+						save_name = join(self.sample_dir, str(i+1)+'-'+display_name+'.wav')
 						librosa.output.write_wav(save_name, wav_transformed, sampling_rate)
 						# self.wandb_run.log({save_name.replace(".wav", "") : wandb.Audio(save_name, caption = save_name, sample_rate = sampling_rate)}, commit = not cpsyn_flag)
-						self.wandb_run.log({"converted" : {wav_name.replace(".wav", "") : wandb.Audio(wav_transformed, caption = save_name, sample_rate = sampling_rate)}}, commit = not cpsyn_flag)
+						self.wandb_run.log({"converted" : {display_name : wandb.Audio(wav_transformed, caption = save_name, sample_rate = sampling_rate)}}, commit = not cpsyn_flag)
 						
 						if cpsyn_flag:
 							wav_cpsyn = world_speech_synthesis(f0=f0, coded_sp=coded_sp, 
